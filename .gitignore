@@ -1,0 +1,66 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Java
+*.class
+*.log
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# NetBeans
+nb-configuration.xml
+nbproject/
+
+# Build
+build/
+dist/
+out/
+
+# Logs
+logs/
+*.log
+
+# Test output
+test-output/
+*.tmp
+*.bak
+
+# ANTLR generated files (keep in source control)
+# Uncomment if you want to ignore generated files:
+# **/generated-sources/antlr4/
+
+# Diagnostic files
+diagnostic*.txt
+validation-reports/
