@@ -1,0 +1,91 @@
+package com.validator.semantic;
+
+/**
+ * Represents the type of a SysML v2 element.
+ * These correspond to the major element types in the SysML v2 metamodel.
+ */
+public enum ElementType {
+    // Structure elements
+    PACKAGE,
+    PART_DEFINITION,
+    PART_USAGE,
+    ATTRIBUTE_DEFINITION,
+    ATTRIBUTE_USAGE,
+    PORT_DEFINITION,
+    PORT_USAGE,
+    INTERFACE_DEFINITION,
+    CONNECTION_DEFINITION,
+    CONNECTION_USAGE,
+    BINDING_DEFINITION,
+    BINDING_USAGE,
+    ITEM_DEFINITION,
+    ITEM_USAGE,
+
+    // Behavior elements
+    ACTION_DEFINITION,
+    ACTION_USAGE,
+    STATE_DEFINITION,
+    STATE_USAGE,
+    TRANSITION,
+
+    // Requirements
+    REQUIREMENT_DEFINITION,
+    REQUIREMENT_USAGE,
+
+    // Analysis & Verification
+    ANALYSIS_DEFINITION,
+    CALC_DEFINITION,
+    CALC_USAGE,
+    VERIFICATION_DEFINITION,
+    VERIFICATION_USAGE,
+    CONSTRAINT_USAGE,
+
+    // Allocation
+    ALLOCATION_DEFINITION,
+    ALLOCATION_USAGE,
+
+    // Views & Rendering
+    VIEW_DEFINITION,
+    VIEW_USAGE,
+    VIEWPOINT_DEFINITION,
+    RENDERING_DEFINITION,
+    RENDERING_USAGE,
+
+    // Metadata
+    METADATA_DEFINITION,
+    COMMENT,
+    DOCUMENTATION,
+
+    // Use Cases
+    USE_CASE_DEFINITION,
+    USE_CASE_USAGE,
+    ACTOR_DEFINITION,
+    STAKEHOLDER_DEFINITION,
+
+    // Occurrence & Time
+    OCCURRENCE_DEFINITION,
+    OCCURRENCE_USAGE,
+    INDIVIDUAL,
+    SNAPSHOT,
+    TIMESLICE,
+
+    // Data Types
+    DATA_TYPE,
+    ENUMERATION_DEFINITION,
+    ENUMERATION_VALUE,
+
+    // Relationships
+    SPECIALIZATION,
+    REDEFINITION,
+    SUBSETTING,
+    FEATURE_TYPING,
+    CONJUGATION,
+    DEPENDENCY,
+
+    // Other
+    IMPORT,
+    FEATURE_MEMBERSHIP,
+    EXPRESSION,
+    LITERAL,
+    UNKNOWN
+}
