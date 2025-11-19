@@ -22,13 +22,6 @@
             <artifactId>antlr4-runtime</artifactId>
         </dependency>
 
-        <!-- Sireum HAMR SysML v2 Parser (via JitPack) -->
-        <dependency>
-            <groupId>com.github.sireum</groupId>
-            <artifactId>hamr-sysml-parser</artifactId>
-            <version>4.20231009</version>
-        </dependency>
-
         <!-- Apache Commons Text for spelling suggestions -->
         <dependency>
             <groupId>org.apache.commons</groupId>
