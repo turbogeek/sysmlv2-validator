@@ -42,6 +42,61 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitCompilationUnit(SysMLv2Parser.CompilationUnitContext ctx) {
+        // Process children in order
+        // Track if we have a file-scoped package (package X; without braces)
+        boolean hasFileScopedPackage = false;
+
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree child = ctx.getChild(i);
+
+            if (child instanceof SysMLv2Parser.PackageDeclarationContext) {
+                SysMLv2Parser.PackageDeclarationContext pkgCtx =
+                    (SysMLv2Parser.PackageDeclarationContext) child;
+
+                // Check if this is file-scoped (semicolon) or block-scoped (braces)
+                boolean isFileScopedPkg = pkgCtx.packageBody() == null;
+
+                if (isFileScopedPkg) {
+                    // Enter scope, visit package, but DON'T exit scope yet
+                    visitPackageDeclarationFileScoped(pkgCtx);
+                    hasFileScopedPackage = true;
+                } else {
+                    // Visit package with braces - it manages its own scope
+                    visit(pkgCtx);
+                }
+            } else {
+                // Visit other children (imports, elements)
+                visit(child);
+            }
+        }
+
+        // Exit file-scoped package at end of file
+        if (hasFileScopedPackage) {
+            symbolTable.exitScope();
+        }
+
+        return null;
+    }
+
+    private void visitPackageDeclarationFileScoped(SysMLv2Parser.PackageDeclarationContext ctx) {
+        String packageName = getIdentifier(ctx.qualifiedName());
+        if (packageName != null) {
+            try {
+                symbolTable.enterScope(packageName, ScopeType.PACKAGE);
+                Location location = getLocation(ctx);
+                Symbol symbol = new Symbol(packageName, packageName, ElementType.PACKAGE, location);
+                symbol.setAstNode(ctx);
+                symbolTable.define(symbol);
+                // DON'T exit scope - it remains open for rest of file
+            } catch (Exception e) {
+                errors.add(String.format("Error processing package '%s' at %s: %s",
+                    packageName, getLocation(ctx), e.getMessage()));
+            }
+        }
+    }
+
+    @Override
     public Void visitPackageDeclaration(SysMLv2Parser.PackageDeclarationContext ctx) {
         String packageName = getIdentifier(ctx.qualifiedName());
         if (packageName != null) {
@@ -52,9 +107,12 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
                 symbol.setAstNode(ctx);
                 symbolTable.define(symbol);
 
-                // Visit children
-                visitChildren(ctx);
+                // Visit packageBody if present (when using braces syntax)
+                if (ctx.packageBody() != null) {
+                    visit(ctx.packageBody());
+                }
 
+                // Exit scope after processing this package (only for block-scoped packages)
                 symbolTable.exitScope();
             } catch (Exception e) {
                 errors.add(String.format("Error processing package '%s' at %s: %s",
@@ -71,8 +129,9 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
             try {
                 Location location = getLocation(ctx);
                 String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + partName;
+                Visibility visibility = extractVisibility(ctx.visibility());
 
-                Symbol symbol = new Symbol(partName, qualifiedName, ElementType.PART_DEFINITION, location);
+                Symbol symbol = new Symbol(partName, qualifiedName, ElementType.PART_DEFINITION, location, visibility);
                 symbol.setAstNode(ctx);
                 symbolTable.define(symbol);
 
@@ -98,8 +157,10 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
             try {
                 Location location = getLocation(ctx);
                 String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + actionName;
+                Visibility visibility = extractVisibility(ctx.visibility());
 
-                Symbol symbol = new Symbol(actionName, qualifiedName, ElementType.ACTION_DEFINITION, location);
+                Symbol symbol = new Symbol(actionName, qualifiedName,
+                    ElementType.ACTION_DEFINITION, location, visibility);
                 symbol.setAstNode(ctx);
                 symbolTable.define(symbol);
 
@@ -121,8 +182,10 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
             try {
                 Location location = getLocation(ctx);
                 String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + stateName;
+                Visibility visibility = extractVisibility(ctx.visibility());
 
-                Symbol symbol = new Symbol(stateName, qualifiedName, ElementType.STATE_DEFINITION, location);
+                Symbol symbol = new Symbol(stateName, qualifiedName,
+                    ElementType.STATE_DEFINITION, location, visibility);
                 symbol.setAstNode(ctx);
                 symbolTable.define(symbol);
 
@@ -144,8 +207,10 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
             try {
                 Location location = getLocation(ctx);
                 String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + reqName;
+                Visibility visibility = extractVisibility(ctx.visibility());
 
-                Symbol symbol = new Symbol(reqName, qualifiedName, ElementType.REQUIREMENT_DEFINITION, location);
+                Symbol symbol = new Symbol(reqName, qualifiedName,
+                    ElementType.REQUIREMENT_DEFINITION, location, visibility);
                 symbol.setAstNode(ctx);
                 symbolTable.define(symbol);
 
@@ -167,12 +232,34 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
             try {
                 Location location = getLocation(ctx);
                 String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + attrName;
+                Visibility visibility = extractVisibility(ctx.visibility());
 
-                Symbol symbol = new Symbol(attrName, qualifiedName, ElementType.ATTRIBUTE_DEFINITION, location);
+                Symbol symbol = new Symbol(attrName, qualifiedName,
+                    ElementType.ATTRIBUTE_DEFINITION, location, visibility);
                 symbol.setAstNode(ctx);
                 symbolTable.define(symbol);
             } catch (Exception e) {
                 errors.add(String.format("Error processing attribute definition '%s' at %s: %s",
+                    attrName, getLocation(ctx), e.getMessage()));
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAttributeUsage(SysMLv2Parser.AttributeUsageContext ctx) {
+        String attrName = getIdentifier(ctx.name());
+        if (attrName != null) {
+            try {
+                Location location = getLocation(ctx);
+                String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + attrName;
+
+                Symbol symbol = new Symbol(attrName, qualifiedName,
+                    ElementType.ATTRIBUTE_USAGE, location);
+                symbol.setAstNode(ctx);
+                symbolTable.define(symbol);
+            } catch (Exception e) {
+                errors.add(String.format("Error processing attribute usage '%s' at %s: %s",
                     attrName, getLocation(ctx), e.getMessage()));
             }
         }
@@ -186,8 +273,9 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
             try {
                 Location location = getLocation(ctx);
                 String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + portName;
+                Visibility visibility = extractVisibility(ctx.visibility());
 
-                Symbol symbol = new Symbol(portName, qualifiedName, ElementType.PORT_DEFINITION, location);
+                Symbol symbol = new Symbol(portName, qualifiedName, ElementType.PORT_DEFINITION, location, visibility);
                 symbol.setAstNode(ctx);
                 symbolTable.define(symbol);
             } catch (Exception e) {
@@ -205,8 +293,10 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
             try {
                 Location location = getLocation(ctx);
                 String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + connectionName;
+                Visibility visibility = extractVisibility(ctx.visibility());
 
-                Symbol symbol = new Symbol(connectionName, qualifiedName, ElementType.CONNECTION_DEFINITION, location);
+                Symbol symbol = new Symbol(connectionName, qualifiedName,
+                    ElementType.CONNECTION_DEFINITION, location, visibility);
                 symbol.setAstNode(ctx);
                 symbolTable.define(symbol);
 
@@ -226,13 +316,37 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitImportDeclaration(SysMLv2Parser.ImportDeclarationContext ctx) {
+        try {
+            // Check if visibility is PUBLIC by checking for the PUBLIC token
+            boolean isPublic = ctx.visibility() != null
+                && ctx.visibility().getText() != null
+                && ctx.visibility().getText().equals("public");
+            String importPath = extractImportPath(ctx.qualifiedName());
+
+            ImportType importType = determineImportType(ctx.getText());
+            String alias = extractImportAlias(ctx.getText());
+
+            ImportStatement importStmt = new ImportStatement(importPath, importType, isPublic, alias);
+            symbolTable.addImport(importStmt);
+        } catch (Exception e) {
+            errors.add(String.format("Error processing import at %s: %s",
+                getLocation(ctx), e.getMessage()));
+        }
+        return null;
+    }
+
+    @Override
     public Void visitImportStatement(SysMLv2Parser.ImportStatementContext ctx) {
         try {
-            boolean isPublic = ctx.visibility() != null && ctx.visibility().PUBLIC() != null;
-            String importPath = getImportPath(ctx);
+            // Check if visibility is PUBLIC by checking for the PUBLIC token
+            boolean isPublic = ctx.visibility() != null
+                && ctx.visibility().getText() != null
+                && ctx.visibility().getText().equals("public");
+            String importPath = extractImportPath(ctx.qualifiedName());
 
-            ImportType importType = determineImportType(ctx);
-            String alias = getImportAlias(ctx);
+            ImportType importType = determineImportType(ctx.getText());
+            String alias = extractImportAlias(ctx.getText());
 
             ImportStatement importStmt = new ImportStatement(importPath, importType, isPublic, alias);
             symbolTable.addImport(importStmt);
@@ -244,6 +358,21 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
     }
 
     // Helper methods
+
+    private Visibility extractVisibility(SysMLv2Parser.VisibilityContext ctx) {
+        if (ctx == null) {
+            return Visibility.PUBLIC; // Default visibility
+        }
+        String text = ctx.getText();
+        if ("public".equals(text)) {
+            return Visibility.PUBLIC;
+        } else if ("private".equals(text)) {
+            return Visibility.PRIVATE;
+        } else if ("protected".equals(text)) {
+            return Visibility.PROTECTED;
+        }
+        return Visibility.PUBLIC;
+    }
 
     private String getIdentifier(ParserRuleContext ctx) {
         if (ctx == null) {
@@ -260,14 +389,14 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
         return new Location(fileName, ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine());
     }
 
-    private String getImportPath(SysMLv2Parser.ImportStatementContext ctx) {
-        // Extract qualified name from import statement
-        // Simplified - actual implementation would parse the import path
-        return ctx.getText().replaceAll("^(public |private )?import ", "").replaceAll(";$", "");
+    private String extractImportPath(SysMLv2Parser.QualifiedNameContext ctx) {
+        if (ctx == null) {
+            return null;
+        }
+        return ctx.getText();
     }
 
-    private ImportType determineImportType(SysMLv2Parser.ImportStatementContext ctx) {
-        String text = ctx.getText();
+    private ImportType determineImportType(String text) {
         if (text.contains("::*")) {
             return ImportType.WILDCARD;
         }
@@ -280,8 +409,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
         return ImportType.SPECIFIC;
     }
 
-    private String getImportAlias(SysMLv2Parser.ImportStatementContext ctx) {
-        String text = ctx.getText();
+    private String extractImportAlias(String text) {
         if (text.contains(" as ")) {
             String[] parts = text.split(" as ");
             if (parts.length > 1) {

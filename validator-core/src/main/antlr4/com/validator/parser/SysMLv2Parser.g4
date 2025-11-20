@@ -6,12 +6,16 @@ options {
 
 // Top-level rule
 compilationUnit
-    : packageDeclaration? importDeclaration* element* EOF
+    : (packageDeclaration | importDeclaration | element)* EOF
     ;
 
 // Package
 packageDeclaration
-    : PACKAGE qualifiedName SEMICOLON
+    : PACKAGE qualifiedName (SEMICOLON | packageBody)
+    ;
+
+packageBody
+    : LBRACE (importStatement | element)* RBRACE
     ;
 
 // Import
@@ -56,7 +60,7 @@ element
 
 // Part Definition
 partDefinition
-    : PART_DEF name (specialization)? (featureBody)?
+    : visibility? PART_DEF name (specialization)? (featureBody)?
     ;
 
 // Part Usage
@@ -66,7 +70,7 @@ partUsage
 
 // Action Definition
 actionDefinition
-    : ACTION_DEF name (specialization)? (featureBody)?
+    : visibility? ACTION_DEF name (specialization)? (featureBody)?
     ;
 
 // Action Usage
@@ -76,7 +80,7 @@ actionUsage
 
 // State Definition
 stateDefinition
-    : STATE_DEF name (specialization)? (stateBody)?
+    : visibility? STATE_DEF name (specialization)? (stateBody)?
     ;
 
 // State Usage
@@ -86,7 +90,7 @@ stateUsage
 
 // Requirement Definition
 requirementDefinition
-    : REQUIREMENT_DEF name (specialization)? (requirementBody)?
+    : visibility? REQUIREMENT_DEF name (specialization)? (requirementBody)?
     ;
 
 // Requirement Usage
@@ -96,7 +100,7 @@ requirementUsage
 
 // View Definition
 viewDefinition
-    : VIEW_DEF name (specialization)? (viewBody)?
+    : visibility? VIEW_DEF name (specialization)? (viewBody)?
     ;
 
 // View Usage
@@ -106,7 +110,7 @@ viewUsage
 
 // Constraint Definition
 constraintDefinition
-    : CONSTRAINT_DEF name (specialization)? (featureBody)?
+    : visibility? CONSTRAINT_DEF name (specialization)? (featureBody)?
     ;
 
 // Constraint Usage
@@ -116,7 +120,7 @@ constraintUsage
 
 // Attribute Definition
 attributeDefinition
-    : ATTRIBUTE_DEF name (specialization)? (featureBody)?
+    : visibility? ATTRIBUTE_DEF name (specialization)? (featureBody)?
     ;
 
 // Attribute Usage
@@ -126,12 +130,12 @@ attributeUsage
 
 // Port Definition
 portDefinition
-    : PORT_DEF name (specialization)? (featureBody)?
+    : visibility? PORT_DEF name (specialization)? (featureBody)?
     ;
 
 // Connection Definition
 connectionDefinition
-    : CONNECTION_DEF name (specialization)? (featureBody)?
+    : visibility? CONNECTION_DEF name (specialization)? (featureBody)?
     ;
 
 // Connection Usage
@@ -156,7 +160,12 @@ satisfyRequirement
 
 // Bodies
 featureBody
-    : LBRACE element* RBRACE
+    : LBRACE featureBodyElement* RBRACE
+    ;
+
+featureBodyElement
+    : element
+    | statement
     ;
 
 stateBody
@@ -169,6 +178,7 @@ stateElement
     | exitAction
     | doAction
     | transitionUsage
+    | statement
     ;
 
 requirementBody
@@ -236,11 +246,11 @@ assumeConstraint
     ;
 
 requireConstraint
-    : REQUIRE expression SEMICOLON
+    : REQUIRE (CONSTRAINT name? (COLON qualifiedName)?)? expression SEMICOLON
     ;
 
 subjectDeclaration
-    : SUBJECT name SEMICOLON
+    : SUBJECT name (COLON qualifiedName)? SEMICOLON
     ;
 
 // Specialization
@@ -330,4 +340,19 @@ name
 
 qualifiedName
     : name (DOUBLE_COLON name)*
+    ;
+
+// Statements - for simple action invocations and flow control
+statement
+    : expressionStatement
+    | successionStatement
+    ;
+
+expressionStatement
+    : expression SEMICOLON
+    ;
+
+successionStatement
+    : FIRST expression SEMICOLON
+    | THEN expression SEMICOLON
     ;

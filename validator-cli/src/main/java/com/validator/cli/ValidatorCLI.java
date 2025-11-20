@@ -186,11 +186,11 @@ public class ValidatorCLI implements Callable<Integer> {
         System.out.println();
     }
 
-    private List<File> expandFileList(List<File> files, boolean recursive) {
+    private List<File> expandFileList(List<File> fileList, boolean recurse) {
         List<File> result = new ArrayList<>();
 
-        for (File file : files) {
-            if (file.isDirectory() && recursive) {
+        for (File file : fileList) {
+            if (file.isDirectory() && recurse) {
                 expandDirectory(file, result);
             } else if (file.isFile()) {
                 result.add(file);
@@ -201,9 +201,9 @@ public class ValidatorCLI implements Callable<Integer> {
     }
 
     private void expandDirectory(File dir, List<File> result) {
-        File[] files = dir.listFiles();
-        if (files != null) {
-            for (File file : files) {
+        File[] dirFiles = dir.listFiles();
+        if (dirFiles != null) {
+            for (File file : dirFiles) {
                 if (file.isDirectory()) {
                     expandDirectory(file, result);
                 } else if (file.getName().endsWith(".sysml") || file.getName().endsWith(".kerml")) {
