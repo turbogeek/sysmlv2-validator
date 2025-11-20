@@ -30,7 +30,6 @@
         <slf4j.version>2.0.9</slf4j.version>
         <jacoco.version>0.8.11</jacoco.version>
         <owasp.version>9.0.9</owasp.version>
-        <lucene.version>9.9.2</lucene.version>
 
         <!-- Code coverage thresholds -->
         <jacoco.line.coverage.minimum>0.80</jacoco.line.coverage.minimum>
@@ -77,23 +76,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-
-            <!-- Apache Lucene for full-text search -->
-            <dependency>
-                <groupId>org.apache.lucene</groupId>
-                <artifactId>lucene-core</artifactId>
-                <version>${lucene.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.lucene</groupId>
-                <artifactId>lucene-queryparser</artifactId>
-                <version>${lucene.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.lucene</groupId>
-                <artifactId>lucene-analysis-common</artifactId>
-                <version>${lucene.version}</version>
             </dependency>
 
             <!-- JUnit 5 for testing -->
