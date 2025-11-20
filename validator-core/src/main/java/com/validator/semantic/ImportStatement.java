@@ -22,6 +22,9 @@ public class ImportStatement {
 
     public ImportStatement(String importPath, ImportType importType, boolean isPublic, String alias) {
         this.importPath = Objects.requireNonNull(importPath, "Import path cannot be null");
+        if (importPath.isEmpty()) {
+            throw new IllegalArgumentException("Import path cannot be empty");
+        }
         this.importType = Objects.requireNonNull(importType, "Import type cannot be null");
         this.isPublic = isPublic;
         this.alias = alias;
@@ -48,6 +51,7 @@ public class ImportStatement {
      * Add a resolved symbol from this import.
      */
     public void addImportedSymbol(Symbol symbol) {
+        Objects.requireNonNull(symbol, "Cannot add null symbol");
         String key = (alias != null) ? alias : symbol.getName();
         importedSymbols.put(key, symbol);
     }
@@ -74,9 +78,7 @@ public class ImportStatement {
         }
         sb.append("import ");
         sb.append(importPath);
-        if (importType == ImportType.WILDCARD) {
-            sb.append("::*");
-        }
+        sb.append(" [").append(importType).append("]");
         if (alias != null) {
             sb.append(" as ").append(alias);
         }

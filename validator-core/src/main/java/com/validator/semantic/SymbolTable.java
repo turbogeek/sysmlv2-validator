@@ -7,6 +7,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The symbol table for a SysML v2 model.
@@ -44,6 +45,8 @@ public class SymbolTable {
      * Enter a new scope.
      */
     public void enterScope(String name, ScopeType type) {
+        Objects.requireNonNull(name, "Scope name cannot be null");
+        Objects.requireNonNull(type, "Scope type cannot be null");
         Scope newScope = new Scope(name, type, currentScope);
         currentScope = newScope;
         scopesByQualifiedName.put(newScope.getQualifiedName(), newScope);
@@ -64,6 +67,7 @@ public class SymbolTable {
      * Define a symbol in the current scope.
      */
     public void define(Symbol symbol) {
+        Objects.requireNonNull(symbol, "Cannot define null symbol");
         currentScope.define(symbol);
 
         // Also add to global symbols map for quick lookup
@@ -81,6 +85,9 @@ public class SymbolTable {
      * Resolve a symbol by name, searching current scope and parent scopes.
      */
     public Symbol resolve(String name) {
+        if (name == null) {
+            return null;
+        }
         return currentScope.resolve(name);
     }
 
@@ -88,6 +95,9 @@ public class SymbolTable {
      * Resolve a qualified name (e.g., "Package::PartDef::attribute").
      */
     public Symbol resolveQualified(String qualifiedName) {
+        if (qualifiedName == null) {
+            return null;
+        }
         // First try direct lookup in global symbols
         Symbol symbol = globalSymbols.get(qualifiedName);
         if (symbol != null) {
@@ -102,6 +112,7 @@ public class SymbolTable {
      * Add an import to the current scope.
      */
     public void addImport(ImportStatement importStmt) {
+        Objects.requireNonNull(importStmt, "Cannot add null import");
         currentScope.addImport(importStmt);
     }
 
@@ -109,6 +120,9 @@ public class SymbolTable {
      * Get a scope by its qualified name.
      */
     public Scope getScopeByQualifiedName(String qualifiedName) {
+        if (qualifiedName == null) {
+            return null;
+        }
         return scopesByQualifiedName.get(qualifiedName);
     }
 
@@ -144,7 +158,7 @@ public class SymbolTable {
                 result.add(symbol);
             }
         }
-        return result;
+        return Collections.unmodifiableList(result);
     }
 
     /**

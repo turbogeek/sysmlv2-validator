@@ -1,6 +1,11 @@
 package com.validator.semantic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a scope in the symbol table.
@@ -51,13 +56,13 @@ public class Scope {
 
     /**
      * Define a new symbol in this scope.
-     * @throws IllegalArgumentException if a symbol with the same name already exists
+     * @throws IllegalStateException if a symbol with the same name already exists
      */
     public void define(Symbol symbol) {
         String symbolName = symbol.getName();
         if (symbols.containsKey(symbolName)) {
             Symbol existing = symbols.get(symbolName);
-            throw new IllegalArgumentException(
+            throw new IllegalStateException(
                 String.format("Symbol '%s' already defined in scope '%s' at %s (previous definition at %s)",
                     symbolName, getQualifiedName(), symbol.getLocation(), existing.getLocation())
             );
@@ -68,23 +73,23 @@ public class Scope {
     /**
      * Look up a symbol by name in this scope only (not parent scopes).
      */
-    public Symbol lookup(String name) {
-        return symbols.get(name);
+    public Symbol lookup(String symbolName) {
+        return symbols.get(symbolName);
     }
 
     /**
      * Resolve a symbol by name, searching this scope and parent scopes.
      */
-    public Symbol resolve(String name) {
+    public Symbol resolve(String symbolName) {
         // Check this scope
-        Symbol symbol = lookup(name);
+        Symbol symbol = lookup(symbolName);
         if (symbol != null) {
             return symbol;
         }
 
         // Check imports
         for (ImportStatement importStmt : imports) {
-            symbol = importStmt.resolve(name);
+            symbol = importStmt.resolve(symbolName);
             if (symbol != null) {
                 return symbol;
             }
@@ -92,7 +97,7 @@ public class Scope {
 
         // Check parent scope
         if (parent != null) {
-            return parent.resolve(name);
+            return parent.resolve(symbolName);
         }
 
         return null;
@@ -125,15 +130,16 @@ public class Scope {
     }
 
     public void addImport(ImportStatement importStmt) {
+        Objects.requireNonNull(importStmt, "Cannot add null import");
         imports.add(importStmt);
     }
 
     public List<ImportStatement> getImports() {
-        return new ArrayList<>(imports);
+        return Collections.unmodifiableList(imports);
     }
 
     public Map<String, Symbol> getSymbols() {
-        return new LinkedHashMap<>(symbols);
+        return Collections.unmodifiableMap(symbols);
     }
 
     public List<Scope> getChildren() {

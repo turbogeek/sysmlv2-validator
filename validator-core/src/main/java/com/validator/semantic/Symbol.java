@@ -3,6 +3,7 @@ package com.validator.semantic;
 import com.validator.ast.Location;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -57,7 +58,7 @@ public class Symbol {
     }
 
     public List<Symbol> getRedefinitions() {
-        return new ArrayList<>(redefinitions);
+        return Collections.unmodifiableList(redefinitions);
     }
 
     public void addRedefinition(Symbol symbol) {
@@ -68,7 +69,7 @@ public class Symbol {
     }
 
     public List<Symbol> getSpecializations() {
-        return new ArrayList<>(specializations);
+        return Collections.unmodifiableList(specializations);
     }
 
     public void addSpecialization(Symbol symbol) {
@@ -79,7 +80,7 @@ public class Symbol {
     }
 
     public List<Symbol> getSubsettings() {
-        return new ArrayList<>(subsettings);
+        return Collections.unmodifiableList(subsettings);
     }
 
     public void addSubsetting(Symbol symbol) {
@@ -99,8 +100,12 @@ public class Symbol {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Symbol symbol = (Symbol) o;
         return qualifiedName.equals(symbol.qualifiedName);
     }

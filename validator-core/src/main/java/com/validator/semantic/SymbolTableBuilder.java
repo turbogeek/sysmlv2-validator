@@ -5,7 +5,6 @@ import com.validator.parser.SysMLv2Parser;
 import com.validator.parser.SysMLv2ParserBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     public SymbolTableBuilder(String fileName) {
         this.symbolTable = new SymbolTable();
-        this.fileName = fileName;
+        this.fileName = (fileName != null) ? fileName : "<unknown>";
         this.errors = new ArrayList<>();
     }
 
@@ -44,7 +43,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     @Override
     public Void visitPackageDeclaration(SysMLv2Parser.PackageDeclarationContext ctx) {
-        String packageName = getIdentifier(ctx.name);
+        String packageName = getIdentifier(ctx.qualifiedName());
         if (packageName != null) {
             try {
                 symbolTable.enterScope(packageName, ScopeType.PACKAGE);
@@ -67,7 +66,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     @Override
     public Void visitPartDefinition(SysMLv2Parser.PartDefinitionContext ctx) {
-        String partName = getIdentifier(ctx.name);
+        String partName = getIdentifier(ctx.name());
         if (partName != null) {
             try {
                 Location location = getLocation(ctx);
@@ -94,7 +93,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     @Override
     public Void visitActionDefinition(SysMLv2Parser.ActionDefinitionContext ctx) {
-        String actionName = getIdentifier(ctx.name);
+        String actionName = getIdentifier(ctx.name());
         if (actionName != null) {
             try {
                 Location location = getLocation(ctx);
@@ -117,7 +116,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     @Override
     public Void visitStateDefinition(SysMLv2Parser.StateDefinitionContext ctx) {
-        String stateName = getIdentifier(ctx.name);
+        String stateName = getIdentifier(ctx.name());
         if (stateName != null) {
             try {
                 Location location = getLocation(ctx);
@@ -140,7 +139,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     @Override
     public Void visitRequirementDefinition(SysMLv2Parser.RequirementDefinitionContext ctx) {
-        String reqName = getIdentifier(ctx.name);
+        String reqName = getIdentifier(ctx.name());
         if (reqName != null) {
             try {
                 Location location = getLocation(ctx);
@@ -163,7 +162,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     @Override
     public Void visitAttributeDefinition(SysMLv2Parser.AttributeDefinitionContext ctx) {
-        String attrName = getIdentifier(ctx.name);
+        String attrName = getIdentifier(ctx.name());
         if (attrName != null) {
             try {
                 Location location = getLocation(ctx);
@@ -182,7 +181,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     @Override
     public Void visitPortDefinition(SysMLv2Parser.PortDefinitionContext ctx) {
-        String portName = getIdentifier(ctx.name);
+        String portName = getIdentifier(ctx.name());
         if (portName != null) {
             try {
                 Location location = getLocation(ctx);
@@ -200,9 +199,36 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitConnectionDefinition(SysMLv2Parser.ConnectionDefinitionContext ctx) {
+        String connectionName = getIdentifier(ctx.name());
+        if (connectionName != null) {
+            try {
+                Location location = getLocation(ctx);
+                String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + connectionName;
+
+                Symbol symbol = new Symbol(connectionName, qualifiedName, ElementType.CONNECTION_DEFINITION, location);
+                symbol.setAstNode(ctx);
+                symbolTable.define(symbol);
+
+                // Enter connection scope for nested elements
+                symbolTable.enterScope(connectionName, ScopeType.CONNECTION_DEFINITION);
+
+                // Visit children
+                visitChildren(ctx);
+
+                symbolTable.exitScope();
+            } catch (Exception e) {
+                errors.add(String.format("Error processing connection definition '%s' at %s: %s",
+                    connectionName, getLocation(ctx), e.getMessage()));
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Void visitImportStatement(SysMLv2Parser.ImportStatementContext ctx) {
         try {
-            boolean isPublic = ctx.PUBLIC() != null;
+            boolean isPublic = ctx.visibility() != null && ctx.visibility().PUBLIC() != null;
             String importPath = getImportPath(ctx);
 
             ImportType importType = determineImportType(ctx);
@@ -220,13 +246,17 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
     // Helper methods
 
     private String getIdentifier(ParserRuleContext ctx) {
-        if (ctx == null) return null;
+        if (ctx == null) {
+            return null;
+        }
         // This is simplified - actual implementation would extract from identifier rule
         return ctx.getText();
     }
 
     private Location getLocation(ParserRuleContext ctx) {
-        if (ctx == null) return new Location(fileName, 0, 0);
+        if (ctx == null) {
+            return new Location(fileName, 0, 0);
+        }
         return new Location(fileName, ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine());
     }
 
@@ -238,9 +268,15 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     private ImportType determineImportType(SysMLv2Parser.ImportStatementContext ctx) {
         String text = ctx.getText();
-        if (text.contains("::*")) return ImportType.WILDCARD;
-        if (text.contains(" as ")) return ImportType.ALIAS;
-        if (text.contains("{")) return ImportType.FILTERED;
+        if (text.contains("::*")) {
+            return ImportType.WILDCARD;
+        }
+        if (text.contains(" as ")) {
+            return ImportType.ALIAS;
+        }
+        if (text.contains("{")) {
+            return ImportType.FILTERED;
+        }
         return ImportType.SPECIFIC;
     }
 
