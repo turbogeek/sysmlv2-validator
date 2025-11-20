@@ -1,7 +1,12 @@
 package com.validator.parser;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +21,7 @@ import java.util.List;
  * Provides error collection and parse tree generation.
  */
 public class SysMLv2ParserFacade {
-    private static final Logger logger = LoggerFactory.getLogger(SysMLv2ParserFacade.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SysMLv2ParserFacade.class);
 
     /**
      * Parse result containing parse tree and any syntax errors.
@@ -118,7 +123,7 @@ public class SysMLv2ParserFacade {
      * @throws IOException if file cannot be read
      */
     public ParseResult parseFile(File file) throws IOException {
-        logger.debug("Parsing file: {}", file.getAbsolutePath());
+        LOGGER.debug("Parsing file: {}", file.getAbsolutePath());
         String content = Files.readString(file.toPath());
         return parseString(content, file.getName());
     }
@@ -131,7 +136,7 @@ public class SysMLv2ParserFacade {
      * @return parse result with tree and errors
      */
     public ParseResult parseString(String sourceCode, String fileName) {
-        logger.debug("Parsing source: {} ({} characters)", fileName, sourceCode.length());
+        LOGGER.debug("Parsing source: {} ({} characters)", fileName, sourceCode.length());
 
         // Create lexer
         CharStream input = CharStreams.fromString(sourceCode);
@@ -157,7 +162,7 @@ public class SysMLv2ParserFacade {
         ParseTree tree = parser.compilationUnit();
         long parseTime = System.currentTimeMillis() - startTime;
 
-        logger.debug("Parsing completed in {}ms with {} errors",
+        LOGGER.debug("Parsing completed in {}ms with {} errors",
             parseTime, errorListener.getErrors().size());
 
         return new ParseResult(tree, errorListener.getErrors());

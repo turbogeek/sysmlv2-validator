@@ -3,7 +3,7 @@ package com.validator;
 /**
  * Represents a validation warning (non-fatal issue).
  */
-public class ValidationWarning extends ValidationError {
+public final class ValidationWarning extends ValidationError {
 
     private ValidationWarning(Builder builder) {
         super(builder);

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.List;
  * Semantic validation will be added in Phase 2.
  */
 public class SysMLv2ValidatorImpl implements Validator {
-    private static final Logger logger = LoggerFactory.getLogger(SysMLv2ValidatorImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SysMLv2ValidatorImpl.class);
     private static final String VERSION = "0.1.0-SNAPSHOT";
     private static final String NAME = "SysML v2 Semantic Validator";
 
@@ -40,10 +39,10 @@ public class SysMLv2ValidatorImpl implements Validator {
         }
 
         if (!SysMLv2ParserFacade.isSysMLFile(file) && !SysMLv2ParserFacade.isKerMLFile(file)) {
-            logger.warn("File does not have .sysml or .kerml extension: {}", file.getName());
+            LOGGER.warn("File does not have .sysml or .kerml extension: {}", file.getName());
         }
 
-        logger.info("Validating file: {}", file.getAbsolutePath());
+        LOGGER.info("Validating file: {}", file.getAbsolutePath());
         long startTime = System.currentTimeMillis();
 
         // Parse the file
@@ -74,7 +73,7 @@ public class SysMLv2ValidatorImpl implements Validator {
             validationTime
         );
 
-        logger.info("Validation completed: {} errors, {} warnings in {}ms",
+        LOGGER.info("Validation completed: {} errors, {} warnings in {}ms",
             errors.size(), warnings.size(), validationTime);
 
         return result;
@@ -87,7 +86,7 @@ public class SysMLv2ValidatorImpl implements Validator {
 
     @Override
     public ValidationResult validate(String sourceCode, String fileName) {
-        logger.info("Validating source: {}", fileName);
+        LOGGER.info("Validating source: {}", fileName);
         long startTime = System.currentTimeMillis();
 
         // Parse the source code
@@ -118,7 +117,7 @@ public class SysMLv2ValidatorImpl implements Validator {
             validationTime
         );
 
-        logger.info("Validation completed: {} errors, {} warnings in {}ms",
+        LOGGER.info("Validation completed: {} errors, {} warnings in {}ms",
             errors.size(), warnings.size(), validationTime);
 
         return result;
@@ -126,7 +125,7 @@ public class SysMLv2ValidatorImpl implements Validator {
 
     @Override
     public List<ValidationResult> validateAll(List<File> files) throws IOException {
-        logger.info("Validating {} files", files.size());
+        LOGGER.info("Validating {} files", files.size());
         List<ValidationResult> results = new ArrayList<>();
 
         for (File file : files) {
@@ -134,7 +133,7 @@ public class SysMLv2ValidatorImpl implements Validator {
                 ValidationResult result = validate(file);
                 results.add(result);
             } catch (IOException e) {
-                logger.error("Error validating file: {}", file.getAbsolutePath(), e);
+                LOGGER.error("Error validating file: {}", file.getAbsolutePath(), e);
                 // Create error result
                 List<ValidationError> errors = new ArrayList<>();
                 errors.add(new ValidationError.Builder()
@@ -155,7 +154,7 @@ public class SysMLv2ValidatorImpl implements Validator {
             }
         }
 
-        logger.info("Validation complete: {} files processed", results.size());
+        LOGGER.info("Validation complete: {} files processed", results.size());
         return results;
     }
 

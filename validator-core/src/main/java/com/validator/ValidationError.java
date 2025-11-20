@@ -22,15 +22,15 @@ public class ValidationError {
         INFO
     }
 
-    private ValidationError(Builder builder) {
-        this.filePath = builder.filePath;
-        this.line = builder.line;
-        this.column = builder.column;
-        this.message = builder.message;
-        this.errorCode = builder.errorCode;
-        this.severity = builder.severity;
-        this.suggestions = new ArrayList<>(builder.suggestions);
-        this.context = builder.context;
+    protected ValidationError(Builder builder) {
+        this.filePath = builder.builderFilePath;
+        this.line = builder.builderLine;
+        this.column = builder.builderColumn;
+        this.message = builder.builderMessage;
+        this.errorCode = builder.builderErrorCode;
+        this.severity = builder.builderSeverity;
+        this.suggestions = new ArrayList<>(builder.builderSuggestions);
+        this.context = builder.builderContext;
     }
 
     public String getFilePath() {
@@ -80,57 +80,57 @@ public class ValidationError {
     }
 
     public static class Builder {
-        private String filePath;
-        private int line;
-        private int column;
-        private String message;
-        private String errorCode;
-        private Severity severity = Severity.ERROR;
-        private List<String> suggestions = new ArrayList<>();
-        private String context;
+        private String builderFilePath;
+        private int builderLine;
+        private int builderColumn;
+        private String builderMessage;
+        private String builderErrorCode;
+        private Severity builderSeverity = Severity.ERROR;
+        private List<String> builderSuggestions = new ArrayList<>();
+        private String builderContext;
 
         public Builder filePath(String filePath) {
-            this.filePath = filePath;
+            this.builderFilePath = filePath;
             return this;
         }
 
         public Builder line(int line) {
-            this.line = line;
+            this.builderLine = line;
             return this;
         }
 
         public Builder column(int column) {
-            this.column = column;
+            this.builderColumn = column;
             return this;
         }
 
         public Builder message(String message) {
-            this.message = message;
+            this.builderMessage = message;
             return this;
         }
 
         public Builder errorCode(String errorCode) {
-            this.errorCode = errorCode;
+            this.builderErrorCode = errorCode;
             return this;
         }
 
         public Builder severity(Severity severity) {
-            this.severity = severity;
+            this.builderSeverity = severity;
             return this;
         }
 
         public Builder addSuggestion(String suggestion) {
-            this.suggestions.add(suggestion);
+            this.builderSuggestions.add(suggestion);
             return this;
         }
 
         public Builder suggestions(List<String> suggestions) {
-            this.suggestions = new ArrayList<>(suggestions);
+            this.builderSuggestions = new ArrayList<>(suggestions);
             return this;
         }
 
         public Builder context(String context) {
-            this.context = context;
+            this.builderContext = context;
             return this;
         }
 

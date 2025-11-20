@@ -64,3 +64,5 @@ test-output/
 # Diagnostic files
 diagnostic*.txt
 validation-reports/
+.maven/
+nul

@@ -1,6 +1,8 @@
 package com.validator.semantic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Resolves import statements to actual symbols.
@@ -43,11 +45,14 @@ public class ImportResolver {
             case ALIAS:
                 resolveAliasedImport(importStmt, importPath, currentScope);
                 break;
+            default:
+                errors.add(String.format("Unknown import type: %s", importStmt.getImportType()));
+                break;
         }
     }
 
     /**
-     * Resolve wildcard import: import Package::*
+     * Resolve wildcard import: import Package::.
      */
     private void resolveWildcardImport(ImportStatement importStmt, String importPath, Scope currentScope) {
         // Remove "::*" suffix
@@ -60,8 +65,8 @@ public class ImportResolver {
             // Import all symbols from the target scope
             for (Symbol symbol : targetScope.getSymbols().values()) {
                 // Only import public symbols for wildcard imports
-                if (symbol.getVisibility() == Visibility.PUBLIC ||
-                    symbol.getVisibility() == Visibility.PACKAGE) {
+                if (symbol.getVisibility() == Visibility.PUBLIC
+                    || symbol.getVisibility() == Visibility.PACKAGE) {
                     importStmt.addImportedSymbol(symbol);
                 }
             }
@@ -82,7 +87,7 @@ public class ImportResolver {
     }
 
     /**
-     * Resolve specific import: import Package::Element
+     * Resolve specific import: import Package::Element.
      */
     private void resolveSpecificImport(ImportStatement importStmt, String importPath, Scope currentScope) {
         // Try to resolve the qualified name
@@ -111,7 +116,7 @@ public class ImportResolver {
     }
 
     /**
-     * Resolve filtered import: import Package::{Element1, Element2}
+     * Resolve filtered import: import Package::{Element1, Element2}.
      */
     private void resolveFilteredImport(ImportStatement importStmt, String importPath, Scope currentScope) {
         // Parse: "Package::{Element1, Element2}"
@@ -148,7 +153,7 @@ public class ImportResolver {
     }
 
     /**
-     * Resolve aliased import: import Package::Element as Alias
+     * Resolve aliased import: import Package::Element as Alias.
      */
     private void resolveAliasedImport(ImportStatement importStmt, String importPath, Scope currentScope) {
         // Parse: "Package::Element as Alias"
@@ -278,10 +283,18 @@ public class ImportResolver {
             this.errorCount = errorCount;
         }
 
-        public int getTotalImports() { return totalImports; }
-        public int getResolvedImports() { return resolvedImports; }
-        public int getUnresolvedImports() { return unresolvedImports; }
-        public int getErrorCount() { return errorCount; }
+        public int getTotalImports() {
+            return totalImports;
+        }
+        public int getResolvedImports() {
+            return resolvedImports;
+        }
+        public int getUnresolvedImports() {
+            return unresolvedImports;
+        }
+        public int getErrorCount() {
+            return errorCount;
+        }
 
         @Override
         public String toString() {

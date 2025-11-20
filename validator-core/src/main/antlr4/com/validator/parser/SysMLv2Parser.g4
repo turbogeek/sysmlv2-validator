@@ -19,6 +19,10 @@ importDeclaration
     : visibility? IMPORT qualifiedName (DOUBLE_COLON STAR)? SEMICOLON
     ;
 
+importStatement
+    : visibility? IMPORT qualifiedName (DOUBLE_COLON STAR)? SEMICOLON
+    ;
+
 visibility
     : PUBLIC
     | PRIVATE
@@ -41,6 +45,7 @@ element
     | constraintUsage
     | attributeDefinition
     | attributeUsage
+    | portDefinition
     | connectionDefinition
     | connectionUsage
     | transitionUsage
@@ -117,6 +122,11 @@ attributeDefinition
 // Attribute Usage
 attributeUsage
     : ATTRIBUTE name? (COLON qualifiedName)? (multiplicity)? (specialization)? (featureValueInit)? SEMICOLON?
+    ;
+
+// Port Definition
+portDefinition
+    : PORT_DEF name (specialization)? (featureBody)?
     ;
 
 // Connection Definition

@@ -215,12 +215,24 @@ public class ModelIndexer {
             this.score = score;
         }
 
-        public String getName() { return name; }
-        public String getQualifiedName() { return qualifiedName; }
-        public String getType() { return type; }
-        public String getVisibility() { return visibility; }
-        public String getLocation() { return location; }
-        public float getScore() { return score; }
+        public String getName() {
+            return name;
+        }
+        public String getQualifiedName() {
+            return qualifiedName;
+        }
+        public String getType() {
+            return type;
+        }
+        public String getVisibility() {
+            return visibility;
+        }
+        public String getLocation() {
+            return location;
+        }
+        public float getScore() {
+            return score;
+        }
 
         @Override
         public String toString() {
@@ -241,8 +253,12 @@ public class ModelIndexer {
             this.maxDoc = maxDoc;
         }
 
-        public int getNumDocs() { return numDocs; }
-        public int getMaxDoc() { return maxDoc; }
+        public int getNumDocs() {
+            return numDocs;
+        }
+        public int getMaxDoc() {
+            return maxDoc;
+        }
 
         @Override
         public String toString() {
