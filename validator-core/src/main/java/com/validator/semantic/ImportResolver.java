@@ -62,22 +62,17 @@ public class ImportResolver {
         Scope targetScope = findScope(packagePath);
 
         if (targetScope != null) {
-            // Import all symbols from the target scope
-            for (Symbol symbol : targetScope.getSymbols().values()) {
-                // Only import public symbols for wildcard imports
-                if (symbol.getVisibility() == Visibility.PUBLIC
-                    || symbol.getVisibility() == Visibility.PACKAGE) {
-                    importStmt.addImportedSymbol(symbol);
-                }
-            }
+            // Import all public symbols from the target scope using streams
+            targetScope.getSymbols().values().stream()
+                .filter(symbol -> symbol.getVisibility() == Visibility.PUBLIC
+                    || symbol.getVisibility() == Visibility.PACKAGE)
+                .forEach(importStmt::addImportedSymbol);
         } else {
             // Try standard library
             if (standardLibrary != null) {
                 List<Symbol> stdLibSymbols = standardLibrary.getSymbolsInPackage(packagePath);
                 if (!stdLibSymbols.isEmpty()) {
-                    for (Symbol symbol : stdLibSymbols) {
-                        importStmt.addImportedSymbol(symbol);
-                    }
+                    stdLibSymbols.forEach(importStmt::addImportedSymbol);
                     return;
                 }
             }
@@ -130,26 +125,27 @@ public class ImportResolver {
 
         String packagePath = importPath.substring(0, braceStart).replaceAll("::$", "");
         String elementList = importPath.substring(braceStart + 1, braceEnd);
-        String[] elements = elementList.split(",");
 
-        for (String element : elements) {
-            element = element.trim();
-            String qualifiedName = packagePath.isEmpty() ? element : packagePath + "::" + element;
+        // Use streams to process filtered elements
+        java.util.Arrays.stream(elementList.split(","))
+            .map(String::trim)
+            .forEach(element -> {
+                String qualifiedName = packagePath.isEmpty() ? element : packagePath + "::" + element;
 
-            Symbol symbol = symbolTable.resolveQualified(qualifiedName);
-            if (symbol != null && isAccessible(symbol, currentScope)) {
-                importStmt.addImportedSymbol(symbol);
-            } else if (standardLibrary != null) {
-                symbol = standardLibrary.resolveSymbol(qualifiedName);
-                if (symbol != null) {
+                Symbol symbol = symbolTable.resolveQualified(qualifiedName);
+                if (symbol != null && isAccessible(symbol, currentScope)) {
                     importStmt.addImportedSymbol(symbol);
+                } else if (standardLibrary != null) {
+                    Symbol stdSymbol = standardLibrary.resolveSymbol(qualifiedName);
+                    if (stdSymbol != null) {
+                        importStmt.addImportedSymbol(stdSymbol);
+                    } else {
+                        errors.add(String.format("Cannot resolve filtered import element '%s'", qualifiedName));
+                    }
                 } else {
                     errors.add(String.format("Cannot resolve filtered import element '%s'", qualifiedName));
                 }
-            } else {
-                errors.add(String.format("Cannot resolve filtered import element '%s'", qualifiedName));
-            }
-        }
+            });
     }
 
     /**
@@ -249,22 +245,17 @@ public class ImportResolver {
      * Get import resolution statistics.
      */
     public ImportResolutionStats getStats() {
-        int totalImports = 0;
-        int resolvedImports = 0;
-        int unresolvedImports = 0;
+        List<ImportStatement> allImports = symbolTable.getAllScopes().stream()
+            .flatMap(scope -> scope.getImports().stream())
+            .toList();
 
-        for (Scope scope : symbolTable.getAllScopes()) {
-            for (ImportStatement importStmt : scope.getImports()) {
-                totalImports++;
-                if (importStmt.getImportedSymbols().isEmpty()) {
-                    unresolvedImports++;
-                } else {
-                    resolvedImports++;
-                }
-            }
-        }
+        int totalImports = allImports.size();
+        long unresolvedImports = allImports.stream()
+            .filter(importStmt -> importStmt.getImportedSymbols().isEmpty())
+            .count();
+        int resolvedImports = totalImports - (int) unresolvedImports;
 
-        return new ImportResolutionStats(totalImports, resolvedImports, unresolvedImports, errors.size());
+        return new ImportResolutionStats(totalImports, resolvedImports, (int) unresolvedImports, errors.size());
     }
 
     /**

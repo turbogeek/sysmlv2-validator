@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -29,6 +29,11 @@ public class StandardLibraryManager {
     private static final String SYSML_LIBRARY = "SysML";
     private static final String ISQ_LIBRARY = "ISQ";
     private static final String SI_LIBRARY = "SI";
+
+    // Primitive types set for efficient lookup
+    private static final Set<String> PRIMITIVE_TYPES = Set.of(
+        "Boolean", "Integer", "Real", "String", "Natural"
+    );
 
     public StandardLibraryManager() {
         this.standardSymbols = new LinkedHashMap<>();
@@ -145,8 +150,7 @@ public class StandardLibraryManager {
      * Check if a type is a primitive type.
      */
     public boolean isPrimitiveType(String typeName) {
-        return Arrays.asList("Boolean", "Integer", "Real", "String", "Natural")
-            .contains(typeName);
+        return PRIMITIVE_TYPES.contains(typeName);
     }
 
     /**
@@ -200,10 +204,12 @@ public class StandardLibraryManager {
             initializeBuiltins();
         }
 
-        Map<ElementType, Integer> typeCounts = new EnumMap<>(ElementType.class);
-        for (Symbol symbol : standardSymbols.values()) {
-            typeCounts.merge(symbol.getType(), 1, Integer::sum);
-        }
+        Map<ElementType, Integer> typeCounts = standardSymbols.values().stream()
+            .collect(Collectors.groupingBy(
+                Symbol::getType,
+                () -> new EnumMap<>(ElementType.class),
+                Collectors.summingInt(symbol -> 1)
+            ));
 
         return new StandardLibraryStats(
             standardSymbols.size(),

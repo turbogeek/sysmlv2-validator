@@ -87,12 +87,15 @@ public class Scope {
             return symbol;
         }
 
-        // Check imports
-        for (ImportStatement importStmt : imports) {
-            symbol = importStmt.resolve(symbolName);
-            if (symbol != null) {
-                return symbol;
-            }
+        // Check imports using streams
+        symbol = imports.stream()
+            .map(importStmt -> importStmt.resolve(symbolName))
+            .filter(java.util.Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+
+        if (symbol != null) {
+            return symbol;
         }
 
         // Check parent scope
@@ -161,10 +164,10 @@ public class Scope {
             allSymbols.putAll(parent.getAllVisibleSymbols());
         }
 
-        // Add imported symbols
-        for (ImportStatement importStmt : imports) {
-            allSymbols.putAll(importStmt.getImportedSymbols());
-        }
+        // Add imported symbols using streams
+        imports.stream()
+            .map(ImportStatement::getImportedSymbols)
+            .forEach(allSymbols::putAll);
 
         // Add local symbols (these take precedence)
         allSymbols.putAll(symbols);

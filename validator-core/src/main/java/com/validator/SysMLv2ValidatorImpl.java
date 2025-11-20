@@ -48,21 +48,19 @@ public class SysMLv2ValidatorImpl implements Validator {
         // Parse the file
         ParseResult parseResult = parserFacade.parseFile(file);
 
-        // Convert syntax errors to validation errors
-        List<ValidationError> errors = new ArrayList<>();
-        List<ValidationWarning> warnings = new ArrayList<>();
-
-        for (SyntaxError syntaxError : parseResult.getSyntaxErrors()) {
-            ValidationError error = new ValidationError.Builder()
+        // Convert syntax errors to validation errors using streams
+        List<ValidationError> errors = parseResult.getSyntaxErrors().stream()
+            .map(syntaxError -> new ValidationError.Builder()
                 .filePath(file.getAbsolutePath())
                 .line(syntaxError.getLine())
                 .column(syntaxError.getCharPositionInLine())
                 .message(syntaxError.getMessage())
                 .errorCode("SYNTAX_ERROR")
                 .severity(ValidationError.Severity.ERROR)
-                .build();
-            errors.add(error);
-        }
+                .build())
+            .toList();
+
+        List<ValidationWarning> warnings = new ArrayList<>();
 
         long validationTime = System.currentTimeMillis() - startTime;
 
@@ -92,21 +90,19 @@ public class SysMLv2ValidatorImpl implements Validator {
         // Parse the source code
         ParseResult parseResult = parserFacade.parseString(sourceCode, fileName);
 
-        // Convert syntax errors to validation errors
-        List<ValidationError> errors = new ArrayList<>();
-        List<ValidationWarning> warnings = new ArrayList<>();
-
-        for (SyntaxError syntaxError : parseResult.getSyntaxErrors()) {
-            ValidationError error = new ValidationError.Builder()
+        // Convert syntax errors to validation errors using streams
+        List<ValidationError> errors = parseResult.getSyntaxErrors().stream()
+            .map(syntaxError -> new ValidationError.Builder()
                 .filePath(fileName)
                 .line(syntaxError.getLine())
                 .column(syntaxError.getCharPositionInLine())
                 .message(syntaxError.getMessage())
                 .errorCode("SYNTAX_ERROR")
                 .severity(ValidationError.Severity.ERROR)
-                .build();
-            errors.add(error);
-        }
+                .build())
+            .toList();
+
+        List<ValidationWarning> warnings = new ArrayList<>();
 
         long validationTime = System.currentTimeMillis() - startTime;
 
@@ -126,33 +122,32 @@ public class SysMLv2ValidatorImpl implements Validator {
     @Override
     public List<ValidationResult> validateAll(List<File> files) throws IOException {
         LOGGER.info("Validating {} files", files.size());
-        List<ValidationResult> results = new ArrayList<>();
 
-        for (File file : files) {
-            try {
-                ValidationResult result = validate(file);
-                results.add(result);
-            } catch (IOException e) {
-                LOGGER.error("Error validating file: {}", file.getAbsolutePath(), e);
-                // Create error result
-                List<ValidationError> errors = new ArrayList<>();
-                errors.add(new ValidationError.Builder()
-                    .filePath(file.getAbsolutePath())
-                    .line(0)
-                    .column(0)
-                    .message("Failed to read file: " + e.getMessage())
-                    .errorCode("IO_ERROR")
-                    .severity(ValidationError.Severity.ERROR)
-                    .build());
+        List<ValidationResult> results = files.stream()
+            .map(file -> {
+                try {
+                    return validate(file);
+                } catch (IOException e) {
+                    LOGGER.error("Error validating file: {}", file.getAbsolutePath(), e);
+                    // Create error result
+                    ValidationError error = new ValidationError.Builder()
+                        .filePath(file.getAbsolutePath())
+                        .line(0)
+                        .column(0)
+                        .message("Failed to read file: " + e.getMessage())
+                        .errorCode("IO_ERROR")
+                        .severity(ValidationError.Severity.ERROR)
+                        .build();
 
-                results.add(new ValidationResult(
-                    file.getAbsolutePath(),
-                    errors,
-                    new ArrayList<>(),
-                    0
-                ));
-            }
-        }
+                    return new ValidationResult(
+                        file.getAbsolutePath(),
+                        List.of(error),
+                        List.of(),
+                        0
+                    );
+                }
+            })
+            .toList();
 
         LOGGER.info("Validation complete: {} files processed", results.size());
         return results;

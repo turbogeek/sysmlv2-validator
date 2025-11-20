@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * The symbol table for a SysML v2 model.
@@ -152,13 +153,12 @@ public class SymbolTable {
      * Get all symbols of a specific type.
      */
     public List<Symbol> getSymbolsByType(ElementType type) {
-        List<Symbol> result = new ArrayList<>();
-        for (Symbol symbol : globalSymbols.values()) {
-            if (symbol.getType() == type) {
-                result.add(symbol);
-            }
-        }
-        return Collections.unmodifiableList(result);
+        return globalSymbols.values().stream()
+            .filter(symbol -> symbol.getType() == type)
+            .collect(Collectors.collectingAndThen(
+                Collectors.toList(),
+                Collections::unmodifiableList
+            ));
     }
 
     /**
@@ -172,15 +172,19 @@ public class SymbolTable {
      * Get statistics about the symbol table.
      */
     public SymbolTableStats getStats() {
-        Map<ElementType, Integer> typeCounts = new EnumMap<>(ElementType.class);
-        for (Symbol symbol : globalSymbols.values()) {
-            typeCounts.merge(symbol.getType(), 1, Integer::sum);
-        }
+        Map<ElementType, Integer> typeCounts = globalSymbols.values().stream()
+            .collect(Collectors.groupingBy(
+                Symbol::getType,
+                () -> new EnumMap<>(ElementType.class),
+                Collectors.summingInt(symbol -> 1)
+            ));
 
-        Map<ScopeType, Integer> scopeCounts = new EnumMap<>(ScopeType.class);
-        for (Scope scope : scopesByQualifiedName.values()) {
-            scopeCounts.merge(scope.getType(), 1, Integer::sum);
-        }
+        Map<ScopeType, Integer> scopeCounts = scopesByQualifiedName.values().stream()
+            .collect(Collectors.groupingBy(
+                Scope::getType,
+                () -> new EnumMap<>(ScopeType.class),
+                Collectors.summingInt(scope -> 1)
+            ));
 
         return new SymbolTableStats(
             scopesByQualifiedName.size(),

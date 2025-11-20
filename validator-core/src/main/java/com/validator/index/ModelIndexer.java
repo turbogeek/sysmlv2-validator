@@ -115,22 +115,24 @@ public class ModelIndexer {
         // Execute search
         TopDocs topDocs = searcher.search(query, maxResults);
 
-        // Convert results
-        List<SearchResult> results = new ArrayList<>();
-        for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
-            Document doc = searcher.doc(scoreDoc.doc);
-            SearchResult result = new SearchResult(
-                doc.get("name"),
-                doc.get("qualifiedName"),
-                doc.get("type"),
-                doc.get("visibility"),
-                doc.get("location"),
-                scoreDoc.score
-            );
-            results.add(result);
-        }
-
-        return results;
+        // Convert results using streams
+        return java.util.Arrays.stream(topDocs.scoreDocs)
+            .map(scoreDoc -> {
+                try {
+                    Document doc = searcher.doc(scoreDoc.doc);
+                    return new SearchResult(
+                        doc.get("name"),
+                        doc.get("qualifiedName"),
+                        doc.get("type"),
+                        doc.get("visibility"),
+                        doc.get("location"),
+                        scoreDoc.score
+                    );
+                } catch (IOException e) {
+                    throw new java.io.UncheckedIOException(e);
+                }
+            })
+            .toList();
     }
 
     /**

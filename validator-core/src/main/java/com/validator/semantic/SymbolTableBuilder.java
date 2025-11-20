@@ -454,10 +454,11 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     private String extractImportAlias(String text) {
         if (text.contains(" as ")) {
-            String[] parts = text.split(" as ");
-            if (parts.length > 1) {
-                return parts[1].replaceAll(";$", "").trim();
-            }
+            return java.util.Arrays.stream(text.split(" as "))
+                .skip(1)
+                .findFirst()
+                .map(part -> part.replaceAll(";$", "").trim())
+                .orElse(null);
         }
         return null;
     }
