@@ -30,7 +30,7 @@ public class Symbol {
         this.qualifiedName = Objects.requireNonNull(qualifiedName, "Qualified name cannot be null");
         this.type = Objects.requireNonNull(type, "Element type cannot be null");
         this.location = location;
-        this.visibility = visibility;
+        this.visibility = visibility != null ? visibility : Visibility.PRIVATE;
         this.redefinitions = new ArrayList<>();
         this.specializations = new ArrayList<>();
         this.subsettings = new ArrayList<>();
@@ -61,6 +61,7 @@ public class Symbol {
     }
 
     public void addRedefinition(Symbol symbol) {
+        Objects.requireNonNull(symbol, "Cannot add null redefinition");
         if (!redefinitions.contains(symbol)) {
             redefinitions.add(symbol);
         }
@@ -71,6 +72,7 @@ public class Symbol {
     }
 
     public void addSpecialization(Symbol symbol) {
+        Objects.requireNonNull(symbol, "Cannot add null specialization");
         if (!specializations.contains(symbol)) {
             specializations.add(symbol);
         }
@@ -81,6 +83,7 @@ public class Symbol {
     }
 
     public void addSubsetting(Symbol symbol) {
+        Objects.requireNonNull(symbol, "Cannot add null subsetting");
         if (!subsettings.contains(symbol)) {
             subsettings.add(symbol);
         }

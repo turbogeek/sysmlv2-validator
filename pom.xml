@@ -31,10 +31,14 @@
         <jacoco.version>0.8.11</jacoco.version>
         <owasp.version>9.0.9</owasp.version>
         <lucene.version>9.9.2</lucene.version>
+        <pitest.version>1.15.3</pitest.version>
+        <spotbugs.version>4.8.3.0</spotbugs.version>
+        <checkstyle.version>3.3.1</checkstyle.version>
 
-        <!-- Code coverage thresholds -->
-        <jacoco.line.coverage.minimum>0.80</jacoco.line.coverage.minimum>
-        <jacoco.branch.coverage.minimum>0.70</jacoco.branch.coverage.minimum>
+        <!-- Code coverage thresholds (increased for production quality) -->
+        <jacoco.line.coverage.minimum>0.95</jacoco.line.coverage.minimum>
+        <jacoco.branch.coverage.minimum>0.90</jacoco.branch.coverage.minimum>
+        <pitest.mutation.threshold>80</pitest.mutation.threshold>
     </properties>
 
     <dependencyManagement>
@@ -138,6 +142,21 @@
                     <artifactId>dependency-check-maven</artifactId>
                     <version>${owasp.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.pitest</groupId>
+                    <artifactId>pitest-maven</artifactId>
+                    <version>${pitest.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${spotbugs.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${checkstyle.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -204,6 +223,88 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- PITest Mutation Testing -->
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <configuration>
+                    <targetClasses>
+                        <param>com.validator.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>com.validator.*</param>
+                    </targetTests>
+                    <mutators>
+                        <mutator>DEFAULTS</mutator>
+                    </mutators>
+                    <mutationThreshold>${pitest.mutation.threshold}</mutationThreshold>
+                    <coverageThreshold>90</coverageThreshold>
+                    <outputFormats>
+                        <outputFormat>HTML</outputFormat>
+                        <outputFormat>XML</outputFormat>
+                    </outputFormats>
+                    <timestampedReports>false</timestampedReports>
+                    <excludedClasses>
+                        <!-- Exclude ANTLR generated classes -->
+                        <excludedClass>com.validator.parser.SysMLv2Lexer*</excludedClass>
+                        <excludedClass>com.validator.parser.SysMLv2Parser*</excludedClass>
+                        <!-- Exclude CLI main classes (tested via integration tests) -->
+                        <excludedClass>com.validator.cli.ValidatorCLI</excludedClass>
+                    </excludedClasses>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>1.2.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- SpotBugs Static Analysis -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <failOnError>true</failOnError>
+                    <xmlOutput>true</xmlOutput>
+                    <htmlOutput>true</htmlOutput>
+                    <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Checkstyle Code Style -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <violationSeverity>warning</violationSeverity>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
