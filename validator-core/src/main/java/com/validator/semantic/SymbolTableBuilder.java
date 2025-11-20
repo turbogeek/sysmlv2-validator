@@ -151,6 +151,26 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitPartUsage(SysMLv2Parser.PartUsageContext ctx) {
+        String partName = getIdentifier(ctx.name());
+        if (partName != null) {
+            try {
+                Location location = getLocation(ctx);
+                String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + partName;
+
+                // Treat typed part usages as part usages (they reference other parts)
+                Symbol symbol = new Symbol(partName, qualifiedName, ElementType.PART_USAGE, location);
+                symbol.setAstNode(ctx);
+                symbolTable.define(symbol);
+            } catch (Exception e) {
+                errors.add(String.format("Error processing part usage '%s' at %s: %s",
+                    partName, getLocation(ctx), e.getMessage()));
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Void visitActionDefinition(SysMLv2Parser.ActionDefinitionContext ctx) {
         String actionName = getIdentifier(ctx.name());
         if (actionName != null) {
@@ -254,8 +274,13 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
                 Location location = getLocation(ctx);
                 String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + attrName;
 
-                Symbol symbol = new Symbol(attrName, qualifiedName,
-                    ElementType.ATTRIBUTE_USAGE, location);
+                // For symbol table purposes, treat typed attribute usages as definitions
+                // since they define the structure of the containing element
+                ElementType type = (ctx.qualifiedName() != null)
+                    ? ElementType.ATTRIBUTE_DEFINITION
+                    : ElementType.ATTRIBUTE_USAGE;
+
+                Symbol symbol = new Symbol(attrName, qualifiedName, type, location);
                 symbol.setAstNode(ctx);
                 symbolTable.define(symbol);
             } catch (Exception e) {
@@ -322,10 +347,19 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
             boolean isPublic = ctx.visibility() != null
                 && ctx.visibility().getText() != null
                 && ctx.visibility().getText().equals("public");
-            String importPath = extractImportPath(ctx.qualifiedName());
 
-            ImportType importType = determineImportType(ctx.getText());
-            String alias = extractImportAlias(ctx.getText());
+            // Extract import path and check for wildcard
+            String baseImportPath = extractImportPath(ctx.qualifiedName());
+            String fullText = ctx.getText();
+            String importPath = baseImportPath;
+
+            // Check if it's a wildcard import (contains ::*)
+            if (fullText.contains("::*")) {
+                importPath = baseImportPath + "::*";
+            }
+
+            ImportType importType = determineImportType(fullText);
+            String alias = extractImportAlias(fullText);
 
             ImportStatement importStmt = new ImportStatement(importPath, importType, isPublic, alias);
             symbolTable.addImport(importStmt);
@@ -343,10 +377,19 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
             boolean isPublic = ctx.visibility() != null
                 && ctx.visibility().getText() != null
                 && ctx.visibility().getText().equals("public");
-            String importPath = extractImportPath(ctx.qualifiedName());
 
-            ImportType importType = determineImportType(ctx.getText());
-            String alias = extractImportAlias(ctx.getText());
+            // Extract import path and check for wildcard
+            String baseImportPath = extractImportPath(ctx.qualifiedName());
+            String fullText = ctx.getText();
+            String importPath = baseImportPath;
+
+            // Check if it's a wildcard import (contains ::*)
+            if (fullText.contains("::*")) {
+                importPath = baseImportPath + "::*";
+            }
+
+            ImportType importType = determineImportType(fullText);
+            String alias = extractImportAlias(fullText);
 
             ImportStatement importStmt = new ImportStatement(importPath, importType, isPublic, alias);
             symbolTable.addImport(importStmt);
