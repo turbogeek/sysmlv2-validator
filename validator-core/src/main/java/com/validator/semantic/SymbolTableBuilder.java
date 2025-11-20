@@ -255,7 +255,7 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
 
     private Location getLocation(ParserRuleContext ctx) {
         if (ctx == null) {
-            return new Location(fileName, 0, 0);
+            return new Location(fileName, 1, 0);
         }
         return new Location(fileName, ctx.getStart().getLine(), ctx.getStart().getCharPositionInLine());
     }

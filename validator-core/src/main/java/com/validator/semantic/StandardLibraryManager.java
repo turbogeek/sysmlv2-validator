@@ -2,11 +2,17 @@ package com.validator.semantic;
 
 import com.validator.ast.Location;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -100,7 +106,7 @@ public class StandardLibraryManager {
     private void addStandardType(String name, ElementType type, String packageName) {
         String qualifiedName = packageName + "::" + name;
         Symbol symbol = new Symbol(name, qualifiedName, type,
-            new Location("<stdlib>", 0, 0), Visibility.PUBLIC);
+            new Location("<stdlib>", 1, 0), Visibility.PUBLIC);
 
         standardSymbols.put(qualifiedName, symbol);
         standardSymbols.put(name, symbol); // Also allow unqualified lookup
@@ -147,8 +153,8 @@ public class StandardLibraryManager {
      * Check if a type is an ISQ quantity type.
      */
     public boolean isQuantityType(String typeName) {
-        return typeName.endsWith("Value") &&
-               resolveSymbol("ISQ::" + typeName) != null;
+        return typeName.endsWith("Value")
+               && resolveSymbol("ISQ::" + typeName) != null;
     }
 
     /**
@@ -230,8 +236,12 @@ public class StandardLibraryManager {
             this.symbolsByType = new EnumMap<>(symbolsByType);
         }
 
-        public int getSymbolCount() { return symbolCount; }
-        public int getPackageCount() { return packageCount; }
+        public int getSymbolCount() {
+            return symbolCount;
+        }
+        public int getPackageCount() {
+            return packageCount;
+        }
         public Map<ElementType, Integer> getSymbolsByType() {
             return Collections.unmodifiableMap(symbolsByType);
         }

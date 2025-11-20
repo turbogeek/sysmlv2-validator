@@ -12,6 +12,12 @@ public class Location {
 
     public Location(String fileName, int line, int column) {
         this.fileName = Objects.requireNonNull(fileName, "File name cannot be null");
+        if (line < 1) {
+            throw new IllegalArgumentException("Line number must be >= 1, got: " + line);
+        }
+        if (column < 0) {
+            throw new IllegalArgumentException("Column number must be >= 0, got: " + column);
+        }
         this.line = line;
         this.column = column;
     }
@@ -30,12 +36,16 @@ public class Location {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Location location = (Location) o;
-        return line == location.line &&
-               column == location.column &&
-               fileName.equals(location.fileName);
+        return line == location.line
+               && column == location.column
+               && fileName.equals(location.fileName);
     }
 
     @Override

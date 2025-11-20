@@ -197,7 +197,7 @@ public class LocationTest {
         assertEquals(0, startOfFile.getColumn());
 
         // Standard library (no real file)
-        Location stdlib = new Location("<stdlib>", 0, 0);
+        Location stdlib = new Location("<stdlib>", 1, 0);
         assertEquals("<stdlib>", stdlib.getFileName());
 
         // Error location (synthetic)
