@@ -28,7 +28,7 @@ public class SymbolTableBuilderTest {
     public void testSimplePackage() {
         String sysml = "package TestPackage;";
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         assertNotNull(parseTree, "Parse tree should not be null");
 
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
@@ -50,7 +50,7 @@ public class SymbolTableBuilderTest {
             part def Vehicle;
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -78,7 +78,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -110,7 +110,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -141,7 +141,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -166,7 +166,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -190,7 +190,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -226,7 +226,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -250,7 +250,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
 
         // Builder should still return a symbol table (not throw exception)
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
@@ -271,7 +271,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -299,7 +299,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -323,7 +323,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -378,7 +378,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "vehicle_model.sysml");
 
         assertNotNull(symbolTable);
@@ -436,7 +436,7 @@ public class SymbolTableBuilderTest {
     @DisplayName("Should handle build with null file path")
     public void testNullFilePath() {
         String sysml = "package TestPackage;";
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
 
         // Null file path should be allowed (e.g., for string-based parsing)
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, null);
@@ -465,7 +465,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);
@@ -485,7 +485,7 @@ public class SymbolTableBuilderTest {
     public void testEmptyModel() {
         String sysml = ""; // Empty file
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
 
         // Should not crash on empty model
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "empty.sysml");
@@ -509,7 +509,7 @@ public class SymbolTableBuilderTest {
             }
             """;
 
-        ParseTree parseTree = parser.parseString(sysml);
+        ParseTree parseTree = parser.parseString(sysml, "test.sysml").getParseTree();
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "test.sysml");
 
         assertNotNull(symbolTable);

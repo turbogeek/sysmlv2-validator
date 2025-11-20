@@ -208,7 +208,7 @@ public class SemanticAnalysisIntegrationTest {
         try {
             // Parse the file
             SysMLv2ParserFacade parser = new SysMLv2ParserFacade();
-            ParseTree parseTree = parser.parseFile(file.getAbsolutePath());
+            ParseTree parseTree = parser.parseFile(file).getParseTree();
 
             if (parseTree == null) {
                 result.success = false;

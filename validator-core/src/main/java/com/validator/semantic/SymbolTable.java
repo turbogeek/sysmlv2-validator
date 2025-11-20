@@ -1,6 +1,12 @@
 package com.validator.semantic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The symbol table for a SysML v2 model.
@@ -107,6 +113,14 @@ public class SymbolTable {
     }
 
     /**
+     * Resolve a scope by its qualified name.
+     * Alias for getScopeByQualifiedName for consistency with resolve methods.
+     */
+    public Scope resolveScope(String qualifiedName) {
+        return getScopeByQualifiedName(qualifiedName);
+    }
+
+    /**
      * Get all scopes in the symbol table.
      */
     public Collection<Scope> getAllScopes() {
@@ -148,10 +162,17 @@ public class SymbolTable {
         for (Symbol symbol : globalSymbols.values()) {
             typeCounts.merge(symbol.getType(), 1, Integer::sum);
         }
+
+        Map<ScopeType, Integer> scopeCounts = new EnumMap<>(ScopeType.class);
+        for (Scope scope : scopesByQualifiedName.values()) {
+            scopeCounts.merge(scope.getType(), 1, Integer::sum);
+        }
+
         return new SymbolTableStats(
             scopesByQualifiedName.size(),
             globalSymbols.size(),
-            typeCounts
+            typeCounts,
+            scopeCounts
         );
     }
 
@@ -168,11 +189,13 @@ public class SymbolTable {
         private final int scopeCount;
         private final int symbolCount;
         private final Map<ElementType, Integer> symbolsByType;
+        private final Map<ScopeType, Integer> symbolsByScope;
 
-        public SymbolTableStats(int scopeCount, int symbolCount, Map<ElementType, Integer> symbolsByType) {
+        public SymbolTableStats(int scopeCount, int symbolCount, Map<ElementType, Integer> symbolsByType, Map<ScopeType, Integer> symbolsByScope) {
             this.scopeCount = scopeCount;
             this.symbolCount = symbolCount;
             this.symbolsByType = new EnumMap<>(symbolsByType);
+            this.symbolsByScope = new EnumMap<>(symbolsByScope);
         }
 
         public int getScopeCount() {
@@ -185,6 +208,10 @@ public class SymbolTable {
 
         public Map<ElementType, Integer> getSymbolsByType() {
             return Collections.unmodifiableMap(symbolsByType);
+        }
+
+        public Map<ScopeType, Integer> getSymbolsByScope() {
+            return Collections.unmodifiableMap(symbolsByScope);
         }
 
         @Override
