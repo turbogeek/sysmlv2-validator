@@ -191,7 +191,9 @@ public class SymbolTable {
         private final Map<ElementType, Integer> symbolsByType;
         private final Map<ScopeType, Integer> symbolsByScope;
 
-        public SymbolTableStats(int scopeCount, int symbolCount, Map<ElementType, Integer> symbolsByType, Map<ScopeType, Integer> symbolsByScope) {
+        public SymbolTableStats(int scopeCount, int symbolCount,
+                                Map<ElementType, Integer> symbolsByType,
+                                Map<ScopeType, Integer> symbolsByScope) {
             this.scopeCount = scopeCount;
             this.symbolCount = symbolCount;
             this.symbolsByType = new EnumMap<>(symbolsByType);
