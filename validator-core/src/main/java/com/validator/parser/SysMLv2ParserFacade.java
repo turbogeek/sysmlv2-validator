@@ -1,5 +1,6 @@
 package com.validator.parser;
 
+import com.validator.suggestions.SpellingSuggestionEngine;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -62,12 +63,19 @@ public class SysMLv2ParserFacade {
         private final int charPositionInLine;
         private final String message;
         private final String offendingSymbol;
+        private final List<String> suggestions;
 
         public SyntaxError(int line, int charPositionInLine, String message, String offendingSymbol) {
+            this(line, charPositionInLine, message, offendingSymbol, List.of());
+        }
+
+        public SyntaxError(int line, int charPositionInLine, String message,
+                          String offendingSymbol, List<String> suggestions) {
             this.line = line;
             this.charPositionInLine = charPositionInLine;
             this.message = message;
             this.offendingSymbol = offendingSymbol;
+            this.suggestions = new ArrayList<>(suggestions);
         }
 
         public int getLine() {
@@ -86,18 +94,36 @@ public class SysMLv2ParserFacade {
             return offendingSymbol;
         }
 
+        public List<String> getSuggestions() {
+            return new ArrayList<>(suggestions);
+        }
+
+        public boolean hasSuggestions() {
+            return !suggestions.isEmpty();
+        }
+
         @Override
         public String toString() {
-            return String.format("Line %d:%d - %s (at '%s')",
-                line, charPositionInLine, message, offendingSymbol);
+            StringBuilder sb = new StringBuilder();
+            sb.append(String.format("Line %d:%d - %s (at '%s')",
+                line, charPositionInLine, message, offendingSymbol));
+            if (!suggestions.isEmpty()) {
+                sb.append(". Did you mean: ").append(String.join(", ", suggestions)).append("?");
+            }
+            return sb.toString();
         }
     }
 
     /**
-     * Custom error listener to collect syntax errors.
+     * Custom error listener to collect syntax errors with spelling suggestions.
      */
     private static class CollectingErrorListener extends BaseErrorListener {
         private final List<SyntaxError> errors = new ArrayList<>();
+        private final SpellingSuggestionEngine suggestionEngine;
+
+        CollectingErrorListener() {
+            this.suggestionEngine = new SpellingSuggestionEngine();
+        }
 
         @Override
         public void syntaxError(Recognizer<?, ?> recognizer,
@@ -107,7 +133,58 @@ public class SysMLv2ParserFacade {
                               String msg,
                               RecognitionException e) {
             String symbol = offendingSymbol != null ? offendingSymbol.toString() : "unknown";
-            errors.add(new SyntaxError(line, charPositionInLine, msg, symbol));
+
+            // Extract the actual token text for suggestion lookup
+            String tokenText = extractTokenText(symbol);
+            List<String> suggestions = List.of();
+
+            // Only suggest for identifier-like tokens (not operators, punctuation, etc.)
+            if (isIdentifierLike(tokenText)) {
+                suggestions = suggestionEngine.suggestForError(tokenText);
+            }
+
+            errors.add(new SyntaxError(line, charPositionInLine, msg, symbol, suggestions));
+        }
+
+        /**
+         * Extracts the actual token text from ANTLR's symbol representation.
+         * ANTLR tokens look like "[@5,10:15='identifier',<IDENTIFIER>,1:10]"
+         */
+        private String extractTokenText(String symbol) {
+            if (symbol == null) {
+                return "";
+            }
+            // Try to extract text between '=' and ','
+            int eqPos = symbol.indexOf('=');
+            if (eqPos >= 0) {
+                int endPos = symbol.indexOf(',', eqPos);
+                if (endPos > eqPos) {
+                    String text = symbol.substring(eqPos + 1, endPos);
+                    // Remove quotes if present
+                    if (text.startsWith("'") && text.endsWith("'")) {
+                        return text.substring(1, text.length() - 1);
+                    }
+                    return text;
+                }
+            }
+            // Fallback: return original
+            return symbol;
+        }
+
+        /**
+         * Checks if the token looks like an identifier (for suggestion purposes).
+         */
+        private boolean isIdentifierLike(String token) {
+            if (token == null || token.isEmpty()) {
+                return false;
+            }
+            // Skip very short tokens and common syntax characters
+            if (token.length() < 2) {
+                return false;
+            }
+            // Check for alphanumeric start (identifiers typically start with letter)
+            char first = token.charAt(0);
+            return Character.isLetter(first) || first == '_';
         }
 
         public List<SyntaxError> getErrors() {

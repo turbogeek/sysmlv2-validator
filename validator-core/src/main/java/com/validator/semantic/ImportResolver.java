@@ -1,5 +1,8 @@
 package com.validator.semantic;
 
+import com.validator.suggestions.SpellingSuggestionEngine;
+import com.validator.suggestions.StandardLibraryProvider;
+import com.validator.suggestions.UserModelProvider;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,20 +11,46 @@ import java.util.Objects;
 /**
  * Resolves import statements to actual symbols.
  * Handles wildcard imports, specific imports, filtered imports, and aliased imports.
+ * Provides spelling suggestions when imports cannot be resolved.
  */
 public class ImportResolver {
     private final SymbolTable symbolTable;
     private final StandardLibraryManager standardLibrary;
-    private final List<String> errors;
+    private final SpellingSuggestionEngine suggestionEngine;
+    private final List<ImportError> errors;
 
     @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "StandardLibraryManager is intentionally shared")
     public ImportResolver(SymbolTable symbolTable, StandardLibraryManager standardLibrary) {
         this.symbolTable = Objects.requireNonNull(symbolTable, "Symbol table cannot be null");
         this.standardLibrary = standardLibrary; // Can be null if no standard library
         this.errors = new ArrayList<>();
+
+        // Initialize suggestion engine with all available sources
+        List<com.validator.suggestions.SuggestionProvider> providers = new ArrayList<>();
+        if (standardLibrary != null) {
+            providers.add(new StandardLibraryProvider(standardLibrary));
+        }
+        providers.add(new UserModelProvider(symbolTable));
+        this.suggestionEngine = new SpellingSuggestionEngine(providers, 5);
     }
 
+    /**
+     * Gets errors as simple strings (for backwards compatibility).
+     *
+     * @return list of error messages
+     */
     public List<String> getErrors() {
+        return errors.stream()
+            .map(ImportError::getMessage)
+            .toList();
+    }
+
+    /**
+     * Gets structured import errors with suggestions.
+     *
+     * @return list of import errors with suggestions
+     */
+    public List<ImportError> getStructuredErrors() {
         return new ArrayList<>(errors);
     }
 
@@ -48,7 +77,11 @@ public class ImportResolver {
                 resolveAliasedImport(importStmt, importPath, currentScope);
                 break;
             default:
-                errors.add(String.format("Unknown import type: %s", importStmt.getImportType()));
+                errors.add(new ImportError(
+                    String.format("Unknown import type: %s", importStmt.getImportType()),
+                    importPath,
+                    List.of()
+                ));
                 break;
         }
     }
@@ -79,7 +112,14 @@ public class ImportResolver {
                 }
             }
 
-            errors.add(String.format("Cannot resolve wildcard import '%s': package not found", packagePath));
+            // Extract the last part of the package path for suggestions
+            String lastPart = extractLastPart(packagePath);
+            List<String> suggestions = suggestionEngine.suggestForError(lastPart);
+            errors.add(new ImportError(
+                String.format("Cannot resolve wildcard import '%s': package not found", packagePath),
+                packagePath,
+                suggestions
+            ));
         }
     }
 
@@ -95,8 +135,12 @@ public class ImportResolver {
             if (isAccessible(symbol, currentScope)) {
                 importStmt.addImportedSymbol(symbol);
             } else {
-                errors.add(String.format("Cannot import '%s': element is not accessible (visibility: %s)",
-                    importPath, symbol.getVisibility()));
+                errors.add(new ImportError(
+                    String.format("Cannot import '%s': element is not accessible (visibility: %s)",
+                        importPath, symbol.getVisibility()),
+                    importPath,
+                    List.of("Consider changing visibility to 'public' or importing from a different package")
+                ));
             }
         } else {
             // Try standard library
@@ -108,7 +152,13 @@ public class ImportResolver {
                 }
             }
 
-            errors.add(String.format("Cannot resolve import '%s': element not found", importPath));
+            String lastPart = extractLastPart(importPath);
+            List<String> suggestions = suggestionEngine.suggestForError(lastPart);
+            errors.add(new ImportError(
+                String.format("Cannot resolve import '%s': element not found", importPath),
+                importPath,
+                suggestions
+            ));
         }
     }
 
@@ -121,7 +171,11 @@ public class ImportResolver {
         int braceEnd = importPath.indexOf('}');
 
         if (braceStart == -1 || braceEnd == -1) {
-            errors.add(String.format("Invalid filtered import syntax: '%s'", importPath));
+            errors.add(new ImportError(
+                String.format("Invalid filtered import syntax: '%s'", importPath),
+                importPath,
+                List.of()
+            ));
             return;
         }
 
@@ -142,10 +196,22 @@ public class ImportResolver {
                     if (stdSymbol != null) {
                         importStmt.addImportedSymbol(stdSymbol);
                     } else {
-                        errors.add(String.format("Cannot resolve filtered import element '%s'", qualifiedName));
+                        String elementName = extractLastPart(qualifiedName);
+                        List<String> suggestions = suggestionEngine.suggestForError(elementName);
+                        errors.add(new ImportError(
+                            String.format("Cannot resolve filtered import element '%s'", qualifiedName),
+                            qualifiedName,
+                            suggestions
+                        ));
                     }
                 } else {
-                    errors.add(String.format("Cannot resolve filtered import element '%s'", qualifiedName));
+                    String elementName = extractLastPart(qualifiedName);
+                    List<String> suggestions = suggestionEngine.suggestForError(elementName);
+                    errors.add(new ImportError(
+                        String.format("Cannot resolve filtered import element '%s'", qualifiedName),
+                        qualifiedName,
+                        suggestions
+                    ));
                 }
             });
     }
@@ -157,7 +223,11 @@ public class ImportResolver {
         // Parse: "Package::Element as Alias"
         String[] parts = importPath.split("\\s+as\\s+");
         if (parts.length != 2) {
-            errors.add(String.format("Invalid aliased import syntax: '%s'", importPath));
+            errors.add(new ImportError(
+                String.format("Invalid aliased import syntax: '%s'", importPath),
+                importPath,
+                List.of()
+            ));
             return;
         }
 
@@ -172,10 +242,22 @@ public class ImportResolver {
             if (symbol != null) {
                 importStmt.addImportedSymbol(symbol);
             } else {
-                errors.add(String.format("Cannot resolve aliased import '%s'", elementPath));
+                String lastPart = extractLastPart(elementPath);
+                List<String> suggestions = suggestionEngine.suggestForError(lastPart);
+                errors.add(new ImportError(
+                    String.format("Cannot resolve aliased import '%s'", elementPath),
+                    elementPath,
+                    suggestions
+                ));
             }
         } else {
-            errors.add(String.format("Cannot resolve aliased import '%s'", elementPath));
+            String lastPart = extractLastPart(elementPath);
+            List<String> suggestions = suggestionEngine.suggestForError(lastPart);
+            errors.add(new ImportError(
+                String.format("Cannot resolve aliased import '%s'", elementPath),
+                elementPath,
+                suggestions
+            ));
         }
     }
 
@@ -230,6 +312,21 @@ public class ImportResolver {
             return "";
         }
         return qualifiedName.substring(0, lastSeparator);
+    }
+
+    /**
+     * Extract the last part of a qualified name for suggestion matching.
+     * Example: "Package::SubPackage::Element" -> "Element"
+     */
+    private String extractLastPart(String qualifiedName) {
+        if (qualifiedName == null || qualifiedName.isEmpty()) {
+            return "";
+        }
+        int lastSeparator = qualifiedName.lastIndexOf("::");
+        if (lastSeparator == -1) {
+            return qualifiedName;
+        }
+        return qualifiedName.substring(lastSeparator + 2);
     }
 
     /**
@@ -293,6 +390,64 @@ public class ImportResolver {
         public String toString() {
             return String.format("Import Resolution: %d total, %d resolved, %d unresolved, %d errors",
                 totalImports, resolvedImports, unresolvedImports, errorCount);
+        }
+    }
+
+    /**
+     * Represents an import resolution error with suggestions.
+     */
+    public static class ImportError {
+        private final String message;
+        private final String importPath;
+        private final List<String> suggestions;
+
+        public ImportError(String message, String importPath, List<String> suggestions) {
+            this.message = message;
+            this.importPath = importPath;
+            this.suggestions = new ArrayList<>(suggestions);
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getImportPath() {
+            return importPath;
+        }
+
+        public List<String> getSuggestions() {
+            return new ArrayList<>(suggestions);
+        }
+
+        public boolean hasSuggestions() {
+            return !suggestions.isEmpty();
+        }
+
+        /**
+         * Formats the error with suggestions for display.
+         *
+         * @return formatted error message
+         */
+        public String toDisplayString() {
+            if (suggestions.isEmpty()) {
+                return message;
+            }
+
+            StringBuilder sb = new StringBuilder(message);
+            if (suggestions.size() == 1) {
+                sb.append(". Did you mean ").append(suggestions.get(0)).append("?");
+            } else {
+                sb.append(". Did you mean one of:");
+                for (String suggestion : suggestions) {
+                    sb.append("\n  - ").append(suggestion);
+                }
+            }
+            return sb.toString();
+        }
+
+        @Override
+        public String toString() {
+            return toDisplayString();
         }
     }
 }

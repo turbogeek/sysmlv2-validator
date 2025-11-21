@@ -47,16 +47,23 @@ public class SysMLv2ValidatorImpl implements Validator {
         // Parse the file
         ParseResult parseResult = parserFacade.parseFile(file);
 
-        // Convert syntax errors to validation errors using streams
+        // Convert syntax errors to validation errors using streams (with suggestions)
         List<ValidationError> errors = parseResult.getSyntaxErrors().stream()
-            .map(syntaxError -> new ValidationError.Builder()
-                .filePath(file.getAbsolutePath())
-                .line(syntaxError.getLine())
-                .column(syntaxError.getCharPositionInLine())
-                .message(syntaxError.getMessage())
-                .errorCode("SYNTAX_ERROR")
-                .severity(ValidationError.Severity.ERROR)
-                .build())
+            .map(syntaxError -> {
+                ValidationError.Builder builder = new ValidationError.Builder()
+                    .filePath(file.getAbsolutePath())
+                    .line(syntaxError.getLine())
+                    .column(syntaxError.getCharPositionInLine())
+                    .message(syntaxError.getMessage())
+                    .errorCode("SYNTAX_ERROR")
+                    .severity(ValidationError.Severity.ERROR);
+
+                // Add spelling suggestions if available
+                if (syntaxError.hasSuggestions()) {
+                    builder.suggestions(syntaxError.getSuggestions());
+                }
+                return builder.build();
+            })
             .toList();
 
         List<ValidationWarning> warnings = new ArrayList<>();
@@ -89,16 +96,23 @@ public class SysMLv2ValidatorImpl implements Validator {
         // Parse the source code
         ParseResult parseResult = parserFacade.parseString(sourceCode, fileName);
 
-        // Convert syntax errors to validation errors using streams
+        // Convert syntax errors to validation errors using streams (with suggestions)
         List<ValidationError> errors = parseResult.getSyntaxErrors().stream()
-            .map(syntaxError -> new ValidationError.Builder()
-                .filePath(fileName)
-                .line(syntaxError.getLine())
-                .column(syntaxError.getCharPositionInLine())
-                .message(syntaxError.getMessage())
-                .errorCode("SYNTAX_ERROR")
-                .severity(ValidationError.Severity.ERROR)
-                .build())
+            .map(syntaxError -> {
+                ValidationError.Builder builder = new ValidationError.Builder()
+                    .filePath(fileName)
+                    .line(syntaxError.getLine())
+                    .column(syntaxError.getCharPositionInLine())
+                    .message(syntaxError.getMessage())
+                    .errorCode("SYNTAX_ERROR")
+                    .severity(ValidationError.Severity.ERROR);
+
+                // Add spelling suggestions if available
+                if (syntaxError.hasSuggestions()) {
+                    builder.suggestions(syntaxError.getSuggestions());
+                }
+                return builder.build();
+            })
             .toList();
 
         List<ValidationWarning> warnings = new ArrayList<>();
