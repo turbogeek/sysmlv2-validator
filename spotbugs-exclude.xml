@@ -39,4 +39,11 @@
         <Bug pattern="MS_PKGPROTECT"/>
     </Match>
 
+    <!-- ModelIndexer searcher is lazily initialized, not uninitialized -->
+    <Match>
+        <Class name="com.validator.index.ModelIndexer"/>
+        <Field name="searcher"/>
+        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    </Match>
+
 </FindBugsFilter>

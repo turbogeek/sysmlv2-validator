@@ -68,12 +68,12 @@ public class ValidationError {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("[%s] %s:%d:%d\n", severity, filePath, line, column));
-        sb.append(String.format("  %s: %s\n", errorCode, message));
+        sb.append(String.format("[%s] %s:%d:%d%n", severity, filePath, line, column));
+        sb.append(String.format("  %s: %s%n", errorCode, message));
         if (!suggestions.isEmpty()) {
-            sb.append("  Suggestions:\n");
+            sb.append("  Suggestions:%n");
             for (String suggestion : suggestions) {
-                sb.append(String.format("    - %s\n", suggestion));
+                sb.append(String.format("    - %s%n", suggestion));
             }
         }
         return sb.toString();

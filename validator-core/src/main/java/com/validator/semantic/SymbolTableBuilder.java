@@ -3,6 +3,7 @@ package com.validator.semantic;
 import com.validator.ast.Location;
 import com.validator.parser.SysMLv2Parser;
 import com.validator.parser.SysMLv2ParserBaseVisitor;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -24,6 +25,8 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
         this.errors = new ArrayList<>();
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP",
+            justification = "Symbol table is intentionally returned for further processing")
     public SymbolTable getSymbolTable() {
         return symbolTable;
     }

@@ -1,5 +1,6 @@
 package com.validator.semantic;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,10 +17,12 @@ public class ImportStatement {
     private final String alias; // For aliased imports
     private final Map<String, Symbol> importedSymbols; // Resolved symbols
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public ImportStatement(String importPath, ImportType importType, boolean isPublic) {
         this(importPath, importType, isPublic, null);
     }
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public ImportStatement(String importPath, ImportType importType, boolean isPublic, String alias) {
         this.importPath = Objects.requireNonNull(importPath, "Import path cannot be null");
         if (importPath.isEmpty()) {

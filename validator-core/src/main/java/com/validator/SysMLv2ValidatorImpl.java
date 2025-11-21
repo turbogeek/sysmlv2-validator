@@ -2,7 +2,6 @@ package com.validator;
 
 import com.validator.parser.SysMLv2ParserFacade;
 import com.validator.parser.SysMLv2ParserFacade.ParseResult;
-import com.validator.parser.SysMLv2ParserFacade.SyntaxError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

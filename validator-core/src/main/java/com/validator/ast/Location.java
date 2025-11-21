@@ -1,5 +1,6 @@
 package com.validator.ast;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Objects;
 
 /**
@@ -10,6 +11,7 @@ public class Location {
     private final int line;
     private final int column;
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public Location(String fileName, int line, int column) {
         this.fileName = Objects.requireNonNull(fileName, "File name cannot be null");
         if (line < 1) {

@@ -1,5 +1,6 @@
 package com.validator.semantic;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -19,6 +20,7 @@ public class Scope {
     private final List<ImportStatement> imports;
     private final List<Scope> children;
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Parent scope reference required for scope hierarchy")
     public Scope(String name, ScopeType type, Scope parent) {
         this.name = Objects.requireNonNull(name, "Scope name cannot be null");
         this.type = Objects.requireNonNull(type, "Scope type cannot be null");
@@ -40,6 +42,8 @@ public class Scope {
         return type;
     }
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP",
+            justification = "Parent scope must be mutable for hierarchical navigation")
     public Scope getParent() {
         return parent;
     }

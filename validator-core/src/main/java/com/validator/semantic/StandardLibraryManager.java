@@ -255,11 +255,11 @@ public class StandardLibraryManager {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("Standard Library: %d symbols across %d packages\n", symbolCount, packageCount));
-            sb.append("By Type:\n");
+            sb.append(String.format("Standard Library: %d symbols across %d packages%n", symbolCount, packageCount));
+            sb.append("By Type:%n");
             symbolsByType.entrySet().stream()
                 .sorted(Map.Entry.<ElementType, Integer>comparingByValue().reversed())
-                .forEach(entry -> sb.append(String.format("  %s: %d\n", entry.getKey(), entry.getValue())));
+                .forEach(entry -> sb.append(String.format("  %s: %d%n", entry.getKey(), entry.getValue())));
             return sb.toString();
         }
     }

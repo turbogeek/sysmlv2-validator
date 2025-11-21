@@ -1,6 +1,6 @@
 package com.validator.semantic;
 
-import java.util.ArrayList;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -31,6 +31,8 @@ public class SymbolTable {
     /**
      * Get the global scope.
      */
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP",
+            justification = "Global scope must be mutable for symbol table operations")
     public Scope getGlobalScope() {
         return globalScope;
     }
@@ -38,6 +40,7 @@ public class SymbolTable {
     /**
      * Get the current scope.
      */
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Current scope must be mutable for symbol resolution")
     public Scope getCurrentScope() {
         return currentScope;
     }
@@ -237,13 +240,13 @@ public class SymbolTable {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("Symbol Table Statistics:\n"));
-            sb.append(String.format("  Scopes: %d\n", scopeCount));
-            sb.append(String.format("  Symbols: %d\n", symbolCount));
-            sb.append("  By Type:\n");
+            sb.append(String.format("Symbol Table Statistics:%n"));
+            sb.append(String.format("  Scopes: %d%n", scopeCount));
+            sb.append(String.format("  Symbols: %d%n", symbolCount));
+            sb.append("  By Type:%n");
             symbolsByType.entrySet().stream()
                 .sorted(Map.Entry.<ElementType, Integer>comparingByValue().reversed())
-                .forEach(entry -> sb.append(String.format("    %s: %d\n", entry.getKey(), entry.getValue())));
+                .forEach(entry -> sb.append(String.format("    %s: %d%n", entry.getKey(), entry.getValue())));
             return sb.toString();
         }
     }

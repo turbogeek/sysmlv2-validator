@@ -1,5 +1,6 @@
 package com.validator.semantic;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,6 +14,7 @@ public class ImportResolver {
     private final StandardLibraryManager standardLibrary;
     private final List<String> errors;
 
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "StandardLibraryManager is intentionally shared")
     public ImportResolver(SymbolTable symbolTable, StandardLibraryManager standardLibrary) {
         this.symbolTable = Objects.requireNonNull(symbolTable, "Symbol table cannot be null");
         this.standardLibrary = standardLibrary; // Can be null if no standard library
