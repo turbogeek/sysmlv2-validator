@@ -15,7 +15,9 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 
@@ -50,6 +52,20 @@ public class ModelIndexer {
             indexSymbol(symbol);
         }
         writer.commit();
+
+        // Force reader refresh to see committed changes
+        if (reader != null) {
+            DirectoryReader newReader = DirectoryReader.openIfChanged(reader);
+            if (newReader != null) {
+                reader.close();
+                reader = newReader;
+                searcher = new IndexSearcher(reader);
+            }
+        } else {
+            // Initialize reader if this is the first time
+            reader = DirectoryReader.open(index);
+            searcher = new IndexSearcher(reader);
+        }
     }
 
     /**
@@ -142,9 +158,47 @@ public class ModelIndexer {
 
     /**
      * Search by element type.
+     * Uses exact term matching since type is indexed as StringField.
      */
-    public List<SearchResult> searchByType(String type, int maxResults) throws IOException, ParseException {
-        return search("type:" + type, maxResults);
+    public List<SearchResult> searchByType(String type, int maxResults) throws IOException {
+        // Ensure index is readable
+        if (reader == null) {
+            reader = DirectoryReader.open(index);
+            searcher = new IndexSearcher(reader);
+        } else {
+            // Reopen to get latest changes
+            DirectoryReader newReader = DirectoryReader.openIfChanged(reader);
+            if (newReader != null) {
+                reader.close();
+                reader = newReader;
+                searcher = new IndexSearcher(reader);
+            }
+        }
+
+        // Use TermQuery for exact match on StringField
+        Query query = new TermQuery(new Term("type", type));
+
+        // Execute search
+        TopDocs topDocs = searcher.search(query, maxResults);
+
+        // Convert results using streams
+        return java.util.Arrays.stream(topDocs.scoreDocs)
+            .map(scoreDoc -> {
+                try {
+                    Document doc = searcher.doc(scoreDoc.doc);
+                    return new SearchResult(
+                        doc.get("name"),
+                        doc.get("qualifiedName"),
+                        doc.get("type"),
+                        doc.get("visibility"),
+                        doc.get("location"),
+                        scoreDoc.score
+                    );
+                } catch (IOException e) {
+                    throw new java.io.UncheckedIOException(e);
+                }
+            })
+            .toList();
     }
 
     /**

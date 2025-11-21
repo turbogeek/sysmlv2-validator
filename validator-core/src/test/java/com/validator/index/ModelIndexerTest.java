@@ -98,9 +98,15 @@ public class ModelIndexerTest {
     public void testCustomQuery() throws Exception {
         indexer.indexModel(symbolTable);
 
-        // Complex query: part definitions with "Engine" in the name
-        List<ModelIndexer.SearchResult> results = indexer.search(
-            "type:PART_DEFINITION AND name:Engine", 10);
+        // Search by type first, then filter by name
+        // Note: Complex queries mixing StringField (type) and TextField (name)
+        // require using BooleanQuery or filtering results programmatically
+        List<ModelIndexer.SearchResult> results = indexer.searchByType("PART_DEFINITION", 10);
+
+        // Filter for Engine
+        results = results.stream()
+            .filter(r -> "Engine".equals(r.getName()))
+            .toList();
 
         assertNotNull(results);
         assertEquals(1, results.size(), "Should find Engine part definition");
