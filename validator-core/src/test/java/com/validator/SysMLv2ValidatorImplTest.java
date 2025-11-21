@@ -146,8 +146,7 @@ public class SysMLv2ValidatorImplTest {
 
             requirement def NutritionalRequirement {
                 subject meal : Meal;
-                // Note: Collection operators like -> not yet in grammar
-                // require constraint meal.ingredients->size() >= 3;
+                require constraint meal.ingredients->size() >= 3;
             }
 
             view BreakfastFlow : Views::ActionView {

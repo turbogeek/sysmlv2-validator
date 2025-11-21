@@ -136,6 +136,7 @@ DOTDOT: '..';
 DOUBLE_COLON: '::';
 DOUBLE_STAR: '**';
 TRIPLE_COLON: ':::';
+ARROW: '->';  // Collection pipeline operator (must be before MINUS and GT)
 
 // Relationship operators
 SPECIALIZES_OP: ':>';

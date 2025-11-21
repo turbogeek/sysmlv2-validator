@@ -288,19 +288,20 @@ featureValueInit
 expression
     : primary
     | qualifiedName
-    | expression DOT qualifiedName                           // Member access
-    | expression LPAREN argumentList? RPAREN                 // Function call
-    | expression LBRACK expression RBRACK                    // Index
-    | MINUS expression                                        // Unary minus
-    | BANG expression                                         // Logical not
-    | NEW qualifiedName LPAREN argumentList? RPAREN          // New instance
-    | expression (STAR | SLASH | PERCENT) expression         // Multiplicative
-    | expression (PLUS | MINUS) expression                   // Additive
-    | expression (LT | GT | LE | GE) expression              // Relational
-    | expression (EQ | NE) expression                        // Equality
-    | expression AND expression                              // Logical and
-    | expression OR expression                               // Logical or
-    | LPAREN expression RPAREN                               // Parenthesized
+    | expression DOT qualifiedName                                      // Member access
+    | expression ARROW qualifiedName LPAREN argumentList? RPAREN        // Arrow operator (collection operations)
+    | expression LPAREN argumentList? RPAREN                            // Function call
+    | expression LBRACK expression RBRACK                               // Index
+    | MINUS expression                                                  // Unary minus
+    | BANG expression                                                   // Logical not
+    | NEW qualifiedName LPAREN argumentList? RPAREN                     // New instance
+    | expression (STAR | SLASH | PERCENT) expression                    // Multiplicative
+    | expression (PLUS | MINUS) expression                              // Additive
+    | expression (LT | GT | LE | GE) expression                         // Relational
+    | expression (EQ | NE) expression                                   // Equality
+    | expression AND expression                                         // Logical and
+    | expression OR expression                                          // Logical or
+    | LPAREN expression RPAREN                                          // Parenthesized
     ;
 
 argumentList
