@@ -70,7 +70,8 @@ public final class SuggestionResult implements Comparable<SuggestionResult> {
 
     private static int getSourcePriority(String source) {
         return switch (source) {
-            case "model" -> 4;
+            case "model" -> 5;
+            case "kpar" -> 4;
             case "cameo" -> 3;
             case "stdlib" -> 2;
             case "keyword" -> 1;
@@ -112,6 +113,7 @@ public final class SuggestionResult implements Comparable<SuggestionResult> {
     public String toDisplayString() {
         String sourceDisplay = switch (source) {
             case "model" -> "user model";
+            case "kpar" -> "KPAR library";
             case "cameo" -> "Cameo library";
             case "stdlib" -> "standard library";
             case "keyword" -> "keyword";

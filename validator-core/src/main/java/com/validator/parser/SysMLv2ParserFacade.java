@@ -275,4 +275,24 @@ public class SysMLv2ParserFacade {
     public static boolean isKerMLFile(File file) {
         return file.getName().toLowerCase().endsWith(".kerml");
     }
+
+    /**
+     * Check if a file is a KPAR library archive based on extension.
+     *
+     * @param file the file to check
+     * @return true if .kpar extension
+     */
+    public static boolean isKparFile(File file) {
+        return file.getName().toLowerCase().endsWith(".kpar");
+    }
+
+    /**
+     * Check if a file is any supported SysML v2 file type.
+     *
+     * @param file the file to check
+     * @return true if supported file type (.sysml, .kerml, .kpar)
+     */
+    public static boolean isSupportedFile(File file) {
+        return isSysMLFile(file) || isKerMLFile(file) || isKparFile(file);
+    }
 }
