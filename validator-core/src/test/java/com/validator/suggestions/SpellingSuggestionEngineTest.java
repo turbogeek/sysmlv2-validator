@@ -180,12 +180,12 @@ public class SpellingSuggestionEngineTest {
     @Test
     @DisplayName("Should have correct provider count")
     public void testProviderCount() {
-        // Default engine has keyword + stdlib providers
-        assertEquals(2, engine.getProviderCount());
+        // Default engine has keyword + stdlib + cameo providers
+        assertEquals(3, engine.getProviderCount());
 
         SymbolTable symbolTable = new SymbolTable();
         SpellingSuggestionEngine withModel = SpellingSuggestionEngine.withUserModel(symbolTable);
-        assertEquals(3, withModel.getProviderCount());
+        assertEquals(4, withModel.getProviderCount());
     }
 
     @Test

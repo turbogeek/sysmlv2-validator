@@ -24,10 +24,14 @@ public final class SpellingSuggestionEngine {
     private final int maxSuggestions;
 
     /**
-     * Creates an engine with default settings (keywords and standard library).
+     * Creates an engine with default settings (keywords, standard library, and Cameo library).
      */
     public SpellingSuggestionEngine() {
-        this(List.of(new KeywordProvider(), new StandardLibraryProvider()), DEFAULT_MAX_SUGGESTIONS);
+        this(List.of(
+            new KeywordProvider(),
+            new StandardLibraryProvider(),
+            new CameoLibraryProvider()
+        ), DEFAULT_MAX_SUGGESTIONS);
     }
 
     /**
@@ -53,6 +57,7 @@ public final class SpellingSuggestionEngine {
             List.of(
                 new KeywordProvider(),
                 new StandardLibraryProvider(),
+                new CameoLibraryProvider(),
                 new UserModelProvider(symbolTable)
             ),
             DEFAULT_MAX_SUGGESTIONS
@@ -69,6 +74,7 @@ public final class SpellingSuggestionEngine {
         return new SpellingSuggestionEngine(
             List.of(
                 new StandardLibraryProvider(),
+                new CameoLibraryProvider(),
                 UserModelProvider.forDefinitions(symbolTable)
             ),
             DEFAULT_MAX_SUGGESTIONS
