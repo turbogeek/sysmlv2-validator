@@ -50,6 +50,18 @@ public class StandardLibraryManager {
             return;
         }
 
+        initializeKerMLTypes();
+        initializeSysMLTypes();
+        initializeISQTypes();
+        initializeSIUnits();
+        initializeCollectionTypes();
+        initializeFunctionTypes();
+        initializeOtherTypes();
+
+        initialized = true;
+    }
+
+    private void initializeKerMLTypes() {
         // Base types from Kernel Library
         addStandardType("Base", ElementType.DATA_TYPE, "KerML");
         addStandardType("Anything", ElementType.DATA_TYPE, "KerML");
@@ -62,6 +74,22 @@ public class StandardLibraryManager {
         addStandardType("String", ElementType.DATA_TYPE, "KerML");
         addStandardType("Natural", ElementType.DATA_TYPE, "KerML");
 
+        // KerML Core Types
+        addStandardType("Feature", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Type", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Classifier", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Class", ElementType.DATA_TYPE, "KerML");
+        addStandardType("DataType", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Structure", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Association", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Behavior", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Function", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Predicate", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Interaction", ElementType.DATA_TYPE, "KerML");
+        addStandardType("Metaclass", ElementType.DATA_TYPE, "KerML");
+    }
+
+    private void initializeSysMLTypes() {
         // SysML base types
         addStandardType("Part", ElementType.PART_DEFINITION, "SysML");
         addStandardType("Action", ElementType.ACTION_DEFINITION, "SysML");
@@ -72,6 +100,26 @@ public class StandardLibraryManager {
         addStandardType("Connection", ElementType.CONNECTION_DEFINITION, "SysML");
         addStandardType("Item", ElementType.ITEM_DEFINITION, "SysML");
 
+        // SysML Actions library elements
+        addStandardType("AcceptAction", ElementType.ACTION_DEFINITION, "SysML");
+        addStandardType("SendAction", ElementType.ACTION_DEFINITION, "SysML");
+        addStandardType("AssignAction", ElementType.ACTION_DEFINITION, "SysML");
+        addStandardType("PerformAction", ElementType.ACTION_DEFINITION, "SysML");
+        addStandardType("DecisionNode", ElementType.ACTION_DEFINITION, "SysML");
+        addStandardType("MergeNode", ElementType.ACTION_DEFINITION, "SysML");
+        addStandardType("ForkNode", ElementType.ACTION_DEFINITION, "SysML");
+        addStandardType("JoinNode", ElementType.ACTION_DEFINITION, "SysML");
+
+        // SysML Constraints library elements
+        addStandardType("Constraint", ElementType.DATA_TYPE, "SysML");
+        addStandardType("ConstraintCheck", ElementType.DATA_TYPE, "SysML");
+
+        // SysML Calculations library elements
+        addStandardType("Calculation", ElementType.CALC_DEFINITION, "SysML");
+        addStandardType("CalcDef", ElementType.CALC_DEFINITION, "SysML");
+    }
+
+    private void initializeISQTypes() {
         // ISQ quantities (International System of Quantities)
         addStandardType("QuantityValue", ElementType.DATA_TYPE, "ISQ");
         addStandardType("LengthValue", ElementType.DATA_TYPE, "ISQ");
@@ -85,8 +133,21 @@ public class StandardLibraryManager {
         addStandardType("PowerValue", ElementType.DATA_TYPE, "ISQ");
         addStandardType("PressureValue", ElementType.DATA_TYPE, "ISQ");
         addStandardType("VolumeValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("ElectricCurrentValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("ElectricPotentialValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("ResistanceValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("CapacitanceValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("InductanceValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("FrequencyValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("AreaValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("DensityValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("TorqueValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("AngleValue", ElementType.DATA_TYPE, "ISQ");
+        addStandardType("SolidAngleValue", ElementType.DATA_TYPE, "ISQ");
+    }
 
-        // SI units (International System of Units)
+    private void initializeSIUnits() {
+        // SI units (International System of Units) - Base units
         addStandardType("m", ElementType.DATA_TYPE, "SI");  // meter
         addStandardType("kg", ElementType.DATA_TYPE, "SI"); // kilogram
         addStandardType("s", ElementType.DATA_TYPE, "SI");  // second
@@ -94,15 +155,86 @@ public class StandardLibraryManager {
         addStandardType("A", ElementType.DATA_TYPE, "SI");  // ampere
         addStandardType("mol", ElementType.DATA_TYPE, "SI"); // mole
         addStandardType("cd", ElementType.DATA_TYPE, "SI"); // candela
-
         // Derived SI units
         addStandardType("N", ElementType.DATA_TYPE, "SI");  // newton
         addStandardType("Pa", ElementType.DATA_TYPE, "SI"); // pascal
         addStandardType("J", ElementType.DATA_TYPE, "SI");  // joule
         addStandardType("W", ElementType.DATA_TYPE, "SI");  // watt
         addStandardType("Hz", ElementType.DATA_TYPE, "SI"); // hertz
+        addStandardType("V", ElementType.DATA_TYPE, "SI");  // volt
+        addStandardType("C", ElementType.DATA_TYPE, "SI");  // coulomb
+        addStandardType("F", ElementType.DATA_TYPE, "SI");  // farad
+        addStandardType("Ohm", ElementType.DATA_TYPE, "SI"); // ohm
+        addStandardType("S", ElementType.DATA_TYPE, "SI");  // siemens
+        addStandardType("Wb", ElementType.DATA_TYPE, "SI"); // weber
+        addStandardType("T", ElementType.DATA_TYPE, "SI");  // tesla
+        addStandardType("H", ElementType.DATA_TYPE, "SI");  // henry
+        addStandardType("lm", ElementType.DATA_TYPE, "SI"); // lumen
+        addStandardType("lx", ElementType.DATA_TYPE, "SI"); // lux
+        addStandardType("Bq", ElementType.DATA_TYPE, "SI"); // becquerel
+        addStandardType("Gy", ElementType.DATA_TYPE, "SI"); // gray
+        addStandardType("Sv", ElementType.DATA_TYPE, "SI"); // sievert
+    }
 
-        initialized = true;
+    private void initializeCollectionTypes() {
+        // Collections library
+        addStandardType("Array", ElementType.DATA_TYPE, "Collections");
+        addStandardType("List", ElementType.DATA_TYPE, "Collections");
+        addStandardType("Set", ElementType.DATA_TYPE, "Collections");
+        addStandardType("OrderedSet", ElementType.DATA_TYPE, "Collections");
+        addStandardType("Bag", ElementType.DATA_TYPE, "Collections");
+        addStandardType("Map", ElementType.DATA_TYPE, "Collections");
+        addStandardType("Sequence", ElementType.DATA_TYPE, "Collections");
+        // Scalar values
+        addStandardType("ScalarValue", ElementType.DATA_TYPE, "ScalarValues");
+        addStandardType("NumericalValue", ElementType.DATA_TYPE, "ScalarValues");
+        addStandardType("Positive", ElementType.DATA_TYPE, "ScalarValues");
+        addStandardType("NonNegative", ElementType.DATA_TYPE, "ScalarValues");
+    }
+
+    private void initializeFunctionTypes() {
+        // Sequence functions (commonly used collection operations)
+        addStandardType("size", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("isEmpty", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("notEmpty", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("includes", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("excludes", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("head", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("tail", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("first", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("last", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("union", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("intersection", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("including", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("excluding", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("select", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("reject", ElementType.DATA_TYPE, "SequenceFunctions");
+        addStandardType("collect", ElementType.DATA_TYPE, "SequenceFunctions");
+        // Base functions
+        addStandardType("BaseFunctions", ElementType.DATA_TYPE, "BaseFunctions");
+        addStandardType("sum", ElementType.DATA_TYPE, "BaseFunctions");
+        addStandardType("product", ElementType.DATA_TYPE, "BaseFunctions");
+    }
+
+    private void initializeOtherTypes() {
+        // Occurrences
+        addStandardType("Occurrence", ElementType.DATA_TYPE, "Occurrences");
+        addStandardType("Event", ElementType.DATA_TYPE, "Occurrences");
+        addStandardType("Life", ElementType.DATA_TYPE, "Occurrences");
+        addStandardType("Snapshot", ElementType.DATA_TYPE, "Occurrences");
+        addStandardType("TimesliceOf", ElementType.DATA_TYPE, "Occurrences");
+        addStandardType("Transfer", ElementType.DATA_TYPE, "Occurrences");
+
+        // Links
+        addStandardType("Link", ElementType.DATA_TYPE, "Links");
+        addStandardType("BinaryLink", ElementType.DATA_TYPE, "Links");
+
+        // Performances
+        addStandardType("Performance", ElementType.DATA_TYPE, "Performances");
+
+        // Metadata
+        addStandardType("Metaobject", ElementType.DATA_TYPE, "Metadata");
+        addStandardType("SemanticMetadata", ElementType.DATA_TYPE, "Metadata");
     }
 
     /**
