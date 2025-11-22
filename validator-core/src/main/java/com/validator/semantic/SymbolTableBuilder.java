@@ -403,7 +403,113 @@ public class SymbolTableBuilder extends SysMLv2ParserBaseVisitor<Void> {
         return null;
     }
 
+    // ============================================================================
+    // KerML Definitions
+    // ============================================================================
+
+    @Override
+    public Void visitDatatypeDefinition(SysMLv2Parser.DatatypeDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.DATATYPE_DEFINITION, "datatype");
+    }
+
+    @Override
+    public Void visitClassDefinition(SysMLv2Parser.ClassDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.CLASS_DEFINITION, "class");
+    }
+
+    @Override
+    public Void visitStructDefinition(SysMLv2Parser.StructDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.STRUCT_DEFINITION, "struct");
+    }
+
+    @Override
+    public Void visitAssocDefinition(SysMLv2Parser.AssocDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.ASSOCIATION_DEFINITION, "assoc");
+    }
+
+    @Override
+    public Void visitBehaviorDefinition(SysMLv2Parser.BehaviorDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.BEHAVIOR_DEFINITION, "behavior");
+    }
+
+    @Override
+    public Void visitFunctionDefinition(SysMLv2Parser.FunctionDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.FUNCTION_DEFINITION, "function");
+    }
+
+    @Override
+    public Void visitPredicateDefinition(SysMLv2Parser.PredicateDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.PREDICATE_DEFINITION, "predicate");
+    }
+
+    @Override
+    public Void visitInteractionDefinition(SysMLv2Parser.InteractionDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(),
+            ElementType.INTERACTION_DEFINITION, "interaction");
+    }
+
+    @Override
+    public Void visitMetaclassDefinition(SysMLv2Parser.MetaclassDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.METACLASS_DEFINITION, "metaclass");
+    }
+
+    @Override
+    public Void visitClassifierDefinition(SysMLv2Parser.ClassifierDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.CLASSIFIER_DEFINITION, "classifier");
+    }
+
+    @Override
+    public Void visitTypeDefinition(SysMLv2Parser.TypeDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.TYPE_DEFINITION, "type");
+    }
+
+    @Override
+    public Void visitFeatureDefinition(SysMLv2Parser.FeatureDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.FEATURE_DEFINITION, "feature");
+    }
+
+    @Override
+    public Void visitConnectorDefinition(SysMLv2Parser.ConnectorDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.CONNECTOR_DEFINITION, "connector");
+    }
+
+    @Override
+    public Void visitBindingConnectorDefinition(SysMLv2Parser.BindingConnectorDefinitionContext ctx) {
+        return visitKerMLDefinition(ctx, ctx.name(), ctx.visibility(), ElementType.BINDING_DEFINITION, "binding");
+    }
+
+    /**
+     * Generic visitor for KerML definition nodes.
+     */
+    private Void visitKerMLDefinition(ParserRuleContext ctx, SysMLv2Parser.NameContext nameCtx,
+                                      SysMLv2Parser.VisibilityContext visCtx,
+                                      ElementType elementType, String elementKind) {
+        String name = getIdentifier(nameCtx);
+        if (name != null) {
+            try {
+                Location location = getLocation(ctx);
+                String qualifiedName = symbolTable.getCurrentScope().getQualifiedName() + "::" + name;
+                Visibility visibility = extractVisibility(visCtx);
+
+                Symbol symbol = new Symbol(name, qualifiedName, elementType, location, visibility);
+                symbol.setAstNode(ctx);
+                symbolTable.define(symbol);
+
+                // Enter scope for nested definitions
+                symbolTable.enterScope(name, ScopeType.DEFINITION);
+                visitChildren(ctx);
+                symbolTable.exitScope();
+            } catch (Exception e) {
+                errors.add(String.format("Error processing %s definition '%s' at %s: %s",
+                    elementKind, name, getLocation(ctx), e.getMessage()));
+            }
+        }
+        return null;
+    }
+
+    // ============================================================================
     // Helper methods
+    // ============================================================================
 
     private Visibility extractVisibility(SysMLv2Parser.VisibilityContext ctx) {
         if (ctx == null) {

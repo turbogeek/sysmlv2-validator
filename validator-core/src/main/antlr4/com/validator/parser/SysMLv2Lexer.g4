@@ -1,11 +1,31 @@
 lexer grammar SysMLv2Lexer;
 
-// Keywords - Core Structure
+// Keywords - Core Structure (KerML foundation)
 PACKAGE: 'package';
 IMPORT: 'import';
 PUBLIC: 'public';
 PRIVATE: 'private';
 PROTECTED: 'protected';
+
+// Keywords - KerML Types (foundation)
+DATATYPE: 'datatype';
+CLASS: 'class';
+STRUCT: 'struct';
+ASSOC: 'assoc';
+ASSOC_STRUCT: 'assoc' WS+ 'struct';
+BEHAVIOR: 'behavior';
+STEP: 'step';
+FUNCTION: 'function';
+PREDICATE: 'predicate';
+INTERACTION: 'interaction';
+METACLASS: 'metaclass';
+CLASSIFIER: 'classifier';
+TYPE: 'type';
+FEATURE: 'feature';
+MULTIPLICITY: 'multiplicity';
+CONNECTOR: 'connector';
+BINDING: 'binding';
+SUCCESSION_KEYWORD: 'succession';
 
 // Keywords - Definitions
 PART_DEF: 'part' WS+ 'def';
@@ -63,7 +83,7 @@ BIND: 'bind';
 FLOW: 'flow';
 MESSAGE: 'message';
 
-// Keywords - Relationships
+// Keywords - Relationships (KerML relationships)
 SPECIALIZES: 'specializes';
 REDEFINES: 'redefines';
 SUBSETS: 'subsets';
@@ -71,6 +91,12 @@ REFERENCES: 'references';
 CHAINS: 'chains';
 INVERSES: 'inverses';
 CONJUGATES: 'conjugates';
+UNIONS: 'unions';
+INTERSECTS: 'intersects';
+DIFFERENCES: 'differences';
+DISJOINT: 'disjoint';
+TYPING: 'typing';
+FEATURING: 'featuring';
 
 // Keywords - Modifiers
 ABSTRACT: 'abstract';
@@ -126,6 +152,21 @@ DO: 'do';
 NOT: 'not';
 BY: 'by';
 SUBJECT: 'subject';
+
+// Keywords - KerML Library/Expressions
+LIBRARY: 'library';
+STANDARD: 'standard';
+FILTER: 'filter';
+INV: 'inv';
+XOR: 'xor';
+IMPLIES: 'implies';
+HASTYPE: 'hastype';
+ISTYPE: 'istype';
+META: 'meta';
+INDIVIDUAL: 'individual';
+RETURN: 'return';
+SNAPSHOT: 'snapshot';
+TIMESLICE: 'timeslice';
 
 // Operators and Symbols
 COLON: ':';

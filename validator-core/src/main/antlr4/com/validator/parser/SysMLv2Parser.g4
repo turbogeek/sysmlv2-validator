@@ -56,6 +56,21 @@ element
     | successionUsage
     | satisfyRequirement
     | comment
+    // KerML elements
+    | datatypeDefinition
+    | classDefinition
+    | structDefinition
+    | assocDefinition
+    | behaviorDefinition
+    | functionDefinition
+    | predicateDefinition
+    | interactionDefinition
+    | metaclassDefinition
+    | classifierDefinition
+    | typeDefinition
+    | featureDefinition
+    | connectorDefinition
+    | bindingConnectorDefinition
     ;
 
 // Part Definition
@@ -356,4 +371,89 @@ expressionStatement
 successionStatement
     : FIRST expression SEMICOLON
     | THEN expression SEMICOLON
+    ;
+
+// ============================================================================
+// KerML Definitions (foundation layer)
+// ============================================================================
+
+// Datatype - value types without identity
+datatypeDefinition
+    : visibility? DATATYPE name (specialization)? (featureBody | SEMICOLON)
+    ;
+
+// Class - classifiers with identity
+classDefinition
+    : visibility? CLASS name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Struct - structured classifiers
+structDefinition
+    : visibility? STRUCT name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Association - relationships between classifiers
+assocDefinition
+    : visibility? (ASSOC_STRUCT | ASSOC) name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Behavior - abstract behavioral elements
+behaviorDefinition
+    : visibility? BEHAVIOR name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Function - computational elements with return
+functionDefinition
+    : visibility? FUNCTION name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Predicate - boolean-valued functions
+predicateDefinition
+    : visibility? PREDICATE name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Interaction - behavioral collaboration patterns
+interactionDefinition
+    : visibility? INTERACTION name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Metaclass - types of classifiers
+metaclassDefinition
+    : visibility? METACLASS name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Classifier - general classification
+classifierDefinition
+    : visibility? CLASSIFIER name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Type - most general type definition
+typeDefinition
+    : visibility? TYPE name (specialization)? (featureBody | SEMICOLON)
+    ;
+
+// Feature - general features in KerML
+featureDefinition
+    : visibility? FEATURE name (COLON qualifiedName)? (kermlMultiplicity)? (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Connector - structural relationships
+connectorDefinition
+    : visibility? CONNECTOR name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// Binding Connector - feature bindings
+bindingConnectorDefinition
+    : visibility? BINDING name (specialization)? (featureBody | SEMICOLON)?
+    ;
+
+// KerML-style multiplicity with star support (0..*, 1..*, etc.)
+kermlMultiplicity
+    : LBRACK kermlMultiplicityRange RBRACK
+    ;
+
+kermlMultiplicityRange
+    : expression DOTDOT (expression | STAR)
+    | expression
+    | STAR
     ;

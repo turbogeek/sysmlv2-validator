@@ -65,7 +65,7 @@ public final class KeywordProvider implements SuggestionProvider {
         keywords.add("flow");
         keywords.add("message");
 
-        // Relationships
+        // Relationships (SysML and KerML)
         keywords.add("specializes");
         keywords.add("redefines");
         keywords.add("subsets");
@@ -73,6 +73,12 @@ public final class KeywordProvider implements SuggestionProvider {
         keywords.add("chains");
         keywords.add("inverses");
         keywords.add("conjugates");
+        keywords.add("unions");
+        keywords.add("intersects");
+        keywords.add("differences");
+        keywords.add("disjoint");
+        keywords.add("typing");
+        keywords.add("featuring");
 
         // Modifiers
         keywords.add("abstract");
@@ -133,6 +139,39 @@ public final class KeywordProvider implements SuggestionProvider {
         keywords.add("true");
         keywords.add("false");
         keywords.add("null");
+
+        // KerML Types (foundation)
+        keywords.add("datatype");
+        keywords.add("class");
+        keywords.add("struct");
+        keywords.add("assoc");
+        keywords.add("behavior");
+        keywords.add("step");
+        keywords.add("function");
+        keywords.add("predicate");
+        keywords.add("interaction");
+        keywords.add("metaclass");
+        keywords.add("classifier");
+        keywords.add("type");
+        keywords.add("feature");
+        keywords.add("multiplicity");
+        keywords.add("connector");
+        keywords.add("binding");
+
+        // KerML Library/Expressions
+        keywords.add("library");
+        keywords.add("standard");
+        keywords.add("filter");
+        keywords.add("inv");
+        keywords.add("xor");
+        keywords.add("implies");
+        keywords.add("hastype");
+        keywords.add("istype");
+        keywords.add("meta");
+        keywords.add("individual");
+        keywords.add("return");
+        keywords.add("snapshot");
+        keywords.add("timeslice");
 
         KEYWORDS = Collections.unmodifiableSet(keywords);
     }

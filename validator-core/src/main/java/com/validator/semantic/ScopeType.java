@@ -19,5 +19,21 @@ public enum ScopeType {
     INTERFACE_DEFINITION, // Within an interface def
     CONNECTION_DEFINITION, // Within a connection def
     CONSTRAINT,       // Within a constraint
-    EXPRESSION        // Within an expression
+    EXPRESSION,       // Within an expression
+
+    // KerML scope types
+    DEFINITION,       // Generic definition scope (for KerML types)
+    CLASS_DEFINITION, // Within a class def
+    DATATYPE_DEFINITION, // Within a datatype def
+    STRUCT_DEFINITION, // Within a struct def
+    ASSOCIATION_DEFINITION, // Within an assoc def
+    BEHAVIOR_DEFINITION, // Within a behavior def
+    FUNCTION_DEFINITION, // Within a function def
+    PREDICATE_DEFINITION, // Within a predicate def
+    INTERACTION_DEFINITION, // Within an interaction def
+    METACLASS_DEFINITION, // Within a metaclass def
+    CLASSIFIER_DEFINITION, // Within a classifier def
+    TYPE_DEFINITION,  // Within a type def
+    FEATURE_DEFINITION, // Within a feature def
+    CONNECTOR_DEFINITION // Within a connector def
 }
