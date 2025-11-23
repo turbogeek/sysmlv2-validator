@@ -283,11 +283,24 @@ viewpointBodyElement
     ;
 
 constraintDefinition
-    : CONSTRAINT_DEF declarationName typeRelationships? definitionBody
+    : CONSTRAINT_DEF declarationName typeRelationships? constraintDefBody
+    ;
+
+constraintDefBody
+    : LBRACE constraintDefBodyElement* constraintExpression? RBRACE
+    | SEMICOLON
+    ;
+
+constraintDefBodyElement
+    : namespaceBodyElement
+    | attributeUsage
+    | inParameter
+    | outParameter
     ;
 
 attributeDefinition
-    : ATTRIBUTE_DEF declarationName typeRelationships? definitionBody
+    : ATTRIBUTE_DEF declarationName? typeRelationships? definitionBody
+    | ATTRIBUTE_DEF declarationName? typeRelationships? SEMICOLON
     ;
 
 portDefinition
@@ -474,7 +487,7 @@ constraintUsage
     ;
 
 constraintBody
-    : LBRACE constraintBodyElement* RBRACE
+    : LBRACE constraintBodyElement* constraintExpression? RBRACE
     ;
 
 constraintBodyElement
@@ -482,12 +495,21 @@ constraintBodyElement
     | inParameter
     | outParameter
     | anonymousRedefines
-    | expression SEMICOLON?
+    | attributeUsage
+    ;
+
+constraintExpression
+    : expression
     ;
 
 attributeUsage
     : directionPrefix? ATTRIBUTE usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
-    | directionPrefix? ATTRIBUTE REDEFINES qualifiedName valueInit? (SEMICOLON | usageBody)
+    | directionPrefix? ATTRIBUTE REDEFINES qualifiedName tupleOrValueInit? (SEMICOLON | usageBody)
+    ;
+
+tupleOrValueInit
+    : EQUALS LPAREN argumentList RPAREN
+    | valueInit
     ;
 
 portUsage
@@ -522,6 +544,7 @@ connectionUsage
 flowConnectionUsage
     : FLOW usageName? flowEndpoints? usageBody?
     | FLOW flowEndpoints SEMICOLON?
+    | FLOW expression TO expression SEMICOLON
     ;
 
 successionUsage
@@ -1179,7 +1202,7 @@ thenStatement
     | THEN DECIDE SEMICOLON? decideBody?
     | THEN FORK usageName? SEMICOLON
     | THEN JOIN usageName? SEMICOLON
-    | THEN TERMINATE usageName? SEMICOLON
+    | THEN TERMINATE expression? SEMICOLON
     | THEN ACTION usageName? featureRelationships? usageBody
     | THEN ACTION usageName? WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
     | THEN STATE usageName? featureRelationships? stateUsageBody
@@ -1198,6 +1221,7 @@ flowStatement
 
 terminateStatement
     : TERMINATE expression? SEMICOLON
+    | TERMINATE usageName SEMICOLON
     ;
 
 expressionStatement
@@ -1319,6 +1343,8 @@ baseExpression
     | metadataAccessExpression
     | newExpression
     | thisExpression
+    | START
+    | DONE
     | LPAREN expression RPAREN                            // Parenthesized
     ;
 
