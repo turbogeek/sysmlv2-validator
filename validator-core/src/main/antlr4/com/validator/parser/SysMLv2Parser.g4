@@ -88,6 +88,7 @@ prefixes
 
 metadataAnnotation
     : AT_SIGN qualifiedName (LPAREN annotationArguments RPAREN)?
+    | AT_SIGN qualifiedName metadataBody
     | HASH qualifiedName
     ;
 
@@ -335,7 +336,17 @@ flowDefinition
     ;
 
 metadataDefinition
-    : METADATA_DEF declarationName typeRelationships? definitionBody
+    : METADATA_DEF declarationName? shortName? typeRelationships? metadataDefBody?
+    | METADATA_DEF declarationName? shortName? typeRelationships? SEMICOLON
+    ;
+
+metadataDefBody
+    : LBRACE metadataDefBodyElement* RBRACE
+    ;
+
+metadataDefBodyElement
+    : namespaceBodyElement
+    | anonymousRedefines
     ;
 
 // ============================================================================
@@ -404,6 +415,8 @@ bindingConnectorDefinition
 
 partUsage
     : directionPrefix? PART usageName? featureRelationships? usageBody?
+    | directionPrefix? PART featureRelationships usageBody?
+    | directionPrefix? PART featureRelationships SEMICOLON
     ;
 
 actionUsage
@@ -425,7 +438,7 @@ actionSendClause
     ;
 
 stateUsage
-    : PARALLEL? STATE usageName? featureRelationships? stateUsageBody?
+    : PARALLEL? STATE usageName? PARALLEL? featureRelationships? stateUsageBody?
     ;
 
 requirementUsage
@@ -438,6 +451,8 @@ viewUsage
 
 constraintUsage
     : CONSTRAINT usageName? featureRelationships? usageBody?
+    | ASSERT CONSTRAINT usageName? featureRelationships? usageBody?
+    | ASSERT CONSTRAINT usageName? featureRelationships? SEMICOLON
     ;
 
 attributeUsage
@@ -446,6 +461,8 @@ attributeUsage
 
 portUsage
     : directionPrefix? PORT usageName? featureRelationships? usageBody?
+    | directionPrefix? PORT featureRelationships usageBody?
+    | directionPrefix? PORT featureRelationships SEMICOLON
     ;
 
 itemUsage
@@ -542,6 +559,8 @@ occurrenceUsage
     | INDIVIDUAL usageName? featureRelationships? usageBody?
     | SNAPSHOT usageName? featureRelationships? valueInit? SEMICOLON?
     | TIMESLICE usageName? featureRelationships? valueInit? SEMICOLON?
+    | EVENT OCCURRENCE? usageName? featureRelationships? usageBody?
+    | EVENT OCCURRENCE? usageName? featureRelationships? SEMICOLON
     ;
 
 variantUsage
@@ -830,6 +849,10 @@ definitionBodyElement
 
 simpleFeature
     : usageName? featureRelationships valueInit? SEMICOLON
+    | FEATURE REDEFINES qualifiedName featureRelationships? valueInit? usageBody?
+    | FEATURE REDEFINES qualifiedName featureRelationships? valueInit? SEMICOLON
+    | FEATURE usageName? featureRelationships valueInit? usageBody?
+    | FEATURE usageName? featureRelationships valueInit? SEMICOLON
     ;
 
 returnFeature
@@ -860,10 +883,19 @@ usageBodyElement
     : namespaceBodyElement
     | statement
     | anonymousRedefines
+    | returnFeature
+    | inParameter
+    | outParameter
+    | inoutParameter
     ;
 
 anonymousRedefines
-    : REDEFINES_OP qualifiedName valueInit? SEMICOLON
+    : REDEFINES_OP qualifiedName DEFAULT? valueInit? metaExpression? SEMICOLON
+    | REDEFINES_OP qualifiedName featureRelationships? valueInit? metaExpression? SEMICOLON
+    ;
+
+metaExpression
+    : META qualifiedName
     ;
 
 stateDefinitionBody
@@ -881,6 +913,15 @@ stateBodyElement
     | doAction
     | exitAction
     | transitionUsage
+    | acceptTransition
+    ;
+
+acceptTransition
+    : ACCEPT usageName? (COLON qualifiedName)? (VIA expression)? doActionClause? THEN expression SEMICOLON?
+    ;
+
+doActionClause
+    : DO (ACTION usageName? featureRelationships? | SEND expression TO expression | expression)
     ;
 
 requirementBody
@@ -930,7 +971,9 @@ entryAction
     ;
 
 doAction
-    : DO ACTION? expression? SEMICOLON
+    : DO ACTION? usageName? featureRelationships? SEMICOLON
+    | DO ACTION? expression SEMICOLON
+    | DO SEND expression TO expression SEMICOLON
     ;
 
 exitAction
@@ -1160,7 +1203,12 @@ baseExpression
     | bodyExpression
     | metadataAccessExpression
     | newExpression
+    | thisExpression
     | LPAREN expression RPAREN                            // Parenthesized
+    ;
+
+thisExpression
+    : THIS
     ;
 
 newExpression

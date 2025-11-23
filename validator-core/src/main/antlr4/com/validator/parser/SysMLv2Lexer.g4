@@ -227,6 +227,8 @@ SUBJECT: 'subject';
 FOR: 'for';
 ALIAS: 'alias';
 ASSIGN: 'assign';
+EVENT: 'event';
+THIS: 'this';
 
 // ============================================================================
 // KEYWORDS - KerML Library/Expressions
@@ -279,8 +281,8 @@ COLON_EQUALS: ':=';
 PLUS_EQUALS: '+=';
 
 // Logical operators
-AND: '&&' | 'and';
-OR: '||' | 'or';
+AND: '&&' | '&' | 'and';
+OR: '||' | '|' | 'or';
 // Note: IMPLIES_OP removed - 'implies' is already the IMPLIES keyword
 NULL_COALESCING: '??';
 
