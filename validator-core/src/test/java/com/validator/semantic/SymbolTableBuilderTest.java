@@ -91,11 +91,11 @@ public class SymbolTableBuilderTest {
         assertNotNull(vehicleSymbol);
         assertEquals(ElementType.PART_DEFINITION, vehicleSymbol.getType());
 
-        // Attribute
+        // Attribute - in SysML v2, "attribute x : Type" is a usage, not a definition
         Symbol massSymbol = symbolTable.resolveQualified("Automotive::Vehicle::mass");
         assertNotNull(massSymbol, "Nested attribute should exist");
         assertEquals("mass", massSymbol.getName());
-        assertEquals(ElementType.ATTRIBUTE_DEFINITION, massSymbol.getType());
+        assertEquals(ElementType.ATTRIBUTE_USAGE, massSymbol.getType());
     }
 
     @Test

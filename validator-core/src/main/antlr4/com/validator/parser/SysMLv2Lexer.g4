@@ -1,18 +1,60 @@
 lexer grammar SysMLv2Lexer;
 
-// Keywords - Core Structure (KerML foundation)
+// ============================================================================
+// COMPOUND KEYWORDS (must come before simple keywords due to longest match)
+// ============================================================================
+
+// Definition compound keywords
+PART_DEF: 'part' WS+ 'def';
+ACTION_DEF: 'action' WS+ 'def';
+STATE_DEF: 'state' WS+ 'def';
+REQUIREMENT_DEF: 'requirement' WS+ 'def';
+USE_CASE_DEF: 'use' WS+ 'case' WS+ 'def';
+VIEW_DEF: 'view' WS+ 'def';
+VIEWPOINT_DEF: 'viewpoint' WS+ 'def';
+CONSTRAINT_DEF: 'constraint' WS+ 'def';
+ATTRIBUTE_DEF: 'attribute' WS+ 'def';
+ENUM_DEF: 'enum' WS+ 'def';
+CONNECTION_DEF: 'connection' WS+ 'def';
+INTERFACE_DEF: 'interface' WS+ 'def';
+ALLOCATION_DEF: 'allocation' WS+ 'def';
+PORT_DEF: 'port' WS+ 'def';
+ITEM_DEF: 'item' WS+ 'def';
+CALC_DEF: 'calc' WS+ 'def';
+ANALYSIS_DEF: 'analysis' WS+ 'def';
+CASE_DEF: 'case' WS+ 'def';
+VERIFICATION_DEF: 'verification' WS+ 'def';
+CONCERN_DEF: 'concern' WS+ 'def';
+RENDERING_DEF: 'rendering' WS+ 'def';
+OCCURRENCE_DEF: 'occurrence' WS+ 'def';
+FLOW_DEF: 'flow' WS+ 'def';
+METADATA_DEF: 'metadata' WS+ 'def';
+
+// KerML compound keywords
+ASSOC_STRUCT: 'assoc' WS+ 'struct';
+
+// Other compound keywords
+USE_CASE: 'use' WS+ 'case';
+DEFINED_BY: 'defined' WS+ 'by';
+TYPED_BY: 'typed' WS+ 'by';
+
+// ============================================================================
+// KEYWORDS - Core Structure
+// ============================================================================
 PACKAGE: 'package';
 IMPORT: 'import';
 PUBLIC: 'public';
 PRIVATE: 'private';
 PROTECTED: 'protected';
+NAMESPACE: 'namespace';
 
-// Keywords - KerML Types (foundation)
+// ============================================================================
+// KEYWORDS - KerML Types (foundation layer)
+// ============================================================================
 DATATYPE: 'datatype';
 CLASS: 'class';
 STRUCT: 'struct';
 ASSOC: 'assoc';
-ASSOC_STRUCT: 'assoc' WS+ 'struct';
 BEHAVIOR: 'behavior';
 STEP: 'step';
 FUNCTION: 'function';
@@ -25,41 +67,35 @@ FEATURE: 'feature';
 MULTIPLICITY: 'multiplicity';
 CONNECTOR: 'connector';
 BINDING: 'binding';
-SUCCESSION_KEYWORD: 'succession';
 
-// Keywords - Definitions
-PART_DEF: 'part' WS+ 'def';
+// ============================================================================
+// KEYWORDS - SysML Definitions and Usages
+// ============================================================================
 PART: 'part';
-ACTION_DEF: 'action' WS+ 'def';
 ACTION: 'action';
-STATE_DEF: 'state' WS+ 'def';
 STATE: 'state';
-REQUIREMENT_DEF: 'requirement' WS+ 'def';
 REQUIREMENT: 'requirement';
-USE_CASE_DEF: 'use' WS+ 'case' WS+ 'def';
-USE_CASE: 'use' WS+ 'case';
-VIEW_DEF: 'view' WS+ 'def';
 VIEW: 'view';
-VIEWPOINT_DEF: 'viewpoint' WS+ 'def';
 VIEWPOINT: 'viewpoint';
-CONSTRAINT_DEF: 'constraint' WS+ 'def';
 CONSTRAINT: 'constraint';
-ATTRIBUTE_DEF: 'attribute' WS+ 'def';
 ATTRIBUTE: 'attribute';
-ENUM_DEF: 'enum' WS+ 'def';
 ENUM: 'enum';
-CONNECTION_DEF: 'connection' WS+ 'def';
 CONNECTION: 'connection';
-INTERFACE_DEF: 'interface' WS+ 'def';
 INTERFACE: 'interface';
-ALLOCATION_DEF: 'allocation' WS+ 'def';
 ALLOCATION: 'allocation';
-PORT_DEF: 'port' WS+ 'def';
 PORT: 'port';
-ITEM_DEF: 'item' WS+ 'def';
 ITEM: 'item';
+CALC: 'calc';
+ANALYSIS: 'analysis';
+CASE: 'case';
+VERIFICATION: 'verification';
+CONCERN: 'concern';
+RENDERING: 'rendering';
+OCCURRENCE: 'occurrence';
 
-// Keywords - Flow Control
+// ============================================================================
+// KEYWORDS - Flow Control
+// ============================================================================
 FIRST: 'first';
 THEN: 'then';
 START: 'start';
@@ -72,8 +108,13 @@ FORK: 'fork';
 JOIN: 'join';
 IF: 'if';
 ELSE: 'else';
+WHILE: 'while';
+LOOP: 'loop';
+UNTIL: 'until';
 
-// Keywords - Usage
+// ============================================================================
+// KEYWORDS - Relationships and Usage
+// ============================================================================
 PERFORM: 'perform';
 EXHIBIT: 'exhibit';
 SATISFY: 'satisfy';
@@ -82,8 +123,13 @@ CONNECT: 'connect';
 BIND: 'bind';
 FLOW: 'flow';
 MESSAGE: 'message';
+INCLUDE: 'include';
+ACTOR: 'actor';
+STAKEHOLDER: 'stakeholder';
 
-// Keywords - Relationships (KerML relationships)
+// ============================================================================
+// KEYWORDS - Relationship Operators
+// ============================================================================
 SPECIALIZES: 'specializes';
 REDEFINES: 'redefines';
 SUBSETS: 'subsets';
@@ -97,53 +143,76 @@ DIFFERENCES: 'differences';
 DISJOINT: 'disjoint';
 TYPING: 'typing';
 FEATURING: 'featuring';
+DEPENDENCY: 'dependency';
 
-// Keywords - Modifiers
+// ============================================================================
+// KEYWORDS - Modifiers
+// ============================================================================
 ABSTRACT: 'abstract';
 VARIATION: 'variation';
+VARIANT: 'variant';
 READONLY: 'readonly';
 DERIVED: 'derived';
 END: 'end';
 ORDERED: 'ordered';
 NONUNIQUE: 'nonunique';
 PARALLEL: 'parallel';
+COMPOSITE: 'composite';
+PORTION: 'portion';
+ISTYPE: 'istype';
+HASTYPE: 'hastype';
 
-// Keywords - Parameters/Features
+// ============================================================================
+// KEYWORDS - Parameters/Features Direction and Modifiers
+// ============================================================================
 IN: 'in';
 OUT: 'out';
 INOUT: 'inout';
 DEFAULT: 'default';
 REF: 'ref';
 VALUE: 'value';
+CONSTANT: 'constant';
 
-// Keywords - Documentation
+// ============================================================================
+// KEYWORDS - Documentation and Metadata
+// ============================================================================
 DOC: 'doc';
-COMMENT: 'comment';
+COMMENT_KW: 'comment';
 METADATA: 'metadata';
+REP: 'rep';
+LANGUAGE: 'language';
+LOCALE: 'locale';
 
-// Keywords - Calculations
-CALC: 'calc';
+// ============================================================================
+// KEYWORDS - Calculations and Expressions
+// ============================================================================
 ASSERT: 'assert';
 ASSUME: 'assume';
 REQUIRE: 'require';
+OBJECTIVE: 'objective';
+FRAME: 'frame';
 
-// Keywords - Views
+// ============================================================================
+// KEYWORDS - Views
+// ============================================================================
 EXPOSE: 'expose';
 RENDER: 'render';
 AS: 'as';
-AS_DEFAULT: 'asDefault';
 
-// Keywords - Others
+// ============================================================================
+// KEYWORDS - Other
+// ============================================================================
 ABOUT: 'about';
 FROM: 'from';
 TO: 'to';
+OF: 'of';
 AT: 'at';
+VIA: 'via';
 ALL: 'all';
 ANY: 'any';
 SEQUENCE: 'sequence';
 ACCEPT: 'accept';
 VERIFY: 'verify';
-VIA: 'via';
 SEND: 'send';
 NEW: 'new';
 ENTRY: 'entry';
@@ -152,92 +221,147 @@ DO: 'do';
 NOT: 'not';
 BY: 'by';
 SUBJECT: 'subject';
+FOR: 'for';
+ALIAS: 'alias';
+ASSIGN: 'assign';
 
-// Keywords - KerML Library/Expressions
+// ============================================================================
+// KEYWORDS - KerML Library/Expressions
+// ============================================================================
 LIBRARY: 'library';
 STANDARD: 'standard';
 FILTER: 'filter';
 INV: 'inv';
 XOR: 'xor';
 IMPLIES: 'implies';
-HASTYPE: 'hastype';
-ISTYPE: 'istype';
 META: 'meta';
 INDIVIDUAL: 'individual';
 RETURN: 'return';
 SNAPSHOT: 'snapshot';
 TIMESLICE: 'timeslice';
 
-// Operators and Symbols
+// ============================================================================
+// OPERATORS - Multi-character (order matters - longest first)
+// ============================================================================
+
+// Relationship operators
+REFERENCE_SUBSETTING: '::>';
+REDEFINES_OP: ':>>';
+SPECIALIZES_OP: ':>';
+CROSSES_OP: '=>';
+// FEATURE_CHAIN is same as DOT - use DOT instead and handle in parser
+
+// Namespace operators
+TRIPLE_COLON: ':::';
+DOUBLE_COLON: '::';
+DOUBLE_STAR: '**';
+
+// Flow and arrows
+ARROW: '->';
+// Note: THICK_ARROW is same as CROSSES_OP, removed duplicate
+
+// Multiplicity
+DOTDOT: '..';
+
+// Comparison operators
+LE: '<=';
+GE: '>=';
+EQ: '==';
+NE: '!=';
+SAME: '===';
+NOT_SAME: '!==';
+
+// Assignment operators
+COLON_EQUALS: ':=';
+PLUS_EQUALS: '+=';
+
+// Logical operators
+AND: '&&' | 'and';
+OR: '||' | 'or';
+// Note: IMPLIES_OP removed - 'implies' is already the IMPLIES keyword
+NULL_COALESCING: '??';
+
+// ============================================================================
+// OPERATORS - Single character
+// ============================================================================
 COLON: ':';
 SEMICOLON: ';';
 COMMA: ',';
 DOT: '.';
-DOTDOT: '..';
-DOUBLE_COLON: '::';
-DOUBLE_STAR: '**';
-TRIPLE_COLON: ':::';
-ARROW: '->';  // Collection pipeline operator (must be before MINUS and GT)
-
-// Relationship operators
-SPECIALIZES_OP: ':>';
-REDEFINES_OP: ':>>';
-CONJUGATE_OP: '~';
-TYPED_BY: ':';
-
-// Assignment
 EQUALS: '=';
-COLON_EQUALS: ':=';
-
-// Brackets
 LPAREN: '(';
 RPAREN: ')';
 LBRACE: '{';
 RBRACE: '}';
 LBRACK: '[';
 RBRACK: ']';
-
-// Comparison
 LT: '<';
 GT: '>';
-LE: '<=';
-GE: '>=';
-EQ: '==';
-NE: '!=';
-
-// Arithmetic
 PLUS: '+';
 MINUS: '-';
 STAR: '*';
 SLASH: '/';
 PERCENT: '%';
-
-// Logical
-AND: '&&' | 'and';
-OR: '||' | 'or';
 BANG: '!';
+TILDE: '~';
+QUESTION: '?';
+AT_SIGN: '@';
+HASH: '#';
+CARET: '^';
 
-// Literals
+// ============================================================================
+// LITERALS
+// ============================================================================
 TRUE: 'true';
 FALSE: 'false';
 NULL: 'null';
 
-// Identifiers and Literals
+// ============================================================================
+// IDENTIFIERS
+// ============================================================================
 ID: LETTER (LETTER | DIGIT | '_')*;
-QUOTED_ID: '\'' (~['\r\n])* '\'';
-UNRESTRICTED_ID: '<' (~[>\r\n])* '>';
+QUOTED_ID: '\'' (~['\r\n\\] | '\\' .)* '\'';
+UNRESTRICTED_NAME: '<' (~[>\r\n])* '>';
 
+// ============================================================================
+// NUMERIC LITERALS
+// ============================================================================
+HEX_INTEGER: '0' [xX] HEX_DIGIT+;
+BINARY_INTEGER: '0' [bB] [01]+;
 INTEGER: DIGIT+;
-REAL: DIGIT+ '.' DIGIT+ ([eE] [+-]? DIGIT+)?;
-STRING: '"' (~["\r\n\\] | '\\' .)* '"';
+// Note: REAL must have at least one digit after decimal to avoid matching "0." in "0..*"
+REAL: DIGIT+ '.' DIGIT+ EXPONENT?
+    | '.' DIGIT+ EXPONENT?
+    | DIGIT+ EXPONENT;
+DECIMAL: DIGIT+ '.' DIGIT+;
 
-// Comments
+// ============================================================================
+// STRING LITERALS
+// ============================================================================
+STRING: '"' (~["\r\n\\] | ESCAPE_SEQUENCE)* '"';
+
+// ============================================================================
+// REGULAR EXPRESSION (for text representations)
+// ============================================================================
+REGULAR_EXPRESSION: '/' (~[/\r\n\\] | '\\' .)* '/';
+
+// ============================================================================
+// COMMENTS - Skip these tokens
+// ============================================================================
 BLOCK_COMMENT: '/*' .*? '*/' -> skip;
 LINE_COMMENT: '//' ~[\r\n]* -> skip;
 
-// Whitespace
+// ============================================================================
+// WHITESPACE - Skip
+// ============================================================================
 WS: [ \t\r\n]+ -> skip;
 
-// Fragments
-fragment LETTER: [a-zA-Z];
+// ============================================================================
+// FRAGMENTS - Building blocks
+// ============================================================================
+fragment LETTER: [a-zA-Z_];
 fragment DIGIT: [0-9];
+fragment HEX_DIGIT: [0-9a-fA-F];
+fragment EXPONENT: [eE] [+-]? DIGIT+;
+fragment ESCAPE_SEQUENCE: '\\' [btnfr"'\\] | UNICODE_ESCAPE;
+fragment UNICODE_ESCAPE: '\\' 'u' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT;

@@ -39,6 +39,7 @@ public enum ElementType {
     CALC_USAGE,
     VERIFICATION_DEFINITION,
     VERIFICATION_USAGE,
+    CONSTRAINT_DEFINITION,
     CONSTRAINT_USAGE,
 
     // Allocation
