@@ -151,7 +151,7 @@ public class SysMLv2ParserFacade {
          * ANTLR tokens look like "[@5,10:15='identifier',<IDENTIFIER>,1:10]"
          */
         private String extractTokenText(String symbol) {
-            if (symbol == null) {
+            if (symbol == null || symbol.isEmpty()) {
                 return "";
             }
             // Try to extract text between '=' and ','
@@ -160,8 +160,8 @@ public class SysMLv2ParserFacade {
                 int endPos = symbol.indexOf(',', eqPos);
                 if (endPos > eqPos) {
                     String text = symbol.substring(eqPos + 1, endPos);
-                    // Remove quotes if present
-                    if (text.startsWith("'") && text.endsWith("'")) {
+                    // Remove quotes if present (with length check to avoid index issues)
+                    if (text.length() > 2 && text.startsWith("'") && text.endsWith("'")) {
                         return text.substring(1, text.length() - 1);
                     }
                     return text;

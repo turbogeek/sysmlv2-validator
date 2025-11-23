@@ -213,6 +213,10 @@ member
       | useCaseUsage
       | verificationUsage
       | renderingUsage
+      | viewpointUsage
+      | actorUsage
+      | stakeholderUsage
+      | concernUsage
       | occurrenceUsage
       | variantUsage
       | portionUsage
@@ -264,7 +268,18 @@ viewDefinition
     ;
 
 viewpointDefinition
-    : VIEWPOINT_DEF declarationName typeRelationships? definitionBody
+    : VIEWPOINT_DEF declarationName typeRelationships? viewpointBody
+    ;
+
+viewpointBody
+    : LBRACE viewpointBodyElement* RBRACE
+    | SEMICOLON
+    ;
+
+viewpointBodyElement
+    : namespaceBodyElement
+    | framedConcern
+    | concernUsage
     ;
 
 constraintDefinition
@@ -422,6 +437,7 @@ partUsage
 actionUsage
     : directionPrefix? ACTION usageName? actionKeyword? featureRelationships? actionSendClause? usageBody?
     | directionPrefix? ACTION usageName? actionKeyword? featureRelationships? actionSendClause? SEMICOLON
+    | directionPrefix? ACTION usageName? SEND (VIA expression)? TO expression SEMICOLON?
     ;
 
 actionKeyword
@@ -450,13 +466,28 @@ viewUsage
     ;
 
 constraintUsage
-    : CONSTRAINT usageName? featureRelationships? usageBody?
-    | ASSERT CONSTRAINT usageName? featureRelationships? usageBody?
+    : CONSTRAINT usageName? featureRelationships? constraintBody?
+    | ASSERT CONSTRAINT usageName? featureRelationships? constraintBody?
     | ASSERT CONSTRAINT usageName? featureRelationships? SEMICOLON
+    | ASSERT NOT? qualifiedName constraintBody?
+    | ASSERT NOT? qualifiedName SEMICOLON
+    ;
+
+constraintBody
+    : LBRACE constraintBodyElement* RBRACE
+    ;
+
+constraintBodyElement
+    : namespaceBodyElement
+    | inParameter
+    | outParameter
+    | anonymousRedefines
+    | expression SEMICOLON?
     ;
 
 attributeUsage
     : directionPrefix? ATTRIBUTE usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
+    | directionPrefix? ATTRIBUTE REDEFINES qualifiedName valueInit? (SEMICOLON | usageBody)
     ;
 
 portUsage
@@ -528,6 +559,8 @@ exhibitUsage
 
 includeUsage
     : INCLUDE expression SEMICOLON?
+    | INCLUDE USE_CASE usageName? featureRelationships? usageBody?
+    | INCLUDE USE_CASE usageName? featureRelationships? SEMICOLON
     ;
 
 calcUsage
@@ -552,6 +585,35 @@ verificationUsage
 
 renderingUsage
     : RENDERING usageName? featureRelationships? usageBody?
+    ;
+
+viewpointUsage
+    : VIEWPOINT usageName? featureRelationships? viewpointBody?
+    ;
+
+actorUsage
+    : ACTOR usageName? featureRelationships? valueInit? usageBody?
+    | ACTOR usageName? featureRelationships? valueInit? SEMICOLON
+    ;
+
+stakeholderUsage
+    : STAKEHOLDER usageName? featureRelationships? usageBody?
+    | STAKEHOLDER usageName? featureRelationships? SEMICOLON
+    ;
+
+concernUsage
+    : CONCERN usageName? featureRelationships? concernBody?
+    | CONCERN usageName? featureRelationships? SEMICOLON
+    ;
+
+concernBody
+    : LBRACE concernBodyElement* RBRACE
+    ;
+
+concernBodyElement
+    : namespaceBodyElement
+    | subjectDeclaration
+    | stakeholderUsage
     ;
 
 occurrenceUsage
@@ -768,7 +830,7 @@ conjugatesClause
     ;
 
 typingClause
-    : COLON qualifiedName (COMMA qualifiedName)*
+    : COLON TILDE? qualifiedName (COMMA TILDE? qualifiedName)*
     ;
 
 unionsClause
@@ -860,8 +922,14 @@ returnFeature
     ;
 
 inParameter
-    : IN usageName? featureRelationships? valueInit? usageBody
-    | IN usageName? featureRelationships? valueInit? SEMICOLON
+    : IN usageName? featureRelationships? parameterValueInit? usageBody
+    | IN usageName? featureRelationships? parameterValueInit? SEMICOLON
+    ;
+
+parameterValueInit
+    : EQUALS expression
+    | EQUALS LPAREN argumentList RPAREN
+    | COLON_EQUALS expression
     ;
 
 outParameter
@@ -887,6 +955,8 @@ usageBodyElement
     | inParameter
     | outParameter
     | inoutParameter
+    | subjectDeclaration
+    | objectiveRequirement
     ;
 
 anonymousRedefines
@@ -967,17 +1037,24 @@ transitionBody
 // ============================================================================
 
 entryAction
-    : ENTRY expression? SEMICOLON
+    : ENTRY assignStatement
+    | ENTRY expression? SEMICOLON
     ;
 
 doAction
     : DO ACTION? usageName? featureRelationships? SEMICOLON
     | DO ACTION? expression SEMICOLON
     | DO SEND expression TO expression SEMICOLON
+    | DO assignStatement
     ;
 
 exitAction
-    : EXIT expression? SEMICOLON
+    : EXIT assignStatement
+    | EXIT expression? SEMICOLON
+    ;
+
+assignStatement
+    : ASSIGN qualifiedName COLON_EQUALS expression SEMICOLON
     ;
 
 acceptClause
@@ -1002,7 +1079,8 @@ subjectDeclaration
     ;
 
 framedConcern
-    : FRAME CONCERN qualifiedName SEMICOLON
+    : FRAME CONCERN? qualifiedName SEMICOLON
+    | FRAME expression SEMICOLON
     ;
 
 assumeConstraint
@@ -1015,8 +1093,18 @@ requireConstraint
     ;
 
 objectiveRequirement
-    : OBJECTIVE usageName? featureRelationships? usageBody?
+    : OBJECTIVE usageName? featureRelationships? objectiveBody?
     | OBJECTIVE verifyBody
+    ;
+
+objectiveBody
+    : LBRACE objectiveBodyElement* RBRACE
+    ;
+
+objectiveBodyElement
+    : namespaceBodyElement
+    | subjectDeclaration
+    | usageName EQUALS expression SEMICOLON
     ;
 
 verifyBody
@@ -1043,6 +1131,8 @@ exposeStatement
 
 renderStatement
     : RENDER (AS qualifiedName | ID)? SEMICOLON
+    | RENDER RENDERING usageName? featureRelationships? SEMICOLON
+    | RENDER expression SEMICOLON
     ;
 
 filterStatement
@@ -1072,16 +1162,29 @@ statement
     | ifStatement
     | whileStatement
     | loopStatement
+    | forStatement
     | assignmentStatement
     | sendStatement
     | flowStatement
     | terminateStatement
     | invariantStatement
     | thenStatement
+    | assignStatement
     ;
 
 thenStatement
-    : THEN (member | expression) SEMICOLON?
+    : THEN MERGE usageName? SEMICOLON
+    | THEN ACCEPT usageName? featureRelationships? acceptTiming? SEMICOLON?
+    | THEN SEND expression (VIA expression)? TO expression SEMICOLON
+    | THEN DECIDE SEMICOLON? decideBody?
+    | THEN FORK usageName? SEMICOLON
+    | THEN JOIN usageName? SEMICOLON
+    | THEN TERMINATE usageName? SEMICOLON
+    | THEN ACTION usageName? featureRelationships? usageBody
+    | THEN ACTION usageName? WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
+    | THEN STATE usageName? featureRelationships? stateUsageBody
+    | THEN WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
+    | THEN expression SEMICOLON?
     ;
 
 invariantStatement
@@ -1102,7 +1205,15 @@ expressionStatement
     ;
 
 ifStatement
-    : IF expression LBRACE statement* RBRACE (ELSE LBRACE statement* RBRACE)?
+    : IF expression LBRACE statement* RBRACE elseIfClause* elseClause?
+    ;
+
+elseIfClause
+    : ELSE IF expression LBRACE statement* RBRACE
+    ;
+
+elseClause
+    : ELSE LBRACE statement* RBRACE
     ;
 
 whileStatement
@@ -1111,6 +1222,10 @@ whileStatement
 
 loopStatement
     : LOOP expression? LBRACE statement* RBRACE (UNTIL expression)?
+    ;
+
+forStatement
+    : FOR usageName featureRelationships? IN expression LBRACE statement* RBRACE
     ;
 
 assignmentStatement
@@ -1158,7 +1273,7 @@ equalityExpression
     ;
 
 classificationExpression
-    : relationalExpression ((HASTYPE | ISTYPE | AT_SIGN | META) qualifiedName)?
+    : relationalExpression ((HASTYPE | ISTYPE | AT_SIGN | META | AS) qualifiedName)?
     ;
 
 relationalExpression
