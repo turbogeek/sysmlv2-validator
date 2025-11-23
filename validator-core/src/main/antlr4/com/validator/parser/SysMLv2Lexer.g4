@@ -111,6 +111,9 @@ ELSE: 'else';
 WHILE: 'while';
 LOOP: 'loop';
 UNTIL: 'until';
+AFTER: 'after';
+WHEN: 'when';
+TERMINATE: 'terminate';
 
 // ============================================================================
 // KEYWORDS - Relationships and Usage

@@ -75,7 +75,7 @@ importFilter
     ;
 
 qualifiedNameWithWildcard
-    : qualifiedName (DOUBLE_COLON DOUBLE_STAR | DOUBLE_COLON STAR)?
+    : qualifiedName (DOUBLE_COLON DOUBLE_STAR | DOUBLE_COLON STAR | DOUBLE_COLON DOUBLE_COLON STAR)?
     ;
 
 // ============================================================================
@@ -114,12 +114,14 @@ usagePrefix
     : REF
     | READONLY
     | DERIVED
-    | END
     | ORDERED
     | NONUNIQUE
     | COMPOSITE
     | PORTION
     | INDIVIDUAL
+    | VARIANT
+    | END
+    | CONSTANT
     ;
 
 directionPrefix
@@ -209,6 +211,27 @@ member
       | caseUsage
       | useCaseUsage
       | verificationUsage
+      | renderingUsage
+      | occurrenceUsage
+      | variantUsage
+      | portionUsage
+      | stepUsage
+      | interfaceUsage
+        // Control nodes
+      | decideNode
+      | mergeNode
+      | forkNode
+      | joinNode
+        // Binding and messaging
+      | bindingUsage
+      | acceptUsage
+      | sendUsage
+      | assignUsage
+      | messageUsage
+        // End/connector ends
+      | endUsage
+        // Metadata
+      | metadataUsage
         // Other elements
       | comment
       | documentation
@@ -324,7 +347,7 @@ datatypeDefinition
     ;
 
 classDefinition
-    : CLASS declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : CLASS ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 structDefinition
@@ -384,7 +407,21 @@ partUsage
     ;
 
 actionUsage
-    : directionPrefix? ACTION usageName? featureRelationships? usageBody?
+    : directionPrefix? ACTION usageName? actionKeyword? featureRelationships? actionSendClause? usageBody?
+    | directionPrefix? ACTION usageName? actionKeyword? featureRelationships? actionSendClause? SEMICOLON
+    ;
+
+actionKeyword
+    : SEND
+    | ACCEPT
+    | DECIDE
+    | MERGE
+    | FORK
+    | JOIN
+    ;
+
+actionSendClause
+    : SEND (VIA expression)? TO expression
     ;
 
 stateUsage
@@ -416,11 +453,21 @@ itemUsage
     ;
 
 refUsage
-    : directionPrefix? REF usageName featureRelationships? valueInit? (SEMICOLON | usageBody)
+    : directionPrefix? REF refKind? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
+    ;
+
+refKind
+    : PART
+    | ACTION
+    | STATE
+    | ATTRIBUTE
+    | PORT
+    | ITEM
     ;
 
 connectionUsage
-    : CONNECTION usageName? connectionEndpoints? usageBody?
+    : CONNECTION usageName? featureRelationships? connectionEndpoints? usageBody?
+    | CONNECTION usageName? featureRelationships? connectionEndpoints? SEMICOLON
     | CONNECT connectionEndpoints SEMICOLON?
     ;
 
@@ -432,7 +479,11 @@ flowConnectionUsage
 successionUsage
     : FIRST expression (THEN expression)? SEMICOLON?
     | THEN expression SEMICOLON?
-    | SUCCESSION usageName? successionEndpoints? SEMICOLON?
+    | SUCCESSION FLOW? usageName? featureRelationships? successionFlowOf? successionEndpoints? SEMICOLON?
+    ;
+
+successionFlowOf
+    : OF qualifiedName
     ;
 
 transitionUsage
@@ -440,7 +491,7 @@ transitionUsage
     ;
 
 satisfyRequirement
-    : ASSERT? NOT? SATISFY qualifiedName (BY expression)? SEMICOLON?
+    : ASSERT? NOT? SATISFY expression (BY expression)? SEMICOLON?
     ;
 
 allocateUsage
@@ -449,11 +500,13 @@ allocateUsage
     ;
 
 performUsage
-    : PERFORM expression (BY expression)? SEMICOLON?
+    : PERFORM ACTION? expression (BY expression)? SEMICOLON?
+    | PERFORM ACTION? usageName? featureRelationships? usageBody
     ;
 
 exhibitUsage
-    : EXHIBIT expression (BY expression)? SEMICOLON?
+    : EXHIBIT STATE? expression (BY expression)? SEMICOLON?
+    | EXHIBIT STATE? usageName? featureRelationships? usageBody
     ;
 
 includeUsage
@@ -478,6 +531,143 @@ useCaseUsage
 
 verificationUsage
     : VERIFICATION usageName? featureRelationships? usageBody?
+    ;
+
+renderingUsage
+    : RENDERING usageName? featureRelationships? usageBody?
+    ;
+
+occurrenceUsage
+    : OCCURRENCE usageName? featureRelationships? usageBody?
+    | INDIVIDUAL usageName? featureRelationships? usageBody?
+    | SNAPSHOT usageName? featureRelationships? valueInit? SEMICOLON?
+    | TIMESLICE usageName? featureRelationships? valueInit? SEMICOLON?
+    ;
+
+variantUsage
+    : VARIANT usageName? featureRelationships? usageBody?
+    | VARIANT usageName? featureRelationships? SEMICOLON
+    ;
+
+portionUsage
+    : PORTION usageName? featureRelationships? usageBody?
+    | PORTION usageName? featureRelationships? SEMICOLON
+    ;
+
+stepUsage
+    : STEP usageName? featureRelationships? usageBody?
+    | STEP usageName? featureRelationships? SEMICOLON
+    ;
+
+interfaceUsage
+    : INTERFACE usageName? featureRelationships? connectionEndpoints? usageBody?
+    | INTERFACE usageName? featureRelationships? connectionEndpoints? SEMICOLON
+    ;
+
+// ============================================================================
+// CONTROL NODES
+// ============================================================================
+
+decideNode
+    : DECIDE usageName? SEMICOLON? decideBody?
+    ;
+
+decideBody
+    : ifBranch+ elseBranch?
+    ;
+
+ifBranch
+    : IF expression THEN expression SEMICOLON?
+    ;
+
+elseBranch
+    : ELSE expression SEMICOLON?
+    ;
+
+mergeNode
+    : MERGE usageName? SEMICOLON?
+    ;
+
+forkNode
+    : FORK usageName? SEMICOLON?
+    ;
+
+joinNode
+    : JOIN usageName? SEMICOLON?
+    ;
+
+// ============================================================================
+// BINDING AND MESSAGING
+// ============================================================================
+
+bindingUsage
+    : BIND expression (EQUALS expression)? SEMICOLON?
+    ;
+
+acceptUsage
+    : ACCEPT usageName? featureRelationships? acceptTiming? SEMICOLON?
+    ;
+
+acceptTiming
+    : AFTER expression
+    | AT expression
+    | WHEN expression
+    ;
+
+sendUsage
+    : SEND expression (VIA expression)? TO expression SEMICOLON?
+    ;
+
+assignUsage
+    : ASSIGN expression COLON_EQUALS expression SEMICOLON?
+    ;
+
+messageUsage
+    : MESSAGE usageName? featureRelationships? flowEndpoints? usageBody?
+    | MESSAGE usageName? featureRelationships? flowEndpoints? SEMICOLON
+    ;
+
+metadataUsage
+    : METADATA usageName? featureRelationships? metadataBody?
+    | METADATA usageName? featureRelationships? SEMICOLON
+    ;
+
+metadataBody
+    : LBRACE metadataBodyElement* RBRACE
+    ;
+
+metadataBodyElement
+    : usageName EQUALS expression SEMICOLON
+    | metadataAnnotation
+    ;
+
+// ============================================================================
+// END USAGES (CONNECTOR ENDPOINTS)
+// ============================================================================
+
+endUsage
+    : END multiplicityClause? endModifiers? endMemberKind? usageName? featureRelationships? valueInit? usageBody?
+    | END multiplicityClause? endModifiers? endMemberKind? usageName? featureRelationships? valueInit? SEMICOLON
+    | END usageName? multiplicityClause? endModifiers? endMemberKind? usageName? featureRelationships? valueInit? usageBody?
+    | END usageName? multiplicityClause? endModifiers? endMemberKind? usageName? featureRelationships? valueInit? SEMICOLON
+    | END featureRelationships SEMICOLON?
+    ;
+
+endModifiers
+    : (NONUNIQUE | ORDERED | REF)+
+    ;
+
+endMemberKind
+    : PART
+    | ITEM
+    | PORT
+    | REF
+    | ACTION
+    | STATE
+    | CONNECTION
+    | INTERFACE
+    | FLOW
+    | ATTRIBUTE
     ;
 
 // ============================================================================
@@ -522,6 +712,10 @@ typeRelationship
     | referencesClause
     | conjugatesClause
     | typingClause
+    | unionsClause
+    | intersectsClause
+    | differencesClause
+    | disjointClause
     ;
 
 featureRelationships
@@ -558,6 +752,22 @@ typingClause
     : COLON qualifiedName (COMMA qualifiedName)*
     ;
 
+unionsClause
+    : UNIONS qualifiedName (COMMA qualifiedName)*
+    ;
+
+intersectsClause
+    : INTERSECTS qualifiedName (COMMA qualifiedName)*
+    ;
+
+differencesClause
+    : DIFFERENCES qualifiedName (COMMA qualifiedName)*
+    ;
+
+disjointClause
+    : DISJOINT FROM? qualifiedName (COMMA qualifiedName)*
+    ;
+
 multiplicityClause
     : LBRACK multiplicityRange RBRACK
     ;
@@ -578,7 +788,12 @@ multiplicityBound
 // ============================================================================
 
 connectionEndpoints
-    : CONNECT? expression TO expression
+    : CONNECT? multiplicityClause? expression TO multiplicityClause? expression
+    | CONNECT LPAREN expressionList RPAREN
+    ;
+
+expressionList
+    : expression (COMMA expression)*
     ;
 
 flowEndpoints
@@ -588,6 +803,8 @@ flowEndpoints
 
 successionEndpoints
     : FIRST expression THEN expression
+    | FROM expression TO expression
+    | expression THEN expression
     ;
 
 transitionRelationships
@@ -608,6 +825,11 @@ definitionBodyElement
     | inParameter
     | outParameter
     | inoutParameter
+    | simpleFeature
+    ;
+
+simpleFeature
+    : usageName? featureRelationships valueInit? SEMICOLON
     ;
 
 returnFeature
@@ -615,15 +837,18 @@ returnFeature
     ;
 
 inParameter
-    : IN usageName? featureRelationships? (SEMICOLON | usageBody)
+    : IN usageName? featureRelationships? valueInit? usageBody
+    | IN usageName? featureRelationships? valueInit? SEMICOLON
     ;
 
 outParameter
-    : OUT usageName? featureRelationships? (SEMICOLON | usageBody)
+    : OUT usageName? featureRelationships? valueInit? usageBody
+    | OUT usageName? featureRelationships? valueInit? SEMICOLON
     ;
 
 inoutParameter
-    : INOUT usageName? featureRelationships? (SEMICOLON | usageBody)
+    : INOUT usageName? featureRelationships? valueInit? usageBody
+    | INOUT usageName? featureRelationships? valueInit? SEMICOLON
     ;
 
 usageBody
@@ -634,6 +859,11 @@ usageBody
 usageBodyElement
     : namespaceBodyElement
     | statement
+    | anonymousRedefines
+    ;
+
+anonymousRedefines
+    : REDEFINES_OP qualifiedName valueInit? SEMICOLON
     ;
 
 stateDefinitionBody
@@ -724,7 +954,8 @@ effectClause
 // ============================================================================
 
 subjectDeclaration
-    : SUBJECT usageName? featureRelationships? SEMICOLON
+    : SUBJECT usageName? featureRelationships? valueInit? SEMICOLON?
+    | SUBJECT usageName? featureRelationships? valueInit? usageBody
     ;
 
 framedConcern
@@ -737,10 +968,26 @@ assumeConstraint
 
 requireConstraint
     : REQUIRE CONSTRAINT? usageName? featureRelationships? expression? SEMICOLON?
+    | REQUIRE expression SEMICOLON?
     ;
 
 objectiveRequirement
     : OBJECTIVE usageName? featureRelationships? usageBody?
+    | OBJECTIVE verifyBody
+    ;
+
+verifyBody
+    : LBRACE verifyBodyElement* RBRACE
+    ;
+
+verifyBodyElement
+    : namespaceBodyElement
+    | verifyRequirement
+    ;
+
+verifyRequirement
+    : VERIFY REQUIREMENT? usageName? featureRelationships? SEMICOLON?
+    | VERIFY expression SEMICOLON?
     ;
 
 // ============================================================================
@@ -785,11 +1032,26 @@ statement
     | assignmentStatement
     | sendStatement
     | flowStatement
+    | terminateStatement
+    | invariantStatement
+    | thenStatement
+    ;
+
+thenStatement
+    : THEN (member | expression) SEMICOLON?
+    ;
+
+invariantStatement
+    : INV usageBody
     ;
 
 flowStatement
-    : FIRST expression SEMICOLON
-    | THEN expression SEMICOLON
+    : FIRST (START | DONE | expression) SEMICOLON
+    | THEN (START | DONE | expression) SEMICOLON
+    ;
+
+terminateStatement
+    : TERMINATE expression? SEMICOLON
     ;
 
 expressionStatement
@@ -853,7 +1115,7 @@ equalityExpression
     ;
 
 classificationExpression
-    : relationalExpression ((HASTYPE | ISTYPE | AT_SIGN) qualifiedName)?
+    : relationalExpression ((HASTYPE | ISTYPE | AT_SIGN | META) qualifiedName)?
     ;
 
 relationalExpression
@@ -897,7 +1159,12 @@ baseExpression
     | invocationExpression
     | bodyExpression
     | metadataAccessExpression
+    | newExpression
     | LPAREN expression RPAREN                            // Parenthesized
+    ;
+
+newExpression
+    : NEW qualifiedName LPAREN argumentList? RPAREN
     ;
 
 literalExpression
@@ -946,10 +1213,16 @@ positionalArgument
 // ============================================================================
 
 comment
-    : COMMENT_KW (ABOUT qualifiedName)? (LOCALE STRING)? STRING? SEMICOLON?
+    : COMMENT_KW usageName? (ABOUT qualifiedName)? (LOCALE STRING)? documentationBody? SEMICOLON?
     ;
 
 documentation
-    : DOC (LOCALE STRING)? STRING SEMICOLON?
-    | REP (LANGUAGE STRING)? STRING SEMICOLON?
+    : DOC (LOCALE STRING)? documentationBody? SEMICOLON?
+    | REP (LANGUAGE STRING)? documentationBody? SEMICOLON?
+    | LOCALE STRING documentationBody? SEMICOLON?
+    ;
+
+documentationBody
+    : STRING
+    | REGULAR_EXPRESSION
     ;
