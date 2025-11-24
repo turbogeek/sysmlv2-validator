@@ -1096,7 +1096,8 @@ guardClause
     ;
 
 effectClause
-    : DO (SEND expression TO expression | expression)
+    : DO ACTION usageName? featureRelationships?
+    | DO (SEND expression TO expression | expression)
     ;
 
 // ============================================================================
@@ -1200,6 +1201,7 @@ statement
     | invariantStatement
     | thenStatement
     | assignStatement
+    | doStatement
     ;
 
 thenStatement
@@ -1230,6 +1232,11 @@ flowStatement
 terminateStatement
     : TERMINATE expression? SEMICOLON
     | TERMINATE usageName SEMICOLON
+    ;
+
+doStatement
+    : DO ACTION usageName? featureRelationships? usageBody?
+    | DO ACTION usageName? featureRelationships? SEMICOLON
     ;
 
 expressionStatement
