@@ -83,13 +83,17 @@ qualifiedNameWithWildcard
 // ============================================================================
 
 prefixes
-    : (metadataAnnotation | featurePrefix)+
+    : (metadataAnnotation | hashAnnotation | featurePrefix)+
+    ;
+
+hashAnnotation
+    : HASH qualifiedName
     ;
 
 metadataAnnotation
     : AT_SIGN qualifiedName (LPAREN annotationArguments RPAREN)?
     | AT_SIGN qualifiedName metadataBody
-    | HASH qualifiedName
+    | AT_SIGN qualifiedName SEMICOLON?
     ;
 
 annotationArguments
@@ -523,7 +527,7 @@ itemUsage
     ;
 
 refUsage
-    : directionPrefix? REF refKind? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
+    : directionPrefix? REF hashAnnotation* refKind? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
     ;
 
 refKind
@@ -559,6 +563,7 @@ successionFlowOf
 
 transitionUsage
     : TRANSITION usageName? transitionRelationships? transitionBody
+    | TRANSITION usageName? FIRST expression transitionBody
     ;
 
 satisfyRequirement
