@@ -935,6 +935,7 @@ definitionBodyElement
     | outParameter
     | inoutParameter
     | simpleFeature
+    | statement
     ;
 
 simpleFeature
@@ -1205,6 +1206,7 @@ thenStatement
     | THEN ACCEPT usageName? featureRelationships? acceptTiming? SEMICOLON?
     | THEN SEND expression (VIA expression)? TO expression SEMICOLON
     | THEN DECIDE SEMICOLON? decideBody?
+    | THEN FORK usageName? usageBody?
     | THEN FORK usageName? SEMICOLON
     | THEN JOIN usageName? SEMICOLON
     | THEN TERMINATE expression? SEMICOLON
