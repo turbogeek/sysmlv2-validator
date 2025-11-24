@@ -113,6 +113,7 @@ featurePrefix
 definitionPrefix
     : ABSTRACT
     | VARIATION
+    | INDIVIDUAL
     ;
 
 usagePrefix
@@ -241,6 +242,8 @@ member
       | endUsage
         // Metadata
       | metadataUsage
+        // Dependencies
+      | dependencyDeclaration
         // Other elements
       | comment
       | documentation
@@ -736,6 +739,10 @@ messageUsage
     | MESSAGE usageName? featureRelationships? flowEndpoints? SEMICOLON
     ;
 
+dependencyDeclaration
+    : DEPENDENCY usageName? (FROM expression)? TO expression (COMMA expression)* SEMICOLON
+    ;
+
 metadataUsage
     : METADATA usageName? featureRelationships? metadataBody?
     | METADATA usageName? featureRelationships? SEMICOLON
@@ -1105,7 +1112,8 @@ effectClause
 // ============================================================================
 
 subjectDeclaration
-    : SUBJECT usageName? featureRelationships? valueInit? SEMICOLON?
+    : SUBJECT SEMICOLON
+    | SUBJECT usageName? featureRelationships? valueInit? SEMICOLON?
     | SUBJECT usageName? featureRelationships? valueInit? usageBody
     ;
 
@@ -1124,7 +1132,8 @@ requireConstraint
     ;
 
 objectiveRequirement
-    : OBJECTIVE usageName? featureRelationships? objectiveBody?
+    : OBJECTIVE objectiveBody
+    | OBJECTIVE usageName? featureRelationships? objectiveBody?
     | OBJECTIVE verifyBody
     ;
 
