@@ -75,7 +75,7 @@ importFilter
     ;
 
 qualifiedNameWithWildcard
-    : qualifiedName (DOUBLE_COLON DOUBLE_STAR | DOUBLE_COLON STAR | DOUBLE_COLON DOUBLE_COLON STAR)?
+    : qualifiedName (DOUBLE_COLON STAR DOUBLE_COLON DOUBLE_STAR | DOUBLE_COLON DOUBLE_STAR | DOUBLE_COLON STAR)?
     ;
 
 // ============================================================================
@@ -926,6 +926,7 @@ transitionRelationships
 
 definitionBody
     : LBRACE definitionBodyElement* RBRACE
+    | SEMICOLON
     ;
 
 definitionBodyElement
