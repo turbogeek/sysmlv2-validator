@@ -813,6 +813,10 @@ qualifiedName
     : name (DOUBLE_COLON name)*
     ;
 
+featureChain
+    : name (DOT name | DOUBLE_COLON name)*
+    ;
+
 // ============================================================================
 // TYPE RELATIONSHIPS (AFTER DEFINITION/USAGE NAME)
 // ============================================================================
@@ -849,7 +853,7 @@ specializesClause
     ;
 
 redefinesClause
-    : (REDEFINES_OP | REDEFINES) qualifiedName (COMMA qualifiedName)*
+    : (REDEFINES_OP | REDEFINES) (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 subsetsClause
@@ -857,7 +861,7 @@ subsetsClause
     ;
 
 referencesClause
-    : (REFERENCE_SUBSETTING | REFERENCES) qualifiedName (COMMA qualifiedName)*
+    : (REFERENCE_SUBSETTING | REFERENCES) (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 conjugatesClause
@@ -1253,7 +1257,8 @@ expressionStatement
     ;
 
 ifStatement
-    : IF expression LBRACE statement* RBRACE elseIfClause* elseClause?
+    : IF expression THEN statement (ELSE statement)?
+    | IF expression LBRACE statement* RBRACE elseIfClause* elseClause?
     ;
 
 elseIfClause
