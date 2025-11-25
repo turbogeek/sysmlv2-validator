@@ -1311,7 +1311,7 @@ whileStatement
     ;
 
 loopStatement
-    : LOOP expression? LBRACE statement* RBRACE (UNTIL expression)?
+    : LOOP expression? LBRACE statement* RBRACE (UNTIL expression SEMICOLON?)?
     ;
 
 forStatement
@@ -1415,7 +1415,12 @@ baseExpression
     | thisExpression
     | START
     | DONE
+    | collectionLiteral                                   // Collection literal
     | LPAREN expression RPAREN                            // Parenthesized
+    ;
+
+collectionLiteral
+    : LPAREN expression (COMMA expression)+ RPAREN        // Tuple/sequence (1, 2, 3)
     ;
 
 thisExpression
