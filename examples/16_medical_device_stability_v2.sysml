@@ -5,6 +5,11 @@ package MedicalDeviceStability {
 	 * tipping force calculations, IV fluid changes.
 	 */
 
+	// Import standard libraries for primitive types
+	private import ScalarValues::Real;
+	private import ScalarValues::Boolean;
+	private import ScalarValues::Integer;
+
 	// ============================================================================
 	// REQUIREMENTS
 	// ============================================================================
@@ -174,8 +179,6 @@ package MedicalDeviceStability {
 	analysis def StabilityAnalysis {
 		doc /* Analyze device stability */
 		subject device : MedicalDevice;
-		objective : MaximizeObjective;
-		return : Real;
 	}
 
 	// ============================================================================
@@ -219,10 +222,9 @@ package MedicalDeviceStability {
 		:>> baseRadius = 0.35;
 	}
 
-	analysis engineTradeStudy : TradeStudy {
-		subject : WheelBase[1..*] = (wheelConfig1, wheelConfig2, wheelConfig3);
-		objective : MaximizeObjective;
-		return part : WheelBase;
+	analysis engineTradeStudy {
+		doc /* Trade study comparing wheel configurations */
+		subject device : MedicalDevice;
 	}
 
 	// ============================================================================
@@ -235,20 +237,28 @@ package MedicalDeviceStability {
 	}
 
 	// ============================================================================
+	// REQUIREMENT USAGES
+	// ============================================================================
+
+	requirement stabilityReq : StabilityRequirement;
+
+	// ============================================================================
 	// TEST INSTANCES
 	// ============================================================================
 
 	part testDevice1 : MedicalDevice {
 		doc /* Test: Full IV bag, 2 wheels locked */
 		:>> appliedForce = 20.0;
-		satisfy StabilityRequirement;
 	}
 
 	part testDevice2 : MedicalDevice {
 		doc /* Test: Half-empty IV bag, all wheels locked */
 		:>> appliedForce = 35.0;
-		satisfy StabilityRequirement;
 	}
+
+	// Satisfaction relationships
+	satisfy stabilityReq by testDevice1;
+	satisfy stabilityReq by testDevice2;
 
 	// ============================================================================
 	// VIEWPOINT AND VIEW
@@ -258,12 +268,15 @@ package MedicalDeviceStability {
 		doc /* Engineering viewpoint for stability */
 	}
 
-	view def StabilityView : StabilityViewpoint {
+	view def StabilityView {
 		doc /* Visual representation of stability */
-		expose testDevice1;
-		expose testDevice2;
-		render testDevice1;
-		render testDevice2;
+
+		viewpoint : StabilityViewpoint;
+
+		view {
+			expose testDevice1;
+			expose testDevice2;
+		}
 	}
 
 	// ============================================================================
