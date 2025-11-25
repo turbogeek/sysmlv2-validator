@@ -512,6 +512,11 @@ constraintBodyElement
     | outParameter
     | anonymousRedefines
     | attributeUsage
+    | constraintParameter
+    ;
+
+constraintParameter
+    : name COLON qualifiedName SEMICOLON
     ;
 
 constraintExpression
@@ -975,6 +980,7 @@ simpleFeature
 
 returnFeature
     : RETURN usageName? featureRelationships? (SEMICOLON | usageBody)
+    | RETURN PART usageName? featureRelationships? (SEMICOLON | usageBody)
     ;
 
 inParameter
@@ -1013,6 +1019,11 @@ usageBodyElement
     | inoutParameter
     | subjectDeclaration
     | objectiveRequirement
+    | simpleParameter
+    ;
+
+simpleParameter
+    : (ID | OBJECTIVE | SUBJECT) COLON qualifiedName SEMICOLON
     ;
 
 anonymousRedefines
