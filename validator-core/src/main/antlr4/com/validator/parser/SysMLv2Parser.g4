@@ -177,6 +177,7 @@ member
       | occurrenceDefinition
       | flowDefinition
       | metadataDefinition
+      | individualDefinition
         // KerML Definitions
       | datatypeDefinition
       | classDefinition
@@ -334,7 +335,7 @@ allocationDefinition
     ;
 
 itemDefinition
-    : ITEM_DEF declarationName typeRelationships? definitionBody
+    : INDIVIDUAL? ITEM_DEF declarationName typeRelationships? definitionBody
     ;
 
 enumDefinition
@@ -371,7 +372,7 @@ renderingDefinition
     ;
 
 occurrenceDefinition
-    : OCCURRENCE_DEF declarationName typeRelationships? definitionBody
+    : INDIVIDUAL? OCCURRENCE_DEF declarationName typeRelationships? definitionBody
     ;
 
 flowDefinition
@@ -381,6 +382,11 @@ flowDefinition
 metadataDefinition
     : METADATA_DEF declarationName? shortName? typeRelationships? metadataDefBody?
     | METADATA_DEF declarationName? shortName? typeRelationships? SEMICOLON
+    ;
+
+individualDefinition
+    : INDIVIDUAL_DEF declarationName? typeRelationships? definitionBody
+    | INDIVIDUAL_DEF declarationName? typeRelationships? SEMICOLON
     ;
 
 metadataDefBody
@@ -496,6 +502,7 @@ viewUsage
 
 constraintUsage
     : CONSTRAINT usageName? featureRelationships? constraintBody?
+    | CONSTRAINT usageName? featureRelationships? SEMICOLON
     | ASSERT CONSTRAINT usageName? featureRelationships? constraintBody?
     | ASSERT CONSTRAINT usageName? featureRelationships? SEMICOLON
     | ASSERT NOT? qualifiedName constraintBody?
@@ -545,7 +552,7 @@ portUsage
     ;
 
 itemUsage
-    : directionPrefix? ITEM usageName? featureRelationships? usageBody?
+    : directionPrefix? INDIVIDUAL? ITEM usageName? featureRelationships? usageBody?
     ;
 
 refUsage

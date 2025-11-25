@@ -29,6 +29,7 @@ RENDERING_DEF: 'rendering' WS+ 'def';
 OCCURRENCE_DEF: 'occurrence' WS+ 'def';
 FLOW_DEF: 'flow' WS+ 'def';
 METADATA_DEF: 'metadata' WS+ 'def';
+INDIVIDUAL_DEF: 'individual' WS+ 'def';
 
 // KerML compound keywords
 ASSOC_STRUCT: 'assoc' WS+ 'struct';
