@@ -244,6 +244,9 @@ member
       | metadataUsage
         // Dependencies
       | dependencyDeclaration
+        // Textual representations
+      | textualRepresentation
+      | languageStatement
         // Other elements
       | comment
       | documentation
@@ -458,6 +461,7 @@ actionUsage
     : directionPrefix? ACTION usageName? actionKeyword? featureRelationships? actionSendClause? usageBody?
     | directionPrefix? ACTION usageName? actionKeyword? featureRelationships? actionSendClause? SEMICOLON
     | directionPrefix? ACTION usageName? SEND (VIA expression)? TO expression SEMICOLON?
+    | directionPrefix? ACTION usageName? ACCEPT expression (VIA expression)? SEMICOLON?
     ;
 
 actionKeyword
@@ -792,6 +796,7 @@ endMemberKind
 
 declarationName
     : name (shortName)?
+    | shortName (name)?
     | shortName
     ;
 
@@ -1209,6 +1214,7 @@ statement
     | forStatement
     | assignmentStatement
     | sendStatement
+    | acceptStatement
     | flowStatement
     | terminateStatement
     | invariantStatement
@@ -1287,6 +1293,10 @@ assignmentStatement
 
 sendStatement
     : SEND expression (VIA expression)? TO expression SEMICOLON
+    ;
+
+acceptStatement
+    : ACCEPT expression (VIA expression)? SEMICOLON
     ;
 
 // ============================================================================
@@ -1436,11 +1446,19 @@ comment
 
 documentation
     : DOC (LOCALE STRING)? documentationBody? SEMICOLON?
-    | REP (LANGUAGE STRING)? documentationBody? SEMICOLON?
+    | REP usageName? (LANGUAGE STRING)? documentationBody? SEMICOLON?
     | LOCALE STRING documentationBody? SEMICOLON?
     ;
 
 documentationBody
     : STRING
     | REGULAR_EXPRESSION
+    ;
+
+textualRepresentation
+    : REP usageName (LANGUAGE STRING)? documentationBody?
+    ;
+
+languageStatement
+    : LANGUAGE STRING documentationBody? SEMICOLON?
     ;
