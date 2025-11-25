@@ -557,6 +557,7 @@ itemUsage
 
 refUsage
     : directionPrefix? REF hashAnnotation* refKind? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
+    | hashAnnotation+ usageName featureRelationships? valueInit? SEMICOLON
     ;
 
 refKind
@@ -601,7 +602,16 @@ satisfyRequirement
 
 allocateUsage
     : ALLOCATION usageName? featureRelationships? usageBody?
+    | ALLOCATION usageName? featureRelationships? ALLOCATE LPAREN namedAllocationList RPAREN SEMICOLON?
     | ALLOCATE expression TO expression SEMICOLON?
+    ;
+
+namedAllocationList
+    : namedAllocation (COMMA namedAllocation)*
+    ;
+
+namedAllocation
+    : name REFERENCE_SUBSETTING expression
     ;
 
 performUsage
@@ -884,7 +894,7 @@ redefinesClause
     ;
 
 subsetsClause
-    : SUBSETS qualifiedName (COMMA qualifiedName)*
+    : SUBSETS (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 referencesClause
@@ -1027,6 +1037,7 @@ usageBodyElement
     | subjectDeclaration
     | objectiveRequirement
     | simpleParameter
+    | metadataAnnotation
     ;
 
 simpleParameter
@@ -1105,10 +1116,10 @@ enumBodyElement
     ;
 
 enumMember
-    : visibility? ENUM name (EQUALS expression)? SEMICOLON?
-    | visibility? ENUM name enumMemberBody
-    | visibility? name SEMICOLON?
-    | EQUALS expression SEMICOLON?
+    : visibility? hashAnnotation* ENUM name (COLON qualifiedName)? (EQUALS expression)? SEMICOLON?
+    | visibility? hashAnnotation* ENUM name enumMemberBody
+    | visibility? hashAnnotation* name (COLON qualifiedName)? (EQUALS expression)? SEMICOLON?
+    | hashAnnotation* EQUALS expression SEMICOLON?
     ;
 
 enumMemberBody
