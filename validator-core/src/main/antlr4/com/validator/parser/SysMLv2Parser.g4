@@ -1033,6 +1033,7 @@ stateBodyElement
     | exitAction
     | transitionUsage
     | acceptTransition
+    | thenStatement
     ;
 
 acceptTransition
@@ -1087,6 +1088,7 @@ transitionBody
 
 entryAction
     : ENTRY assignStatement
+    | ENTRY assignUsage
     | ENTRY expression? SEMICOLON
     ;
 
@@ -1095,6 +1097,7 @@ doAction
     | DO ACTION? expression SEMICOLON
     | DO SEND expression TO expression SEMICOLON
     | DO assignStatement
+    | DO assignUsage
     ;
 
 exitAction
@@ -1238,6 +1241,7 @@ thenStatement
     | THEN ACTION usageName? featureRelationships? usageBody
     | THEN ACTION usageName? WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
     | THEN STATE usageName? featureRelationships? stateUsageBody
+    | THEN STATE usageName? featureRelationships? SEMICOLON
     | THEN WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
     | THEN expression SEMICOLON?
     ;
@@ -1291,7 +1295,7 @@ forStatement
     ;
 
 assignmentStatement
-    : qualifiedName (EQUALS | COLON_EQUALS | PLUS_EQUALS) expression SEMICOLON
+    : (qualifiedName | featureChain) (EQUALS | COLON_EQUALS | PLUS_EQUALS) expression SEMICOLON
     ;
 
 sendStatement
