@@ -247,6 +247,9 @@ member
         // Textual representations
       | textualRepresentation
       | languageStatement
+        // Analysis/Verification/Use Case elements
+      | subjectDeclaration
+      | objectiveRequirement
         // Other elements
       | comment
       | documentation
@@ -1259,7 +1262,7 @@ doStatement
     ;
 
 expressionStatement
-    : expression SEMICOLON
+    : expression SEMICOLON?
     ;
 
 ifStatement
