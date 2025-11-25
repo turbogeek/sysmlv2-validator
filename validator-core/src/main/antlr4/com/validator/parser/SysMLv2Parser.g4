@@ -200,6 +200,7 @@ member
       | viewUsage
       | constraintUsage
       | attributeUsage
+      | enumUsage
       | portUsage
       | itemUsage
       | refUsage
@@ -338,6 +339,7 @@ itemDefinition
 
 enumDefinition
     : ENUM_DEF declarationName typeRelationships? enumBody
+    | ENUM_DEF declarationName typeRelationships? SEMICOLON
     ;
 
 calcDefinition
@@ -519,6 +521,11 @@ constraintExpression
 attributeUsage
     : directionPrefix? ATTRIBUTE usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
     | directionPrefix? ATTRIBUTE REDEFINES qualifiedName tupleOrValueInit? (SEMICOLON | usageBody)
+    ;
+
+enumUsage
+    : ENUM usageName? featureRelationships? valueInit? SEMICOLON
+    | ENUM usageName? featureRelationships? valueInit? usageBody
     ;
 
 tupleOrValueInit
@@ -1071,11 +1078,28 @@ viewBodyElement
     ;
 
 enumBody
-    : LBRACE enumMember* RBRACE
+    : LBRACE enumBodyElement* RBRACE
+    ;
+
+enumBodyElement
+    : enumMember
+    | documentation
     ;
 
 enumMember
     : visibility? ENUM name (EQUALS expression)? SEMICOLON?
+    | visibility? ENUM name enumMemberBody
+    | visibility? name SEMICOLON?
+    | EQUALS expression SEMICOLON?
+    ;
+
+enumMemberBody
+    : LBRACE enumMemberBodyElement* RBRACE
+    ;
+
+enumMemberBodyElement
+    : redefinesClause EQUALS expression SEMICOLON?
+    | namespaceBodyElement
     ;
 
 transitionBody
