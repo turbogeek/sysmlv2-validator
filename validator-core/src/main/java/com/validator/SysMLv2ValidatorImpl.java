@@ -1,7 +1,10 @@
 package com.validator;
 
+import com.validator.library.LibraryConfig;
+import com.validator.library.LibraryIndex;
 import com.validator.parser.SysMLv2ParserFacade;
 import com.validator.parser.SysMLv2ParserFacade.ParseResult;
+import com.validator.semantic.SemanticValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,18 +16,36 @@ import java.util.List;
 
 /**
  * Main implementation of the SysML v2 validator.
- * Currently performs syntax validation using ANTLR parser.
- * Semantic validation will be added in Phase 2.
+ * Performs both syntax and semantic validation.
+ * - Phase 1: Syntax validation using ANTLR parser
+ * - Phase 2: Semantic validation including import resolution
  */
 public class SysMLv2ValidatorImpl implements Validator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SysMLv2ValidatorImpl.class);
-    private static final String VERSION = "0.1.0-SNAPSHOT";
+    private static final String VERSION = "0.2.0-SNAPSHOT";
     private static final String NAME = "SysML v2 Semantic Validator";
 
     private final SysMLv2ParserFacade parserFacade;
+    private final LibraryIndex libraryIndex;
+    private final boolean semanticValidationEnabled;
 
     public SysMLv2ValidatorImpl() {
         this.parserFacade = new SysMLv2ParserFacade();
+
+        // Initialize library index
+        LibraryConfig libraryConfig = new LibraryConfig();
+        this.libraryIndex = new LibraryIndex();
+
+        // Index libraries if available
+        if (libraryConfig.hasLibraryPaths()) {
+            libraryIndex.indexLibraries(libraryConfig);
+            this.semanticValidationEnabled = true;
+            LOGGER.info("Semantic validation enabled with {} indexed packages",
+                libraryIndex.getIndexedPackages().size());
+        } else {
+            this.semanticValidationEnabled = false;
+            LOGGER.warn("Semantic validation disabled - no library paths configured");
+        }
     }
 
     @Override
@@ -48,7 +69,7 @@ public class SysMLv2ValidatorImpl implements Validator {
         ParseResult parseResult = parserFacade.parseFile(file);
 
         // Convert syntax errors to validation errors using streams (with suggestions)
-        List<ValidationError> errors = parseResult.getSyntaxErrors().stream()
+        List<ValidationError> errors = new ArrayList<>(parseResult.getSyntaxErrors().stream()
             .map(syntaxError -> {
                 ValidationError.Builder builder = new ValidationError.Builder()
                     .filePath(file.getAbsolutePath())
@@ -64,9 +85,34 @@ public class SysMLv2ValidatorImpl implements Validator {
                 }
                 return builder.build();
             })
-            .toList();
+            .toList());
 
         List<ValidationWarning> warnings = new ArrayList<>();
+
+        // Perform semantic validation if enabled and syntax is valid
+        if (semanticValidationEnabled && errors.isEmpty() && parseResult.getParseTree() != null) {
+            LOGGER.debug("Performing semantic validation");
+            SemanticValidator semanticValidator =
+                new SemanticValidator(file.getAbsolutePath(), libraryIndex);
+            List<ValidationError> semanticErrors =
+                semanticValidator.validate(parseResult.getParseTree());
+            errors.addAll(semanticErrors);
+
+            // Add semantic warnings
+            for (String warning : semanticValidator.getWarnings()) {
+                warnings.add((ValidationWarning) new ValidationWarning.Builder()
+                    .message(warning)
+                    .build());
+            }
+
+            LOGGER.debug("Semantic validation found {} errors, {} warnings",
+                semanticErrors.size(), semanticValidator.getWarnings().size());
+        } else if (!semanticValidationEnabled) {
+            warnings.add((ValidationWarning) new ValidationWarning.Builder()
+                .message("Semantic validation disabled - "
+                    + "configure library path to enable import resolution")
+                .build());
+        }
 
         long validationTime = System.currentTimeMillis() - startTime;
 

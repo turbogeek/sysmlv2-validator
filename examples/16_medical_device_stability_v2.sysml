@@ -5,11 +5,6 @@ package MedicalDeviceStability {
 	 * tipping force calculations, IV fluid changes.
 	 */
 
-	// Import standard libraries for primitive types
-	private import ScalarValues::Real;
-	private import ScalarValues::Boolean;
-	private import ScalarValues::Integer;
-
 	// ============================================================================
 	// REQUIREMENTS
 	// ============================================================================
@@ -28,11 +23,11 @@ package MedicalDeviceStability {
 	// PHYSICAL TYPES
 	// ============================================================================
 
-	attribute def MassValue :> Real;
-	attribute def LengthValue :> Real;
-	attribute def ForceValue :> Real;
-	attribute def AngleValue :> Real;
-	attribute def VolumeValue :> Real;
+	attribute def MassValue;
+	attribute def LengthValue;
+	attribute def ForceValue;
+	attribute def AngleValue;
+	attribute def VolumeValue;
 
 	attribute def Position3D {
 		attribute x : LengthValue;
@@ -46,14 +41,14 @@ package MedicalDeviceStability {
 
 	part def Wheel {
 		doc /* Individual wheel with locking capability */
-		attribute isLocked : Boolean;
+		attribute isLocked;
 		attribute diameter : LengthValue;
-		attribute frictionCoefficient : Real;
+		attribute frictionCoefficient;
 	}
 
 	part def WheelBase {
 		doc /* Base structure with multiple wheels */
-		attribute numWheels : Integer;
+		attribute numWheels;
 		attribute baseRadius : LengthValue;
 		part wheels : Wheel[4];
 	}
@@ -62,13 +57,13 @@ package MedicalDeviceStability {
 		doc /* Vertical pole structure */
 		attribute height : LengthValue;
 		attribute mass : MassValue;
-		attribute crossSectionArea : Real;
+		attribute crossSectionArea;
 	}
 
 	part def IVBag {
 		doc /* IV fluid bag with variable volume */
 		attribute fluidVolume : VolumeValue;
-		attribute fluidDensity : Real;
+		attribute fluidDensity;
 		attribute bagMass : MassValue;
 		attribute heightOnPole : LengthValue;
 	}
@@ -117,7 +112,7 @@ package MedicalDeviceStability {
 		// State variables
 		attribute tiltAngle : AngleValue;
 		attribute appliedForce : ForceValue;
-		attribute timeStep : Real;
+		attribute timeStep;
 
 		// ============================================================================
 		// CALCULATIONS
@@ -270,8 +265,6 @@ package MedicalDeviceStability {
 
 	view def StabilityView {
 		doc /* Visual representation of stability */
-
-		viewpoint : StabilityViewpoint;
 
 		view {
 			expose testDevice1;
