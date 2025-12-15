@@ -119,12 +119,15 @@ public class ImportStatement {
 
     /**
      * Add an imported symbol (resolved during semantic analysis).
+     * If this is an aliased import, the symbol is stored under the alias key.
      *
      * @param symbol the symbol to add
      */
     public void addImportedSymbol(Symbol symbol) {
         Objects.requireNonNull(symbol, "Symbol cannot be null");
-        importedSymbols.put(symbol.getName(), symbol);
+        // For aliased imports, use the alias as the key
+        String key = (alias != null) ? alias : symbol.getName();
+        importedSymbols.put(key, symbol);
     }
 
     /**
@@ -191,6 +194,7 @@ public class ImportStatement {
             sb.append("private ");
         }
         sb.append("import ").append(importPath);
+        sb.append(" [").append(importType).append("]");
         if (alias != null) {
             sb.append(" as ").append(alias);
         }

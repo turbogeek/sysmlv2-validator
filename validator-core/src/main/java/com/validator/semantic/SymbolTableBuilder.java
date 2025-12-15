@@ -163,10 +163,12 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.PART_DEFINITION);
-
+        // Create symbol BEFORE entering scope (qualified name uses current scope)
         Symbol symbol = createSymbol(name, ElementType.PART_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        // Now enter the scope for this definition
+        symbolTable.enterScope(name, ScopeType.PART_DEFINITION);
     }
 
     @Override
@@ -186,10 +188,12 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.ACTION_DEFINITION);
-
+        // Create symbol BEFORE entering scope (qualified name uses current scope)
         Symbol symbol = createSymbol(name, ElementType.ACTION_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        // Now enter the scope for this definition
+        symbolTable.enterScope(name, ScopeType.ACTION_DEFINITION);
     }
 
     @Override
@@ -209,10 +213,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.STATE_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.STATE_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.STATE_DEFINITION);
     }
 
     @Override
@@ -232,10 +237,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.REQUIREMENT_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.REQUIREMENT_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.REQUIREMENT_DEFINITION);
     }
 
     @Override
@@ -255,10 +261,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.VIEW_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.VIEW_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.VIEW_DEFINITION);
     }
 
     @Override
@@ -278,10 +285,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.VIEWPOINT_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.VIEWPOINT_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.VIEWPOINT_DEFINITION);
     }
 
     @Override
@@ -301,10 +309,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.CONSTRAINT_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.CONSTRAINT_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.CONSTRAINT_DEFINITION);
     }
 
     @Override
@@ -350,10 +359,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.CONNECTION_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.CONNECTION_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.CONNECTION_DEFINITION);
     }
 
     @Override
@@ -386,10 +396,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.ALLOCATION_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.ALLOCATION_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.ALLOCATION_DEFINITION);
     }
 
     @Override
@@ -422,10 +433,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.ENUM_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.ENUM_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.ENUM_DEFINITION);
     }
 
     @Override
@@ -445,10 +457,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.CALC_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.CALC_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.CALC_DEFINITION);
     }
 
     @Override
@@ -468,10 +481,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.ANALYSIS_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.ANALYSIS_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.ANALYSIS_DEFINITION);
     }
 
     @Override
@@ -491,10 +505,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.CASE_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.CASE_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.CASE_DEFINITION);
     }
 
     @Override
@@ -512,10 +527,11 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        symbolTable.enterScope(name, ScopeType.VERIFICATION_DEFINITION);
-
+        // Create symbol BEFORE entering scope
         Symbol symbol = createSymbol(name, ElementType.VERIFICATION_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.VERIFICATION_DEFINITION);
     }
 
     @Override
@@ -548,8 +564,250 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
             return;
         }
 
-        Symbol symbol = createSymbol(name, ElementType.DATA_TYPE, ctx);
+        Symbol symbol = createSymbol(name, ElementType.DATATYPE_DEFINITION, ctx);
         defineSymbol(symbol, ctx);
+    }
+
+    // ==================== KERML CLASS DEFINITIONS ====================
+
+    @Override
+    public void enterClassDefinition(SysMLv2Parser.ClassDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        // Create symbol BEFORE entering scope
+        Symbol symbol = createSymbol(name, ElementType.CLASS_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.CLASS_DEFINITION);
+    }
+
+    @Override
+    public void exitClassDefinition(SysMLv2Parser.ClassDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name != null) {
+            symbolTable.exitScope();
+        }
+    }
+
+    // ==================== KERML STRUCT DEFINITIONS ====================
+
+    @Override
+    public void enterStructDefinition(SysMLv2Parser.StructDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        // Create symbol BEFORE entering scope
+        Symbol symbol = createSymbol(name, ElementType.STRUCT_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.STRUCT_DEFINITION);
+    }
+
+    @Override
+    public void exitStructDefinition(SysMLv2Parser.StructDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name != null) {
+            symbolTable.exitScope();
+        }
+    }
+
+    // ==================== KERML BEHAVIOR DEFINITIONS ====================
+
+    @Override
+    public void enterBehaviorDefinition(SysMLv2Parser.BehaviorDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        // Create symbol BEFORE entering scope
+        Symbol symbol = createSymbol(name, ElementType.BEHAVIOR_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.BEHAVIOR_DEFINITION);
+    }
+
+    @Override
+    public void exitBehaviorDefinition(SysMLv2Parser.BehaviorDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name != null) {
+            symbolTable.exitScope();
+        }
+    }
+
+    // ==================== KERML FUNCTION DEFINITIONS ====================
+
+    @Override
+    public void enterFunctionDefinition(SysMLv2Parser.FunctionDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        // Create symbol BEFORE entering scope
+        Symbol symbol = createSymbol(name, ElementType.FUNCTION_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.FUNCTION_DEFINITION);
+    }
+
+    @Override
+    public void exitFunctionDefinition(SysMLv2Parser.FunctionDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name != null) {
+            symbolTable.exitScope();
+        }
+    }
+
+    // ==================== KERML PREDICATE DEFINITIONS ====================
+
+    @Override
+    public void enterPredicateDefinition(SysMLv2Parser.PredicateDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        // Create symbol BEFORE entering scope
+        Symbol symbol = createSymbol(name, ElementType.PREDICATE_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.PREDICATE_DEFINITION);
+    }
+
+    @Override
+    public void exitPredicateDefinition(SysMLv2Parser.PredicateDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name != null) {
+            symbolTable.exitScope();
+        }
+    }
+
+    // ==================== KERML INTERACTION DEFINITIONS ====================
+
+    @Override
+    public void enterInteractionDefinition(SysMLv2Parser.InteractionDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        // Create symbol BEFORE entering scope
+        Symbol symbol = createSymbol(name, ElementType.INTERACTION_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.INTERACTION_DEFINITION);
+    }
+
+    @Override
+    public void exitInteractionDefinition(SysMLv2Parser.InteractionDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name != null) {
+            symbolTable.exitScope();
+        }
+    }
+
+    // ==================== KERML METACLASS DEFINITIONS ====================
+
+    @Override
+    public void enterMetaclassDefinition(SysMLv2Parser.MetaclassDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        // Create symbol BEFORE entering scope
+        Symbol symbol = createSymbol(name, ElementType.METACLASS_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.METACLASS_DEFINITION);
+    }
+
+    @Override
+    public void exitMetaclassDefinition(SysMLv2Parser.MetaclassDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name != null) {
+            symbolTable.exitScope();
+        }
+    }
+
+    // ==================== KERML CLASSIFIER DEFINITIONS ====================
+
+    @Override
+    public void enterClassifierDefinition(SysMLv2Parser.ClassifierDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        // Create symbol BEFORE entering scope
+        Symbol symbol = createSymbol(name, ElementType.CLASSIFIER_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.CLASSIFIER_DEFINITION);
+    }
+
+    @Override
+    public void exitClassifierDefinition(SysMLv2Parser.ClassifierDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name != null) {
+            symbolTable.exitScope();
+        }
+    }
+
+    // ==================== KERML TYPE DEFINITIONS ====================
+
+    @Override
+    public void enterTypeDefinition(SysMLv2Parser.TypeDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        Symbol symbol = createSymbol(name, ElementType.TYPE_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+    }
+
+    // ==================== KERML FEATURE DEFINITIONS ====================
+
+    @Override
+    public void enterFeatureDefinition(SysMLv2Parser.FeatureDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        Symbol symbol = createSymbol(name, ElementType.FEATURE_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+    }
+
+    // ==================== KERML CONNECTOR DEFINITIONS ====================
+
+    @Override
+    public void enterConnectorDefinition(SysMLv2Parser.ConnectorDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name == null) {
+            return;
+        }
+
+        // Create symbol BEFORE entering scope
+        Symbol symbol = createSymbol(name, ElementType.CONNECTOR_DEFINITION, ctx);
+        defineSymbol(symbol, ctx);
+
+        symbolTable.enterScope(name, ScopeType.CONNECTOR_DEFINITION);
+    }
+
+    @Override
+    public void exitConnectorDefinition(SysMLv2Parser.ConnectorDefinitionContext ctx) {
+        String name = extractDeclarationName(ctx.declarationName());
+        if (name != null) {
+            symbolTable.exitScope();
+        }
     }
 
     // ==================== USAGES ====================
