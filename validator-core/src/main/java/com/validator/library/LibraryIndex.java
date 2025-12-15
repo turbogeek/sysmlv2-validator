@@ -25,10 +25,16 @@ public class LibraryIndex {
     private static final Pattern PACKAGE_PATTERN =
         Pattern.compile("(?:standard\\s+library\\s+)?package\\s+(\\w+(?:::\\w+)*)\\s*\\{");
 
-    // Pattern to extract type definitions (simplified)
+    // Pattern to extract type definitions (comprehensive)
     private static final Pattern TYPE_PATTERN = Pattern.compile(
-        "(?:abstract\\s+)?(?:datatype|class|part\\s+def|attribute\\s+def|"
-        + "requirement\\s+def)\\s+(\\w+)");
+        "(?:abstract\\s+)?(?:datatype|class|struct|assoc\\s+struct|"
+        + "part\\s+def|attribute\\s+def|requirement\\s+def|action\\s+def|"
+        + "state\\s+def|constraint\\s+def|calc\\s+def|analysis\\s+def|"
+        + "case\\s+def|verification\\s+def|view\\s+def|viewpoint\\s+def|"
+        + "connection\\s+def|interface\\s+def|port\\s+def|item\\s+def|"
+        + "allocation\\s+def|enum\\s+def|metadata\\s+def|flow\\s+def|"
+        + "rendering\\s+def|concern\\s+def|occurrence\\s+def|individual\\s+def|"
+        + "use\\s+case\\s+def)\\s+(\\w+)");
 
     // Map: Package name -> Set of defined elements
     private final Map<String, Set<String>> packageElements = new HashMap<>();
@@ -41,10 +47,20 @@ public class LibraryIndex {
 
     /**
      * Index all library files from configured paths.
+     * Indexes both standard SysML v2 library and optional DS_Views library.
      */
     public void indexLibraries(LibraryConfig config) {
+        // Index standard SysML v2 library
         for (Path libraryPath : config.getLibraryPaths()) {
             indexLibraryPath(libraryPath);
+        }
+
+        // Index optional DS_Views library (Cameo)
+        if (config.hasDSViewsPaths()) {
+            for (Path dsViewsPath : config.getDSViewsPaths()) {
+                LOGGER.info("Indexing DS_Views library: {}", dsViewsPath);
+                indexLibraryPath(dsViewsPath);
+            }
         }
 
         LOGGER.info("Library indexing complete: {} packages, {} elements total",
@@ -107,6 +123,23 @@ public class LibraryIndex {
         String packageName = packageMatcher.group(1);
         indexedPackages.add(packageName);
 
+        // Index nested package paths if qualified (e.g., SysML::Actions)
+        if (packageName.contains("::")) {
+            String[] parts = packageName.split("::");
+            StringBuilder path = new StringBuilder(parts[0]);
+            indexedPackages.add(parts[0]);
+
+            for (int i = 1; i < parts.length; i++) {
+                // Add parent package as having this child element
+                Set<String> parentElements = packageElements.computeIfAbsent(
+                    path.toString(), k -> new HashSet<>());
+                parentElements.add(parts[i]);
+
+                path.append("::").append(parts[i]);
+                indexedPackages.add(path.toString());
+            }
+        }
+
         // Extract type definitions
         Set<String> elements = packageElements.computeIfAbsent(packageName,
             k -> new HashSet<>());
@@ -138,7 +171,8 @@ public class LibraryIndex {
     }
 
     /**
-     * Check if a qualified name (Package::Element) is available.
+     * Check if a qualified name (Package::Element or Package::Sub::Element) is available.
+     * Supports deep path resolution for multi-level qualified names.
      */
     public boolean hasQualifiedName(String qualifiedName) {
         if (!qualifiedName.contains("::")) {
@@ -147,13 +181,77 @@ public class LibraryIndex {
         }
 
         String[] parts = qualifiedName.split("::");
+
         if (parts.length == 2) {
-            return hasElement(parts[0], parts[1]);
+            // Simple case: Package::Element
+            return hasElement(parts[0], parts[1]) || hasPackage(qualifiedName);
         }
 
-        // Handle multi-level: Foo::Bar::Baz
-        // For now, just check the root package exists
+        // Multi-level: SysML::Actions::Action::start (4+ levels)
+        // Strategy: Try progressively deeper package paths
+
+        // Strategy 1: Check if full path is a package
+        if (hasPackage(qualifiedName)) {
+            return true;
+        }
+
+        // Strategy 2: Try Package::Element combinations at each level
+        StringBuilder packagePath = new StringBuilder(parts[0]);
+        for (int i = 1; i < parts.length; i++) {
+            String element = parts[i];
+
+            // Check if current packagePath has this element
+            if (hasElement(packagePath.toString(), element)) {
+                // Found element - if this is the last part, we're done
+                if (i == parts.length - 1) {
+                    return true;
+                }
+                // Otherwise, continue checking nested elements
+                // For nested features like Action::start, we accept if parent exists
+                return true;
+            }
+
+            // Check if packagePath::element is itself a package
+            String nestedPackage = packagePath + "::" + element;
+            if (hasPackage(nestedPackage)) {
+                packagePath = new StringBuilder(nestedPackage);
+                continue;
+            }
+
+            // Check if this could be a nested element (feature of a type)
+            // For paths like SysML::Actions::Action::start
+            // where Action is a type and start is a feature
+            if (i > 1) {
+                // Accept if we've already found a valid intermediate element
+                return hasNestedElement(parts, i);
+            }
+        }
+
+        // Fallback: check if root package exists
         return hasPackage(parts[0]);
+    }
+
+    /**
+     * Check if nested element path exists.
+     * For: SysML::Actions::Action::start
+     * Verifies that intermediate elements exist.
+     */
+    private boolean hasNestedElement(String[] parts, int currentIndex) {
+        // Build all possible package::element combinations
+        for (int pkgEnd = 1; pkgEnd < parts.length; pkgEnd++) {
+            StringBuilder pkgPath = new StringBuilder(parts[0]);
+            for (int j = 1; j < pkgEnd; j++) {
+                pkgPath.append("::").append(parts[j]);
+            }
+
+            String elementName = parts[pkgEnd];
+            if (hasElement(pkgPath.toString(), elementName)) {
+                // Found a valid package::element combination
+                // Accept remaining parts as nested features
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

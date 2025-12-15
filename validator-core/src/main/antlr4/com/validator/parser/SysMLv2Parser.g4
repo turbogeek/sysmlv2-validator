@@ -1412,7 +1412,7 @@ multiplicativeExpression
     ;
 
 exponentiationExpression
-    : unaryExpression (DOUBLE_STAR unaryExpression)*
+    : unaryExpression ((DOUBLE_STAR | CARET) unaryExpression)*
     ;
 
 unaryExpression
