@@ -89,6 +89,20 @@ public class SysMLv2ValidatorImpl implements Validator {
 
         List<ValidationWarning> warnings = new ArrayList<>();
 
+        // Add warnings for line comments (they are not persisted to the model)
+        if (parseResult.hasLineComments()) {
+            for (SysMLv2ParserFacade.LineComment comment : parseResult.getLineComments()) {
+                warnings.add((ValidationWarning) new ValidationWarning.Builder()
+                    .filePath(file.getAbsolutePath())
+                    .line(comment.getLine())
+                    .column(comment.getColumn())
+                    .message("Single-line comment '//' is not persisted to the model. "
+                        + "Use block comment /* */ or doc keyword for persistent documentation.")
+                    .errorCode("LINE_COMMENT_NOT_PERSISTED")
+                    .build());
+            }
+        }
+
         // Perform semantic validation if enabled and syntax is valid
         if (semanticValidationEnabled && errors.isEmpty() && parseResult.getParseTree() != null) {
             LOGGER.debug("Performing semantic validation");
@@ -162,6 +176,20 @@ public class SysMLv2ValidatorImpl implements Validator {
             .toList();
 
         List<ValidationWarning> warnings = new ArrayList<>();
+
+        // Add warnings for line comments (they are not persisted to the model)
+        if (parseResult.hasLineComments()) {
+            for (SysMLv2ParserFacade.LineComment comment : parseResult.getLineComments()) {
+                warnings.add((ValidationWarning) new ValidationWarning.Builder()
+                    .filePath(fileName)
+                    .line(comment.getLine())
+                    .column(comment.getColumn())
+                    .message("Single-line comment '//' is not persisted to the model. "
+                        + "Use block comment /* */ or doc keyword for persistent documentation.")
+                    .errorCode("LINE_COMMENT_NOT_PERSISTED")
+                    .build());
+            }
+        }
 
         long validationTime = System.currentTimeMillis() - startTime;
 

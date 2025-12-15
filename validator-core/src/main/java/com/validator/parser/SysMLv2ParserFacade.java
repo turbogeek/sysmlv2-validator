@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +26,47 @@ public class SysMLv2ParserFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(SysMLv2ParserFacade.class);
 
     /**
+     * Represents a line comment found in the source.
+     * Note: Line comments (//) are NOT persisted to the model in SysML v2.
+     */
+    public static class LineComment {
+        private final int line;
+        private final int column;
+        private final String text;
+
+        public LineComment(int line, int column, String text) {
+            this.line = line;
+            this.column = column;
+            this.text = text;
+        }
+
+        public int getLine() {
+            return line;
+        }
+
+        public int getColumn() {
+            return column;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
+
+    /**
      * Parse result containing parse tree and any syntax errors.
      */
     public static class ParseResult {
         private final ParseTree parseTree;
         private final List<SyntaxError> syntaxErrors;
+        private final List<LineComment> lineComments;
         private final boolean success;
 
-        public ParseResult(ParseTree parseTree, List<SyntaxError> syntaxErrors) {
+        public ParseResult(ParseTree parseTree, List<SyntaxError> syntaxErrors,
+                          List<LineComment> lineComments) {
             this.parseTree = parseTree;
             this.syntaxErrors = new ArrayList<>(syntaxErrors);
+            this.lineComments = new ArrayList<>(lineComments);
             this.success = syntaxErrors.isEmpty();
         }
 
@@ -44,6 +76,14 @@ public class SysMLv2ParserFacade {
 
         public List<SyntaxError> getSyntaxErrors() {
             return new ArrayList<>(syntaxErrors);
+        }
+
+        public List<LineComment> getLineComments() {
+            return new ArrayList<>(lineComments);
+        }
+
+        public boolean hasLineComments() {
+            return !lineComments.isEmpty();
         }
 
         public boolean isSuccess() {
@@ -239,10 +279,37 @@ public class SysMLv2ParserFacade {
         ParseTree tree = parser.compilationUnit();
         long parseTime = System.currentTimeMillis() - startTime;
 
-        LOGGER.debug("Parsing completed in {}ms with {} errors",
-            parseTime, errorListener.getErrors().size());
+        // Collect line comments from channel 1
+        List<LineComment> lineComments = collectLineComments(tokens);
 
-        return new ParseResult(tree, errorListener.getErrors());
+        LOGGER.debug("Parsing completed in {}ms with {} errors, {} line comments",
+            parseTime, errorListener.getErrors().size(), lineComments.size());
+
+        return new ParseResult(tree, errorListener.getErrors(), lineComments);
+    }
+
+    /**
+     * Collect line comments from the hidden channel.
+     * Line comments are on channel 1 (not the default channel 0).
+     */
+    private List<LineComment> collectLineComments(CommonTokenStream tokens) {
+        List<LineComment> comments = new ArrayList<>();
+
+        // Fill the token stream to ensure all tokens are available
+        tokens.fill();
+
+        // Get all tokens from channel 1 (LINE_COMMENT channel)
+        for (Token token : tokens.getTokens()) {
+            if (token.getChannel() == 1 && token.getType() == SysMLv2Lexer.LINE_COMMENT) {
+                comments.add(new LineComment(
+                    token.getLine(),
+                    token.getCharPositionInLine(),
+                    token.getText()
+                ));
+            }
+        }
+
+        return comments;
     }
 
     /**

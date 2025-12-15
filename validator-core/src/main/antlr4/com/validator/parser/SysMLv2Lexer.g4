@@ -291,7 +291,8 @@ NULL_COALESCING: '??';
 // COMMENTS - Skip these tokens (MUST come before SLASH to match properly)
 // ============================================================================
 BLOCK_COMMENT: '/*' .*? '*/' -> skip;
-LINE_COMMENT: '//' ~[\r\n]* -> skip;
+// Note: LINE_COMMENT sent to channel 1 for warning detection (not persisted to model)
+LINE_COMMENT: '//' ~[\r\n]* -> channel(1);
 
 // ============================================================================
 // OPERATORS - Single character
