@@ -5,6 +5,9 @@ package MedicalDeviceStability {
 	 * tipping force calculations, IV fluid changes.
 	 */
 
+	private import ScalarValues::*;
+	private import TradeStudies::*;
+
 	// ============================================================================
 	// REQUIREMENTS
 	// ============================================================================
@@ -174,6 +177,8 @@ package MedicalDeviceStability {
 	analysis def StabilityAnalysis {
 		doc /* Analyze device stability */
 		subject device : MedicalDevice;
+		objective : MaximizeObjective;
+		return : Real;
 	}
 
 	// ============================================================================
@@ -217,9 +222,17 @@ package MedicalDeviceStability {
 		:>> baseRadius = 0.35;
 	}
 
-	analysis engineTradeStudy {
+	analysis engineTradeStudy : TradeStudy {
 		doc /* Trade study comparing wheel configurations */
-		subject device : MedicalDevice;
+		subject : WheelBase[1..*] = (wheelConfig1, wheelConfig2, wheelConfig3);
+		objective : MaximizeObjective;
+
+		calc :>> evaluationFunction {
+			in part : WheelBase;
+			return : Real = part.baseRadius * 10.0;
+		}
+
+		return part : WheelBase;
 	}
 
 	// ============================================================================
@@ -263,12 +276,19 @@ package MedicalDeviceStability {
 		doc /* Engineering viewpoint for stability */
 	}
 
+	rendering def StabilityRendering {
+		doc /* Rendering for stability visualization */
+	}
+
 	view def StabilityView {
 		doc /* Visual representation of stability */
+
+		viewpoint vp : StabilityViewpoint;
 
 		view {
 			expose testDevice1;
 			expose testDevice2;
+			render rendering r : StabilityRendering;
 		}
 	}
 
