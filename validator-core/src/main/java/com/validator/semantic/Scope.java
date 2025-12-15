@@ -164,6 +164,19 @@ public class Scope {
         return Collections.unmodifiableList(imports);
     }
 
+    /**
+     * Get all import statements from this scope and all child scopes.
+     *
+     * @return list of all imports (flattened)
+     */
+    public List<ImportStatement> getAllImports() {
+        List<ImportStatement> allImports = new ArrayList<>(imports);
+        for (Scope child : children) {
+            allImports.addAll(child.getAllImports());
+        }
+        return allImports;
+    }
+
     @Override
     public String toString() {
         return String.format("Scope{name='%s', type=%s, symbols=%d, children=%d}",

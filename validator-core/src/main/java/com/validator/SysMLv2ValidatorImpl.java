@@ -119,8 +119,13 @@ public class SysMLv2ValidatorImpl implements Validator {
                     .build());
             }
 
-            LOGGER.debug("Semantic validation found {} errors, {} warnings",
-                semanticErrors.size(), semanticValidator.getWarnings().size());
+            // Add lint warnings
+            warnings.addAll(semanticValidator.getLintWarnings());
+
+            LOGGER.debug("Semantic validation found {} errors, {} warnings (including {} lint)",
+                semanticErrors.size(),
+                semanticValidator.getWarnings().size() + semanticValidator.getLintWarnings().size(),
+                semanticValidator.getLintWarnings().size());
         } else if (!semanticValidationEnabled) {
             warnings.add((ValidationWarning) new ValidationWarning.Builder()
                 .message("Semantic validation disabled - "

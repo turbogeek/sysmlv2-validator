@@ -4,6 +4,9 @@ import com.validator.SysMLv2ValidatorImpl;
 import com.validator.ValidationError;
 import com.validator.ValidationResult;
 import com.validator.Validator;
+import com.validator.refactor.RefactoringEngine;
+import com.validator.refactor.RefactoringEngine.RefactoringPlan;
+import com.validator.refactor.RefactoringEngine.ApplyResult;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
@@ -13,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.Callable;
 
 /**
@@ -67,6 +71,30 @@ public class ValidatorCLI implements Callable<Integer> {
         description = "Verbose output"
     )
     private boolean verbose = false;
+
+    @Option(
+        names = {"--refactor-imports"},
+        description = "Analyze and suggest import refactorings (wildcard to specific)"
+    )
+    private boolean refactorImports = false;
+
+    @Option(
+        names = {"--apply-refactoring", "-y"},
+        description = "Automatically apply import refactorings without prompting"
+    )
+    private boolean applyRefactoring = false;
+
+    @Option(
+        names = {"--refactor-format"},
+        description = "Output format for refactoring suggestions: human, json, lsp, monaco (default: human)"
+    )
+    private String refactorFormat = "human";
+
+    @Option(
+        names = {"--error-free-only"},
+        description = "Only refactor files without parse errors (default: true)"
+    )
+    private boolean errorFreeOnly = true;
 
     @Override
     public Integer call() throws Exception {
@@ -136,6 +164,21 @@ public class ValidatorCLI implements Callable<Integer> {
         System.out.println("Total warnings: " + totalWarnings);
         System.out.println();
 
+        // Handle import refactoring if requested
+        if (refactorImports) {
+            System.out.println();
+            System.out.println("========================================");
+            System.out.println("IMPORT REFACTORING ANALYSIS");
+            System.out.println("========================================");
+            System.out.println();
+
+            int refactoredFiles = performImportRefactoring(filesToValidate);
+            if (refactoredFiles > 0) {
+                System.out.println();
+                System.out.println("Refactored " + refactoredFiles + " file(s)");
+            }
+        }
+
         if (totalErrors == 0) {
             System.out.println("✓ VALIDATION PASSED");
             return 0;
@@ -143,6 +186,65 @@ public class ValidatorCLI implements Callable<Integer> {
             System.out.println("✗ VALIDATION FAILED");
             return 1;
         }
+    }
+
+    private int performImportRefactoring(List<File> filesToRefactor) {
+        RefactoringEngine engine = new RefactoringEngine();
+        engine.setErrorFreeOnly(errorFreeOnly);
+
+        // Set output format
+        switch (refactorFormat.toLowerCase()) {
+            case "json":
+                engine.setOutputFormat(RefactoringEngine.OutputFormat.JSON);
+                break;
+            case "lsp":
+                engine.setOutputFormat(RefactoringEngine.OutputFormat.LSP);
+                break;
+            case "monaco":
+                engine.setOutputFormat(RefactoringEngine.OutputFormat.MONACO);
+                break;
+            default:
+                engine.setOutputFormat(RefactoringEngine.OutputFormat.HUMAN);
+        }
+
+        int refactoredCount = 0;
+        Scanner scanner = applyRefactoring ? null : new Scanner(System.in);
+
+        for (File file : filesToRefactor) {
+            if (!file.getName().endsWith(".sysml") && !file.getName().endsWith(".kerml")) {
+                continue;
+            }
+
+            RefactoringPlan plan = engine.analyze(file.getAbsolutePath());
+
+            // Output the refactoring plan
+            String output = engine.formatOutput(plan);
+            System.out.println(output);
+
+            if (plan.canApply()) {
+                boolean shouldApply = applyRefactoring;
+
+                if (!applyRefactoring && scanner != null) {
+                    System.out.print("Apply these refactorings to " + file.getName() + "? [y/N] ");
+                    String response = scanner.nextLine().trim().toLowerCase();
+                    shouldApply = response.equals("y") || response.equals("yes");
+                }
+
+                if (shouldApply) {
+                    ApplyResult result = engine.apply(plan);
+                    System.out.println(result);
+                    if (result.isSuccess() && result.getAppliedCount() > 0) {
+                        refactoredCount++;
+                    }
+                }
+            }
+        }
+
+        if (scanner != null) {
+            scanner.close();
+        }
+
+        return refactoredCount;
     }
 
     private void printResult(ValidationResult result) {

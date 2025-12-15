@@ -23,6 +23,12 @@ public class Symbol {
     private final List<Symbol> redefinitions = new ArrayList<>();    // :>>
     private final List<Symbol> subsettings = new ArrayList<>();      // subsets
 
+    // Reference tracking for lint analysis
+    private final List<Location> references = new ArrayList<>();
+    private boolean usedAsType = false;
+    private boolean usedInExpression = false;
+    private boolean usedInImport = false;
+
     // AST node attachment (for back-reference to parse tree)
     private Object astNode;
 
@@ -166,6 +172,123 @@ public class Symbol {
      */
     public void setAstNode(Object astNode) {
         this.astNode = astNode;
+    }
+
+    // =========================================================================
+    // Reference Tracking for Lint Analysis
+    // =========================================================================
+
+    /**
+     * Records a reference to this symbol from another location.
+     *
+     * @param location the location where this symbol is referenced
+     */
+    public void addReference(Location location) {
+        if (location != null) {
+            references.add(location);
+        }
+    }
+
+    /**
+     * Gets all references to this symbol.
+     *
+     * @return unmodifiable list of reference locations
+     */
+    public List<Location> getReferences() {
+        return Collections.unmodifiableList(references);
+    }
+
+    /**
+     * Gets the number of times this symbol is referenced.
+     *
+     * @return the reference count
+     */
+    public int getReferenceCount() {
+        return references.size();
+    }
+
+    /**
+     * Checks if this symbol is unused (no references).
+     *
+     * @return true if this symbol has no references
+     */
+    public boolean isUnused() {
+        return references.isEmpty() && !usedAsType && !usedInExpression && !usedInImport;
+    }
+
+    /**
+     * Checks if this symbol has any references.
+     *
+     * @return true if this symbol is referenced at least once
+     */
+    public boolean isReferenced() {
+        return !isUnused();
+    }
+
+    /**
+     * Marks this symbol as used as a type (e.g., part x : TypeName).
+     */
+    public void markUsedAsType() {
+        this.usedAsType = true;
+    }
+
+    /**
+     * Checks if this symbol was used as a type.
+     *
+     * @return true if used as a type
+     */
+    public boolean isUsedAsType() {
+        return usedAsType;
+    }
+
+    /**
+     * Marks this symbol as used in an expression.
+     */
+    public void markUsedInExpression() {
+        this.usedInExpression = true;
+    }
+
+    /**
+     * Checks if this symbol was used in an expression.
+     *
+     * @return true if used in expression
+     */
+    public boolean isUsedInExpression() {
+        return usedInExpression;
+    }
+
+    /**
+     * Marks this symbol as used (imported) by another file.
+     */
+    public void markUsedInImport() {
+        this.usedInImport = true;
+    }
+
+    /**
+     * Checks if this symbol was used in an import.
+     *
+     * @return true if used in import
+     */
+    public boolean isUsedInImport() {
+        return usedInImport;
+    }
+
+    /**
+     * Checks if this symbol is a definition type (part def, action def, etc.).
+     *
+     * @return true if this is a definition
+     */
+    public boolean isDefinition() {
+        return type != null && type.name().contains("DEFINITION");
+    }
+
+    /**
+     * Checks if this symbol is a usage type (part, action, attribute, etc.).
+     *
+     * @return true if this is a usage
+     */
+    public boolean isUsage() {
+        return type != null && type.name().contains("USAGE");
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.validator.semantic;
 
+import com.validator.ast.Location;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class ImportStatement {
     private final boolean isPublic;
     private final String alias;
     private final Map<String, Symbol> importedSymbols = new LinkedHashMap<>();
+    private Location location;
 
     /**
      * Create an import statement.
@@ -115,6 +117,32 @@ public class ImportStatement {
      */
     public boolean isWildcard() {
         return importType == ImportType.WILDCARD || importPath.endsWith("::*");
+    }
+
+    /**
+     * Check if this is a recursive wildcard import (::*::* or **).
+     * Recursive wildcards import all nested packages as well.
+     */
+    public boolean isRecursiveWildcard() {
+        return importPath.contains("::*::*") || importPath.contains("::**");
+    }
+
+    /**
+     * Get the source location of this import statement.
+     *
+     * @return the location, or null if not set
+     */
+    public Location getLocation() {
+        return location;
+    }
+
+    /**
+     * Set the source location of this import statement.
+     *
+     * @param location the source location
+     */
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     /**
