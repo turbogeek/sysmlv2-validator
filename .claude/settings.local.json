@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn -pl validator-core exec:java -Dexec.mainClass=com.validator.Main -Dexec.args=\"examples/16_medical_device_stability_v2.sysml\")",
+      "Bash(where mvn:*)",
+      "Bash(dir /b *.bat *.cmd)",
+      "Bash(cat:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(./build-with-portable-maven.cmd clean compile)",
+      "Bash(./build-with-portable-maven.cmd clean test)",
+      "Bash(./build-with-portable-maven.cmd compile test)",
+      "Bash(./build-with-portable-maven.cmd compile test -DskipCheckstyle=true)",
+      "Bash(./build-with-portable-maven.cmd test -Dtest=SymbolTest,ScopeTest,SymbolTableTest,ImportStatementTest -DskipCheckstyle=true)",
+      "Bash(./build-with-portable-maven.cmd compile -DskipTests)",
+      "Bash(.maven/apache-maven-3.9.6/bin/mvn.cmd:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd warning for single-line comments not persisted to model\n\n- Lexer: Route LINE_COMMENT tokens to channel 1 instead of skip\n- ParserFacade: Add LineComment class and collection from hidden channel\n- SysMLv2ValidatorImpl: Generate warnings for detected line comments\n- Fix StandardLibraryManager: Use line=1 (not 0) to satisfy Location validation\n\nThe ''//'' single-line comments in SysML v2 are not persisted to the model.\nUsers should use block comments /* */ or doc keyword for persistent docs.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\nPhase 2: Enhance semantic validation infrastructure\n\nAdds new semantic analysis components:\n- ModelIndexer: Cross-file model indexing\n- KparReader: Read .kpar library archives\n- ImportResolver, ImportStatement, ImportType: Import handling\n- Symbol, SymbolTable, SymbolTableBuilder: Symbol management\n- Scope, ScopeType, Visibility: Scoping rules\n- ElementType: SysML v2 element type enumeration\n- KparLibraryProvider, StandardLibraryProvider: Library suggestions\n\nUpdates existing components:\n- LibraryConfig/LibraryIndex: Enhanced library indexing\n- SpellingSuggestionEngine: Improved suggestion support\n- SysMLv2Parser.g4: Grammar refinements\n- DS_Views stub for Dassault views support\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(grep:*)",
+      "Bash(mvn -q exec:java -pl validator-core -Dexec.mainClass=\"com.validator.Main\" -Dexec.args=\"test-suite/CheatSheet/pastableExamples/Actions_1ActionDefinition.sysml\")",
+      "Bash(\"C:\\Program Files\\Maven\\apache-maven-3.9.6\\bin\\mvn.cmd\" -q exec:java -pl validator-core -Dexec.mainClass=\"com.validator.Main\" -Dexec.args=\"test-suite/CheatSheet/pastableExamples/Actions_1ActionDefinition.sysml\")",
+      "Bash(ls:*)",
+      "Bash(git clone:*)",
+      "Bash(./build-with-portable-maven.cmd test:*)",
+      "Bash(find:*)",
+      "Bash(./build-with-portable-maven.cmd compile -DskipCheckstyle=true)",
+      "Bash(./build-with-portable-maven.cmd compile:*)",
+      "Bash(wc:*)",
+      "Bash(java:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
