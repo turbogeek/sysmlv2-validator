@@ -3,7 +3,6 @@ package com.validator.semantic;
 import com.validator.ValidationError;
 import com.validator.ValidationWarning;
 import com.validator.library.ImportResolver;
-import com.validator.library.LibraryIndex;
 import com.validator.lint.LintAnalyzer;
 import com.validator.lint.LintConfig;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -29,16 +28,24 @@ public class SemanticValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SemanticValidator.class);
 
     private final String filePath;
-    private final LibraryIndex libraryIndex;
+    private final StandardLibraryManager standardLibraryManager;
+    private final ImportResolver importResolver;
     private final List<ValidationError> errors = new ArrayList<>();
     private final List<String> warnings = new ArrayList<>();
     private final List<ValidationWarning> lintWarnings = new ArrayList<>();
     private boolean lintEnabled = true;
     private LintConfig lintConfig;
 
-    public SemanticValidator(String filePath, LibraryIndex libraryIndex) {
+    /**
+     * Constructor for semantic validator.
+     *
+     * @param filePath the path of the file being validated
+     * @param standardLibraryManager the standard library manager for semantic resolution
+     */
+    public SemanticValidator(String filePath, StandardLibraryManager standardLibraryManager) {
         this.filePath = filePath;
-        this.libraryIndex = libraryIndex;
+        this.standardLibraryManager = standardLibraryManager;
+        this.importResolver = new ImportResolver(standardLibraryManager);
         // Load lint config for the file's directory
         try {
             Path path = Paths.get(filePath);
@@ -76,9 +83,6 @@ public class SemanticValidator {
     public List<ValidationError> validate(ParseTree tree) {
         LOGGER.debug("Starting semantic validation for: {}", filePath);
 
-        // Create import resolver
-        ImportResolver importResolver = new ImportResolver(libraryIndex);
-
         // Create listener for semantic validation
         SemanticValidationListener listener =
             new SemanticValidationListener(filePath, importResolver, errors, warnings);
@@ -112,7 +116,7 @@ public class SemanticValidator {
 
         try {
             // Build symbol table
-            SymbolTable symbolTable = SymbolTableBuilder.build(tree, filePath);
+            SymbolTable symbolTable = SymbolTableBuilder.build(tree, filePath, standardLibraryManager);
 
             // Track references (second pass)
             ReferenceTracker.track(tree, symbolTable, filePath);

@@ -152,17 +152,17 @@ public class RefactoringEdit {
      */
     public String toJson() {
         return String.format(
-            "{\n" +
-            "  \"file\": \"%s\",\n" +
-            "  \"range\": {\n" +
-            "    \"start\": { \"line\": %d, \"column\": %d },\n" +
-            "    \"end\": { \"line\": %d, \"column\": %d }\n" +
-            "  },\n" +
-            "  \"oldText\": \"%s\",\n" +
-            "  \"newText\": \"%s\",\n" +
-            "  \"description\": \"%s\",\n" +
-            "  \"errorCode\": \"%s\"\n" +
-            "}",
+            "{\n"
+            + "  \"file\": \"%s\",\n"
+            + "  \"range\": {\n"
+            + "    \"start\": { \"line\": %d, \"column\": %d },\n"
+            + "    \"end\": { \"line\": %d, \"column\": %d }\n"
+            + "  },\n"
+            + "  \"oldText\": \"%s\",\n"
+            + "  \"newText\": \"%s\",\n"
+            + "  \"description\": \"%s\",\n"
+            + "  \"errorCode\": \"%s\"\n"
+            + "}",
             escapeJson(filePath),
             startLine, startColumn,
             endLine, endColumn,
@@ -181,15 +181,15 @@ public class RefactoringEdit {
     public String toMonacoEdit() {
         // Monaco uses 0-based lines, 0-based columns
         return String.format(
-            "{\n" +
-            "  \"range\": {\n" +
-            "    \"startLineNumber\": %d,\n" +
-            "    \"startColumn\": %d,\n" +
-            "    \"endLineNumber\": %d,\n" +
-            "    \"endColumn\": %d\n" +
-            "  },\n" +
-            "  \"text\": \"%s\"\n" +
-            "}",
+            "{\n"
+            + "  \"range\": {\n"
+            + "    \"startLineNumber\": %d,\n"
+            + "    \"startColumn\": %d,\n"
+            + "    \"endLineNumber\": %d,\n"
+            + "    \"endColumn\": %d\n"
+            + "  },\n"
+            + "  \"text\": \"%s\"\n"
+            + "}",
             startLine, startColumn,
             endLine, endColumn,
             escapeJson(newText)
@@ -205,13 +205,13 @@ public class RefactoringEdit {
     public String toLspEdit() {
         // LSP uses 0-based positions
         return String.format(
-            "{\n" +
-            "  \"range\": {\n" +
-            "    \"start\": { \"line\": %d, \"character\": %d },\n" +
-            "    \"end\": { \"line\": %d, \"character\": %d }\n" +
-            "  },\n" +
-            "  \"newText\": \"%s\"\n" +
-            "}",
+            "{\n"
+            + "  \"range\": {\n"
+            + "    \"start\": { \"line\": %d, \"character\": %d },\n"
+            + "    \"end\": { \"line\": %d, \"character\": %d }\n"
+            + "  },\n"
+            + "  \"newText\": \"%s\"\n"
+            + "}",
             startLine - 1, startColumn - 1,
             endLine - 1, endColumn - 1,
             escapeJson(newText)
@@ -277,48 +277,48 @@ public class RefactoringEdit {
         private String description = "";
         private String errorCode = "";
 
-        public Builder filePath(String filePath) {
-            this.filePath = filePath;
+        public Builder filePath(String path) {
+            this.filePath = path;
             return this;
         }
 
-        public Builder startLine(int startLine) {
-            this.startLine = startLine;
+        public Builder startLine(int sl) {
+            this.startLine = sl;
             return this;
         }
 
-        public Builder startColumn(int startColumn) {
-            this.startColumn = startColumn;
+        public Builder startColumn(int sc) {
+            this.startColumn = sc;
             return this;
         }
 
-        public Builder endLine(int endLine) {
-            this.endLine = endLine;
+        public Builder endLine(int el) {
+            this.endLine = el;
             return this;
         }
 
-        public Builder endColumn(int endColumn) {
-            this.endColumn = endColumn;
+        public Builder endColumn(int ec) {
+            this.endColumn = ec;
             return this;
         }
 
-        public Builder oldText(String oldText) {
-            this.oldText = oldText;
+        public Builder oldText(String oldT) {
+            this.oldText = oldT;
             return this;
         }
 
-        public Builder newText(String newText) {
-            this.newText = newText;
+        public Builder newText(String newT) {
+            this.newText = newT;
             return this;
         }
 
-        public Builder description(String description) {
-            this.description = description;
+        public Builder description(String desc) {
+            this.description = desc;
             return this;
         }
 
-        public Builder errorCode(String errorCode) {
-            this.errorCode = errorCode;
+        public Builder errorCode(String err) {
+            this.errorCode = err;
             return this;
         }
 

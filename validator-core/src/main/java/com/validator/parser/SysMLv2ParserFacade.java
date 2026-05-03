@@ -324,6 +324,38 @@ public class SysMLv2ParserFacade {
     }
 
     /**
+     * Extracts the original text for a parse tree node from the character stream.
+     * This preserves whitespace which is normally lost because the lexer skips it.
+     *
+     * @param ctx the parse tree node
+     * @return the original text including skipped whitespace
+     */
+    public static String getOriginalText(ParseTree ctx) {
+        if (ctx instanceof org.antlr.v4.runtime.ParserRuleContext) {
+            org.antlr.v4.runtime.ParserRuleContext ruleCtx = (org.antlr.v4.runtime.ParserRuleContext) ctx;
+            Token start = ruleCtx.getStart();
+            Token stop = ruleCtx.getStop();
+            
+            if (start != null && stop != null) {
+                int startIndex = start.getStartIndex();
+                int stopIndex = stop.getStopIndex();
+                CharStream input = start.getInputStream();
+                
+                if (startIndex >= 0 && stopIndex >= startIndex && input != null) {
+                    return input.getText(org.antlr.v4.runtime.misc.Interval.of(startIndex, stopIndex));
+                }
+            }
+        } else if (ctx instanceof org.antlr.v4.runtime.tree.TerminalNode) {
+            Token symbol = ((org.antlr.v4.runtime.tree.TerminalNode) ctx).getSymbol();
+            if (symbol != null) {
+                return symbol.getText();
+            }
+        }
+        
+        return ctx.getText();
+    }
+
+    /**
      * Check if a file is a SysML v2 file based on extension.
      *
      * @param file the file to check

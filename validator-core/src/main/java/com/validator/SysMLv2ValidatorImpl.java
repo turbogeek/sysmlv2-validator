@@ -1,10 +1,12 @@
 package com.validator;
 
 import com.validator.library.LibraryConfig;
-import com.validator.library.LibraryIndex;
+import com.validator.library.LibraryLoader;
+import com.validator.library.LibraryCache;
 import com.validator.parser.SysMLv2ParserFacade;
 import com.validator.parser.SysMLv2ParserFacade.ParseResult;
 import com.validator.semantic.SemanticValidator;
+import com.validator.semantic.StandardLibraryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,22 +28,27 @@ public class SysMLv2ValidatorImpl implements Validator {
     private static final String NAME = "SysML v2 Semantic Validator";
 
     private final SysMLv2ParserFacade parserFacade;
-    private final LibraryIndex libraryIndex;
+    private final LibraryCache libraryCache;
+    private final LibraryLoader libraryLoader;
+    private final StandardLibraryManager standardLibraryManager;
     private final boolean semanticValidationEnabled;
 
     public SysMLv2ValidatorImpl() {
         this.parserFacade = new SysMLv2ParserFacade();
 
-        // Initialize library index
+        // Initialize standard library manager and library loader
         LibraryConfig libraryConfig = new LibraryConfig();
-        this.libraryIndex = new LibraryIndex();
+        this.libraryCache = new LibraryCache();
+        this.standardLibraryManager = new StandardLibraryManager();
+        this.standardLibraryManager.initializeBuiltins();
+        this.libraryLoader = new LibraryLoader(this.libraryCache, this.standardLibraryManager);
 
-        // Index libraries if available
+        // Load libraries if paths are configured
         if (libraryConfig.hasLibraryPaths()) {
-            libraryIndex.indexLibraries(libraryConfig);
+            this.libraryLoader.loadLibraries(libraryConfig);
             this.semanticValidationEnabled = true;
-            LOGGER.info("Semantic validation enabled with {} indexed packages",
-                libraryIndex.getIndexedPackages().size());
+            LOGGER.info("Semantic validation enabled with {} library symbols loaded",
+                this.standardLibraryManager.getStats().getSymbolCount());
         } else {
             this.semanticValidationEnabled = false;
             LOGGER.warn("Semantic validation disabled - no library paths configured");
@@ -107,7 +114,7 @@ public class SysMLv2ValidatorImpl implements Validator {
         if (semanticValidationEnabled && errors.isEmpty() && parseResult.getParseTree() != null) {
             LOGGER.debug("Performing semantic validation");
             SemanticValidator semanticValidator =
-                new SemanticValidator(file.getAbsolutePath(), libraryIndex);
+                new SemanticValidator(file.getAbsolutePath(), standardLibraryManager);
             List<ValidationError> semanticErrors =
                 semanticValidator.validate(parseResult.getParseTree());
             errors.addAll(semanticErrors);

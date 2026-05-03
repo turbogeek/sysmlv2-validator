@@ -493,9 +493,14 @@ public class SymbolTableBuilderTest {
         SymbolTable symbolTable = SymbolTableBuilder.build(parseTree, "empty.sysml");
         assertNotNull(symbolTable);
 
-        // Should have global scope but no symbols
+        // Should have global scope and standard library symbols, but no user-defined symbols
         Collection<Symbol> symbols = symbolTable.getAllSymbols();
-        assertTrue(symbols.isEmpty() || symbols.size() == 0);
+        assertFalse(symbols.isEmpty(), "Should contain standard library symbols");
+        
+        // Ensure no user-defined symbols were added (e.g., standard library symbols should have standard location)
+        boolean hasUserSymbols = symbols.stream()
+            .anyMatch(s -> s.getLocation() != null && "empty.sysml".equals(s.getLocation().getFileName()));
+        assertFalse(hasUserSymbols, "Should not contain any user-defined symbols");
     }
 
     @Test

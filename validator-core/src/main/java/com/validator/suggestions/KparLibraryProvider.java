@@ -1,66 +1,45 @@
 package com.validator.suggestions;
 
-import com.validator.library.KparReader;
+import com.validator.semantic.StandardLibraryManager;
 import com.validator.semantic.Symbol;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
- * Provides symbols from KPAR (KerML/SysML Package Archive) files for spelling suggestions.
- * Can be loaded from one or more KPAR files or populated programmatically.
+ * Provides symbols from parsed libraries for spelling suggestions.
+ * Can be loaded from the StandardLibraryManager or populated programmatically.
  */
 public final class KparLibraryProvider implements SuggestionProvider {
 
     private final Set<String> candidates = new HashSet<>();
-    private final KparReader reader = new KparReader();
 
     /**
-     * Create an empty KPAR library provider.
+     * Create an empty library provider.
      */
     public KparLibraryProvider() {
     }
 
     /**
-     * Create a provider and load symbols from a KPAR file.
+     * Create a provider and load symbols from a StandardLibraryManager.
      *
-     * @param kparFile the KPAR file to load
+     * @param manager the manager containing parsed symbols
      */
-    public KparLibraryProvider(File kparFile) {
-        loadKparFile(kparFile);
+    public KparLibraryProvider(StandardLibraryManager manager) {
+        loadFromManager(manager);
     }
 
     /**
-     * Create a provider and load symbols from multiple KPAR files.
+     * Load symbols from a StandardLibraryManager.
      *
-     * @param kparFiles the KPAR files to load
+     * @param manager the manager to load symbols from
      */
-    public KparLibraryProvider(List<File> kparFiles) {
-        for (File file : kparFiles) {
-            loadKparFile(file);
-        }
-    }
-
-    /**
-     * Load symbols from a KPAR file.
-     *
-     * @param kparFile the KPAR file to load
-     */
-    public void loadKparFile(File kparFile) {
-        try {
-            KparReader.KparReadResult result = reader.read(kparFile);
-            for (Symbol symbol : result.getSymbols()) {
-                candidates.add(symbol.getName());
-            }
-        } catch (IOException e) {
-            // Log and continue - don't fail on individual file errors
-            System.err.println("Warning: Could not load KPAR file: "
-                + kparFile.getName() + " - " + e.getMessage());
+    public void loadFromManager(StandardLibraryManager manager) {
+        if (manager == null) return;
+        for (Symbol symbol : manager.getAllSymbols()) {
+            candidates.add(symbol.getName());
         }
     }
 

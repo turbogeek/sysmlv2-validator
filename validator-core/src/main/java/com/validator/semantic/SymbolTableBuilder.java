@@ -22,9 +22,39 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
     private final String filePath;
     private Visibility currentVisibility = Visibility.PUBLIC;
 
-    private SymbolTableBuilder(String filePath) {
-        this.symbolTable = new SymbolTable();
+    private SymbolTableBuilder(String filePath, StandardLibraryManager stdLib) {
+        this.symbolTable = new SymbolTable(stdLib);
         this.filePath = filePath != null ? filePath : "<unknown>";
+    }
+
+    /**
+     * Build a symbol table from a parse tree with a specific standard library manager.
+     *
+     * @param tree the parse tree
+     * @param filePath the source file path (for error reporting)
+     * @param stdLib the standard library manager
+     * @return the built symbol table
+     */
+    public static SymbolTable build(ParseTree tree, String filePath, StandardLibraryManager stdLib) {
+        Objects.requireNonNull(tree, "Parse tree cannot be null");
+        Objects.requireNonNull(stdLib, "StandardLibraryManager cannot be null");
+        
+        SymbolTableBuilder builder = new SymbolTableBuilder(filePath, stdLib);
+        
+        ParseTreeWalker walker = new ParseTreeWalker();
+
+        try {
+            walker.walk(builder, tree);
+            
+            // Build the relationship graph for deep namespace resolution
+            builder.symbolTable.getRelationshipGraph().buildFromSymbolTable();
+        } catch (Exception e) {
+            LOGGER.warn("Error building symbol table: {}", e.getMessage());
+        }
+
+        LOGGER.info("Symbol table built: {} symbols from {}",
+            builder.symbolTable.getAllSymbols().size(), filePath);
+        return builder.symbolTable;
     }
 
     /**
@@ -35,20 +65,9 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
      * @return the built symbol table
      */
     public static SymbolTable build(ParseTree tree, String filePath) {
-        Objects.requireNonNull(tree, "Parse tree cannot be null");
-
-        SymbolTableBuilder builder = new SymbolTableBuilder(filePath);
-        ParseTreeWalker walker = new ParseTreeWalker();
-
-        try {
-            walker.walk(builder, tree);
-        } catch (Exception e) {
-            LOGGER.warn("Error building symbol table: {}", e.getMessage());
-        }
-
-        LOGGER.info("Symbol table built: {} symbols from {}",
-            builder.symbolTable.getAllSymbols().size(), filePath);
-        return builder.symbolTable;
+        StandardLibraryManager stdLib = new StandardLibraryManager();
+        stdLib.initializeBuiltins();
+        return build(tree, filePath, stdLib);
     }
 
     // ==================== VISIBILITY ====================

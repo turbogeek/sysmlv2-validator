@@ -270,13 +270,13 @@ public class UsageWithoutDefinitionRule implements LintRule {
 
         private boolean isStandardLibraryType(String typeName) {
             // Common standard library types
-            return typeName.startsWith("ISQ::") ||
-                   typeName.startsWith("SI::") ||
-                   typeName.startsWith("USCustomary::") ||
-                   typeName.startsWith("ScalarValues::") ||
-                   typeName.startsWith("Base::") ||
-                   typeName.startsWith("Quantities::") ||
-                   typeName.startsWith("KerML::");
+            return typeName.startsWith("ISQ::")
+                   || typeName.startsWith("SI::")
+                   || typeName.startsWith("USCustomary::")
+                   || typeName.startsWith("ScalarValues::")
+                   || typeName.startsWith("Base::")
+                   || typeName.startsWith("Quantities::")
+                   || typeName.startsWith("KerML::");
         }
 
         private boolean isBuiltinType(String typeName) {

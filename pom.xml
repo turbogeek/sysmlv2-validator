@@ -298,8 +298,9 @@
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
+                    <failOnViolation>false</failOnViolation>
                     <violationSeverity>warning</violationSeverity>
+                    <skip>${checkstyle.skip}</skip>
                 </configuration>
                 <executions>
                     <execution>

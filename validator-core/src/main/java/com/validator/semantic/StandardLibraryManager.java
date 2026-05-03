@@ -58,6 +58,74 @@ public final class StandardLibraryManager {
         initializeTradeStudies();
     }
 
+    /**
+     * Load external library symbols from a built LibraryCacheData.
+     * This registers all parsed library packages and elements into the semantic scope,
+     * allowing RelationshipGraph to navigate them.
+     *
+     * @param data the cached library data containing external symbols
+     */
+    public void loadFromCache(com.validator.library.LibraryCacheData data) {
+        if (data == null || data.getSymbols() == null) {
+            return;
+        }
+
+        // First pass: register all symbols
+        for (com.validator.library.LibraryCacheData.CachedSymbol cs : data.getSymbols()) {
+            Symbol symbol = new Symbol(cs.getName(), cs.getQualifiedName(), cs.getType(), null, cs.getVisibility());
+            registerSymbolInstance(symbol);
+        }
+
+        // Second pass: wire relationships
+        for (com.validator.library.LibraryCacheData.CachedSymbol cs : data.getSymbols()) {
+            Symbol symbol = resolveSymbol(cs.getQualifiedName());
+            if (symbol != null) {
+                for (String specQn : cs.getSpecializations()) {
+                    Symbol parent = resolveSymbol(specQn);
+                    if (parent != null) symbol.addSpecialization(parent);
+                }
+                for (String redefQn : cs.getRedefinitions()) {
+                    Symbol redef = resolveSymbol(redefQn);
+                    if (redef != null) symbol.addRedefinition(redef);
+                }
+                for (String subsetQn : cs.getSubsettings()) {
+                    Symbol subset = resolveSymbol(subsetQn);
+                    if (subset != null) symbol.addSubsetting(subset);
+                }
+            }
+        }
+    }
+
+    /**
+     * Register a pre-built symbol instance directly.
+     */
+    public void registerSymbolInstance(Symbol symbol) {
+        if (symbol == null) return;
+        symbols.put(symbol.getQualifiedName(), symbol);
+        unqualifiedLookup.put(symbol.getName(), symbol);
+        
+        String packageName = extractPackageName(symbol.getQualifiedName());
+        packageSymbols.computeIfAbsent(packageName, k -> new ArrayList<>()).add(symbol);
+        
+        // Also ensure parent is registered just in case (useful for auto-generating hierarchy)
+        int lastColonIndex = symbol.getQualifiedName().lastIndexOf("::");
+        if (lastColonIndex > 0) {
+            String parentQn = symbol.getQualifiedName().substring(0, lastColonIndex);
+            if (!symbols.containsKey(parentQn)) {
+                String parentName = extractSimpleName(parentQn);
+                registerSymbol(parentName, parentQn, ElementType.PACKAGE);
+            }
+        }
+    }
+
+    private String extractSimpleName(String qualifiedName) {
+        int lastSep = qualifiedName.lastIndexOf("::");
+        if (lastSep > 0) {
+            return qualifiedName.substring(lastSep + 2);
+        }
+        return qualifiedName;
+    }
+
     private void initializePrimitiveTypes() {
         for (String type : PRIMITIVE_TYPES) {
             registerSymbol(type, "ScalarValues::" + type, ElementType.DATA_TYPE);
@@ -146,6 +214,17 @@ public final class StandardLibraryManager {
     }
 
     private void registerSymbol(String name, String qualifiedName, ElementType type) {
+        // Register parent if missing to ensure OWNS relationships can form
+        int lastColonIndex = qualifiedName.lastIndexOf("::");
+        if (lastColonIndex > 0) {
+            String parentQn = qualifiedName.substring(0, lastColonIndex);
+            if (!symbols.containsKey(parentQn)) {
+                int lastParentSep = parentQn.lastIndexOf("::");
+                String parentName = lastParentSep > 0 ? parentQn.substring(lastParentSep + 2) : parentQn;
+                registerSymbol(parentName, parentQn, ElementType.PACKAGE);
+            }
+        }
+
         Symbol symbol = new Symbol(name, qualifiedName, type, STDLIB_LOC, Visibility.PUBLIC);
         symbols.put(qualifiedName, symbol);
 

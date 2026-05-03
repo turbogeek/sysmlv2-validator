@@ -310,15 +310,18 @@ Located in `test-suite/lint/`:
 ## Roadmap
 
 ### Completed
+
 - [x] Phase 1: ANTLR 4 parser integration
 - [x] Phase 2: Symbol table and semantic validation
 - [x] Phase 2.5: Lint rules and refactoring infrastructure
 
 ### In Progress
+
 - [ ] Phase 3: Enhanced constraint expression validation
 - [ ] Phase 3: Cross-file validation
 
 ### Planned
+
 - [ ] Phase 4: Full KerML support
 - [ ] Phase 5: LSP server for IDE integration
 - [ ] Phase 6: Maven/Gradle plugins

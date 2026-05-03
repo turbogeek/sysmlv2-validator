@@ -14,12 +14,12 @@ import java.util.List;
 public class ImportResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportResolver.class);
 
-    private final LibraryIndex libraryIndex;
+    private final com.validator.semantic.StandardLibraryManager standardLibraryManager;
     private final List<ValidationError> errors = new ArrayList<>();
     private final List<String> warnings = new ArrayList<>();
 
-    public ImportResolver(LibraryIndex libraryIndex) {
-        this.libraryIndex = libraryIndex;
+    public ImportResolver(com.validator.semantic.StandardLibraryManager standardLibraryManager) {
+        this.standardLibraryManager = standardLibraryManager;
     }
 
     /**
@@ -44,13 +44,13 @@ public class ImportResolver {
 
     private boolean resolveQualifiedImport(String cleanName, String originalImport,
             String filePath, int line) {
-        if (libraryIndex.hasQualifiedName(cleanName)) {
+        if (standardLibraryManager.resolveSymbol(cleanName) != null) {
             LOGGER.debug("Resolved import: {}", originalImport);
             return true;
         }
 
-        // Check if library is available
-        if (!libraryIndex.hasLibraries()) {
+        // Check if library is available (if there are no symbols other than builtins, or if it's empty)
+        if (standardLibraryManager.getAllSymbols().isEmpty()) {
             addWarning(filePath, line,
                 String.format("Cannot resolve import '%s' - "
                 + "no standard library configured", originalImport));
@@ -66,13 +66,13 @@ public class ImportResolver {
 
     private boolean resolvePackageImport(String packageName, String originalImport,
             String filePath, int line) {
-        if (libraryIndex.hasPackage(packageName)) {
+        if (standardLibraryManager.resolveSymbol(packageName) != null) {
             LOGGER.debug("Resolved package import: {}", packageName);
             return true;
         }
 
         // Check if library is available
-        if (!libraryIndex.hasLibraries()) {
+        if (standardLibraryManager.getAllSymbols().isEmpty()) {
             addWarning(filePath, line,
                 String.format("Cannot resolve import '%s' - "
                 + "no standard library configured", originalImport));

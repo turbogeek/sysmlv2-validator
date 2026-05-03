@@ -18,6 +18,8 @@ public class SymbolTable {
     private Scope currentScope;
     private final Map<String, Symbol> qualifiedSymbols = new LinkedHashMap<>();
     private final Map<String, Scope> qualifiedScopes = new LinkedHashMap<>();
+    private final RelationshipGraph relationshipGraph;
+    private StandardLibraryManager standardLibrary;
 
     /**
      * Create a new symbol table with a global scope.
@@ -26,6 +28,27 @@ public class SymbolTable {
         this.globalScope = new Scope("", ScopeType.GLOBAL, null);
         this.currentScope = globalScope;
         qualifiedScopes.put("", globalScope);
+        this.relationshipGraph = new RelationshipGraph(this);
+    }
+
+    /**
+     * Create a new symbol table with a standard library.
+     */
+    public SymbolTable(StandardLibraryManager standardLibrary) {
+        this();
+        this.standardLibrary = standardLibrary;
+        if (standardLibrary != null) {
+            for (Symbol symbol : standardLibrary.getAllSymbols()) {
+                qualifiedSymbols.put(symbol.getQualifiedName(), symbol);
+            }
+        }
+    }
+
+    /**
+     * Get the relationship graph for deep namespace resolution.
+     */
+    public RelationshipGraph getRelationshipGraph() {
+        return relationshipGraph;
     }
 
     /**
@@ -103,7 +126,23 @@ public class SymbolTable {
     }
 
     /**
-     * Resolve a qualified name (Package::Element::SubElement).
+     * Resolve a symbol by fully qualified name, checking only direct mappings.
+     * Use this internally to avoid recursive deep resolution loops.
+     *
+     * @param qualifiedName the qualified name
+     * @return the symbol if found, null otherwise
+     */
+    public Symbol resolveQualifiedDirect(String qualifiedName) {
+        if (qualifiedName == null) {
+            return null;
+        }
+        return qualifiedSymbols.get(qualifiedName);
+    }
+
+    /**
+     * Resolve a symbol by fully qualified name.
+     * This will attempt direct lookup first, and if not found, 
+     * use the RelationshipGraph to perform deep namespace traversal.
      *
      * @param qualifiedName the qualified name
      * @return the symbol if found, null otherwise
@@ -112,7 +151,38 @@ public class SymbolTable {
         if (qualifiedName == null) {
             return null;
         }
-        return qualifiedSymbols.get(qualifiedName);
+
+        Symbol symbol = resolveQualifiedDirect(qualifiedName);
+        if (symbol != null) {
+            return symbol;
+        }
+
+        // Try deep resolution using RelationshipGraph if it's a multi-part name
+        int firstSep = qualifiedName.indexOf("::");
+        if (firstSep > 0) {
+            String[] parts = qualifiedName.split("::");
+            if (parts.length > 1) {
+                // Determine root symbol (might be 1 or 2 parts depending on what's defined)
+                String rootQn = parts[0];
+                Symbol root = qualifiedSymbols.get(rootQn);
+                int pathStartIndex = 1;
+
+                if (root == null && parts.length > 2) {
+                    rootQn = parts[0] + "::" + parts[1];
+                    root = qualifiedSymbols.get(rootQn);
+                    pathStartIndex = 2;
+                }
+
+                if (root != null) {
+                    java.util.List<String> path = java.util.Arrays.asList(parts).subList(pathStartIndex, parts.length);
+                    Symbol deepResolved = relationshipGraph.resolveDeepNamespace(rootQn, path);
+                    if (deepResolved != null) {
+                        return deepResolved;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**

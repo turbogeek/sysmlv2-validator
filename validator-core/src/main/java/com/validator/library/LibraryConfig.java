@@ -169,12 +169,17 @@ public class LibraryConfig {
             "../../SysML-v2-Release/sysml.library",
             "../sysml.library",
             "./sysml.library",
-            System.getProperty("user.home") + "/SysML-v2-Release/sysml.library"
+            System.getProperty("user.home") + "/SysML-v2-Release/sysml.library",
+            "../SysML-v2-Release/sysml.library.kpar",
+            "../../SysML-v2-Release/sysml.library.kpar",
+            "../sysml.library.kpar",
+            "./sysml.library.kpar",
+            System.getProperty("user.home") + "/SysML-v2-Release/sysml.library.kpar"
         );
 
         for (String pathStr : defaultPaths) {
-            File dir = new File(pathStr);
-            if (dir.exists() && dir.isDirectory()) {
+            File file = new File(pathStr);
+            if (file.exists() && (file.isDirectory() || (file.isFile() && file.getName().endsWith(".kpar")))) {
                 addLibraryPath(pathStr);
                 LOGGER.info("Found library at default path: {}", pathStr);
                 return;

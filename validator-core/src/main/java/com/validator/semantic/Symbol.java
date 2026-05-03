@@ -183,9 +183,9 @@ public class Symbol {
      *
      * @param location the location where this symbol is referenced
      */
-    public void addReference(Location location) {
-        if (location != null) {
-            references.add(location);
+    public void addReference(Location refLocation) {
+        if (refLocation != null) {
+            references.add(refLocation);
         }
     }
 

@@ -569,7 +569,7 @@ refKind
     | ITEM
     ;
 
-connectionUsage
+connectionUsage // Reference: SysMLv2.md, Section 7.13.2 / Line 2416
     : CONNECTION usageName? featureRelationships? connectionEndpoints? usageBody?
     | CONNECTION usageName? featureRelationships? connectionEndpoints? SEMICOLON
     | CONNECT connectionEndpoints SEMICOLON?
@@ -581,7 +581,7 @@ flowConnectionUsage
     | FLOW expression TO expression SEMICOLON
     ;
 
-successionUsage
+successionUsage // Reference: SysMLv2.md, Section 7.17.4 / Line 3317
     : FIRST expression (THEN expression)? SEMICOLON?
     | THEN expression SEMICOLON?
     | SUCCESSION FLOW? usageName? featureRelationships? successionFlowOf? successionEndpoints? SEMICOLON?
@@ -594,6 +594,7 @@ successionFlowOf
 transitionUsage
     : TRANSITION usageName? transitionRelationships? transitionBody
     | TRANSITION usageName? FIRST expression transitionBody
+    | expression TRANSITION expression SEMICOLON? // Reference: SysMLv2.md, Section 7.18.3 / Line 4213
     ;
 
 satisfyRequirement
@@ -902,7 +903,7 @@ referencesClause
     ;
 
 conjugatesClause
-    : (TILDE | CONJUGATES) qualifiedName
+    : (TILDE | CONJUGATES) qualifiedName // Reference: SysMLv2.md, Section 7.12.3 / Line 2158
     ;
 
 typingClause
@@ -1062,7 +1063,7 @@ stateUsageBody
     | SEMICOLON
     ;
 
-stateBodyElement
+stateBodyElement // Reference: SysMLv2.md, Section 7.18.2 / Line 4035
     : namespaceBodyElement
     | entryAction
     | doAction
@@ -1255,7 +1256,7 @@ filterClause
 // VALUES AND INITIALIZATION
 // ============================================================================
 
-valueInit
+valueInit // Reference: SysMLv2.md, Section 7.13.4 / Line 2214
     : EQUALS expression
     | COLON_EQUALS expression
     | DEFAULT (EQUALS | COLON_EQUALS)? expression
@@ -1304,7 +1305,7 @@ invariantStatement
     ;
 
 flowStatement
-    : FIRST (START | DONE | expression) SEMICOLON
+    : FIRST (START | DONE | expression) (THEN (START | DONE | expression))? SEMICOLON
     | THEN (START | DONE | expression) SEMICOLON
     ;
 
@@ -1339,7 +1340,7 @@ whileStatement
     : WHILE expression LBRACE statement* RBRACE
     ;
 
-loopStatement
+loopStatement // Reference: SysMLv2.md, Section 7.17.3 / Line 3867
     : LOOP expression? LBRACE statement* RBRACE (UNTIL expression SEMICOLON?)?
     ;
 

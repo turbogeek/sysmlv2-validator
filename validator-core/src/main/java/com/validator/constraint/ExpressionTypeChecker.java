@@ -58,7 +58,7 @@ public class ExpressionTypeChecker {
             return ConstraintType.ANY;
         }
 
-        String text = expr.getText();
+        String text = com.validator.parser.SysMLv2ParserFacade.getOriginalText(expr);
 
         // Check for literals
         ConstraintType literalType = inferLiteralType(text);
