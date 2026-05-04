@@ -261,6 +261,10 @@ public class ValidatorCLI implements Callable<Integer> {
                     error.getLine(),
                     error.getColumn());
                 System.out.printf("  %s: %s%n", error.getErrorCode(), error.getMessage());
+                
+                if (error.getSpecReference() != null && !error.getSpecReference().isEmpty()) {
+                    System.out.printf("  Ref: %s%n", error.getSpecReference());
+                }
 
                 if (!error.getSuggestions().isEmpty() && suggestions) {
                     System.out.println("  Suggestions:");
@@ -278,6 +282,10 @@ public class ValidatorCLI implements Callable<Integer> {
                     warning.getLine(),
                     warning.getColumn());
                 System.out.printf("  %s: %s%n", warning.getErrorCode(), warning.getMessage());
+                
+                if (warning.getSpecReference() != null && !warning.getSpecReference().isEmpty()) {
+                    System.out.printf("  Ref: %s%n", warning.getSpecReference());
+                }
                 System.out.println();
             }
         }

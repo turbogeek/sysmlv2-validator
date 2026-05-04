@@ -72,16 +72,16 @@ public class UnusedElementRule implements LintRule {
         }
 
         // Check for unused definitions
-        warnings.addAll(checkUnusedDefinitions(symbolTable));
+        warnings.addAll(checkUnusedDefinitions(context));
 
         // Check for unused imports
-        warnings.addAll(checkUnusedImports(symbolTable, context));
+        warnings.addAll(checkUnusedImports(context));
 
         // Check for unused attributes
-        warnings.addAll(checkUnusedAttributes(symbolTable));
+        warnings.addAll(checkUnusedAttributes(context));
 
         // Check for unused parts
-        warnings.addAll(checkUnusedParts(symbolTable));
+        warnings.addAll(checkUnusedParts(context));
 
         return warnings;
     }
@@ -89,10 +89,10 @@ public class UnusedElementRule implements LintRule {
     /**
      * Check for definitions that are never used as types.
      */
-    private List<ValidationWarning> checkUnusedDefinitions(SymbolTable symbolTable) {
+    private List<ValidationWarning> checkUnusedDefinitions(LintContext context) {
         List<ValidationWarning> warnings = new ArrayList<>();
 
-        for (Symbol symbol : symbolTable.getAllSymbols()) {
+        for (Symbol symbol : context.getLocalSymbols()) {
             // Only check definitions
             if (!symbol.isDefinition()) {
                 continue;
@@ -128,18 +128,17 @@ public class UnusedElementRule implements LintRule {
     /**
      * Check for imports that are never used.
      */
-    private List<ValidationWarning> checkUnusedImports(SymbolTable symbolTable, LintContext context) {
+    private List<ValidationWarning> checkUnusedImports(LintContext context) {
         List<ValidationWarning> warnings = new ArrayList<>();
 
-        // Get all imports from global scope
-        Scope globalScope = symbolTable.getGlobalScope();
-        Collection<ImportStatement> imports = globalScope.getImports();
+        // Get all imports from the local file
+        java.util.Collection<ImportStatement> imports = context.getLocalImports();
 
         // Track which imports are actually used
         Set<String> usedImportPaths = new HashSet<>();
 
         // Check each symbol to see what imports they might use
-        for (Symbol symbol : symbolTable.getAllSymbols()) {
+        for (Symbol symbol : context.getLocalSymbols()) {
             if (symbol.isUsedAsType() || symbol.isUsedInExpression() || symbol.isUsedInImport()) {
                 // This symbol was used - mark its import as used
                 String qualifiedName = symbol.getQualifiedName();
@@ -188,10 +187,10 @@ public class UnusedElementRule implements LintRule {
     /**
      * Check for attributes that are never referenced in constraints or expressions.
      */
-    private List<ValidationWarning> checkUnusedAttributes(SymbolTable symbolTable) {
+    private List<ValidationWarning> checkUnusedAttributes(LintContext context) {
         List<ValidationWarning> warnings = new ArrayList<>();
 
-        for (Symbol symbol : symbolTable.getAllSymbols()) {
+        for (Symbol symbol : context.getLocalSymbols()) {
             // Only check attribute usages
             if (symbol.getType() != ElementType.ATTRIBUTE_USAGE) {
                 continue;
@@ -220,10 +219,10 @@ public class UnusedElementRule implements LintRule {
     /**
      * Check for part usages that are never referenced.
      */
-    private List<ValidationWarning> checkUnusedParts(SymbolTable symbolTable) {
+    private List<ValidationWarning> checkUnusedParts(LintContext context) {
         List<ValidationWarning> warnings = new ArrayList<>();
 
-        for (Symbol symbol : symbolTable.getAllSymbols()) {
+        for (Symbol symbol : context.getLocalSymbols()) {
             // Only check part usages
             if (symbol.getType() != ElementType.PART_USAGE) {
                 continue;

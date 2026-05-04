@@ -83,6 +83,8 @@ public class LintAnalyzer {
         registerRule(new NamingConventionRule());
         registerRule(new WildcardImportRule());
         registerRule(new PublicImportRule());
+        registerRule(new ValueUnitCorrectnessRule());
+        registerRule(new ValueUnitCompletenessRule());
         // registerRule(new DocumentationRule());  // TODO: implement
         // registerRule(new ComplexityRule());     // TODO: implement
     }

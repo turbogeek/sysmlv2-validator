@@ -122,7 +122,7 @@ public class SemanticValidator {
             ReferenceTracker.track(tree, symbolTable, filePath);
 
             // Run lint analyzer
-            LintAnalyzer analyzer = new LintAnalyzer(lintConfig);
+            LintAnalyzer analyzer = LintAnalyzer.withDefaultRules(lintConfig);
             List<ValidationWarning> lintResults = analyzer.analyze(tree, symbolTable, filePath);
 
             lintWarnings.addAll(lintResults);

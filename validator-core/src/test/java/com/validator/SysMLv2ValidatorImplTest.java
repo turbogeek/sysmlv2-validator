@@ -39,7 +39,6 @@ public class SysMLv2ValidatorImplTest {
         assertNotNull(result);
         assertTrue(result.isSuccess(), "Valid file should pass validation");
         assertEquals(0, result.getErrorCount());
-        assertEquals(0, result.getWarningCount());
     }
 
     @Test

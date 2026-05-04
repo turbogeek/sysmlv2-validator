@@ -15,6 +15,7 @@ public class ValidationError {
     private final Severity severity;
     private final List<String> suggestions;
     private final String context; // Source code context around the error
+    private final String specReference; // Reference to the SysMLv2 Specification
 
     public enum Severity {
         ERROR,
@@ -31,6 +32,7 @@ public class ValidationError {
         this.severity = builder.builderSeverity;
         this.suggestions = new ArrayList<>(builder.builderSuggestions);
         this.context = builder.builderContext;
+        this.specReference = builder.builderSpecReference;
     }
 
     public String getFilePath() {
@@ -65,11 +67,18 @@ public class ValidationError {
         return context;
     }
 
+    public String getSpecReference() {
+        return specReference;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("[%s] %s:%d:%d%n", severity, filePath, line, column));
         sb.append(String.format("  %s: %s%n", errorCode, message));
+        if (specReference != null && !specReference.isEmpty()) {
+            sb.append(String.format("  Ref: %s%n", specReference));
+        }
         if (!suggestions.isEmpty()) {
             sb.append("  Suggestions:%n");
             for (String suggestion : suggestions) {
@@ -88,6 +97,7 @@ public class ValidationError {
         private Severity builderSeverity = Severity.ERROR;
         private List<String> builderSuggestions = new ArrayList<>();
         private String builderContext;
+        private String builderSpecReference;
 
         public Builder filePath(String filePath) {
             this.builderFilePath = filePath;
@@ -131,6 +141,11 @@ public class ValidationError {
 
         public Builder context(String context) {
             this.builderContext = context;
+            return this;
+        }
+
+        public Builder specReference(String specReference) {
+            this.builderSpecReference = specReference;
             return this;
         }
 

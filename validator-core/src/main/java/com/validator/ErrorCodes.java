@@ -446,6 +446,36 @@ public final class ErrorCodes {
      */
     public static final String LINT_PUBLIC_IMPORT = "LINT019";
 
+    /**
+     * Type specifies a specific dimension/unit but value does not match.
+     *
+     * <p>Cause: An attribute typed by ISQ (e.g., LengthValue) is assigned a value
+     * with an incompatible unit (e.g., [kg]).
+     *
+     * <p>Resolution: Change the value unit to match the type's dimension.
+     */
+    public static final String LINT_UNIT_MISMATCH = "LINT020";
+
+    /**
+     * Type implies a unit but value is missing one.
+     *
+     * <p>Cause: An attribute typed by ISQ (e.g., LengthValue) is assigned a raw
+     * number without a unit annotation.
+     *
+     * <p>Resolution: Add a unit annotation (e.g., [m]) to the value.
+     */
+    public static final String LINT_MISSING_UNIT = "LINT021";
+
+    /**
+     * Value has a unit but type is generic.
+     *
+     * <p>Cause: An attribute is typed as Real (or generic type) but given a
+     * value with a unit (e.g., 4 [m]).
+     *
+     * <p>Resolution: Use a specific value type like LengthValue for unit safety.
+     */
+    public static final String LINT_GENERIC_TYPE_WITH_UNIT = "LINT022";
+
     // =========================================================================
     // CONSTRAINT ERRORS - OCL-like constraint validation issues
     // =========================================================================
@@ -622,6 +652,11 @@ public final class ErrorCodes {
                 || LINT_RECURSIVE_WILDCARD.equals(errorCode)
                 || LINT_PUBLIC_IMPORT.equals(errorCode)) {
             return "imports";
+        }
+        if (LINT_UNIT_MISMATCH.equals(errorCode)
+                || LINT_MISSING_UNIT.equals(errorCode)
+                || LINT_GENERIC_TYPE_WITH_UNIT.equals(errorCode)) {
+            return "units";
         }
         return "other";
     }
