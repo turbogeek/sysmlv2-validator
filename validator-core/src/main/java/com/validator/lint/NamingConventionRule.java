@@ -106,8 +106,8 @@ public class NamingConventionRule implements LintRule {
             return warnings;
         }
 
-        // Analyze all symbols
-        for (Symbol symbol : symbolTable.getAllSymbols()) {
+        // Analyze all local symbols
+        for (Symbol symbol : context.getLocalSymbols()) {
             String name = symbol.getName();
             ElementType type = symbol.getType();
 

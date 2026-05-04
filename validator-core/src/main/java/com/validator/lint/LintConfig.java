@@ -94,6 +94,7 @@ public class LintConfig {
         categorySeverities.put("complexity", Severity.WARN);
         categorySeverities.put("best-practices", Severity.INFO);
         categorySeverities.put("imports", Severity.WARN); // Wildcard/public import warnings
+        categorySeverities.put("units", Severity.WARN); // Value-unit completeness/correctness warnings
     }
 
     /**

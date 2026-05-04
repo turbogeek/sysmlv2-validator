@@ -70,9 +70,8 @@ public class WildcardImportRule implements LintRule {
             return warnings;
         }
 
-        // Get all imports from the global scope and all child scopes
-        Scope globalScope = symbolTable.getGlobalScope();
-        List<ImportStatement> allImports = globalScope.getAllImports();
+        // Get all imports from the local file
+        java.util.Collection<ImportStatement> allImports = context.getLocalImports();
 
         for (ImportStatement imp : allImports) {
             if (imp.isWildcard()) {

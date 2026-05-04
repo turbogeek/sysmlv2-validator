@@ -2,7 +2,11 @@ package com.validator.lint;
 
 import com.validator.SysMLv2ValidatorImpl;
 import com.validator.ValidationResult;
+import com.validator.ValidationWarning;
 import com.validator.Validator;
+import com.validator.parser.SysMLv2ParserFacade;
+import com.validator.semantic.SymbolTableBuilder;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -164,6 +168,32 @@ public class LintTestFilesTest {
     }
 
     @Test
+    @DisplayName("unit_mismatches.sysml parses and the lint rule set reports its unit problems")
+    public void testUnitMismatchesParses() throws IOException {
+        Path file = lintTestDir.resolve("unit_mismatches.sysml");
+        if (!Files.exists(file)) {
+            System.out.println("Skipping test - file not found: " + file);
+            return;
+        }
+
+        ValidationResult result = validator.validate(file.toFile());
+        assertTrue(result.getErrors().stream()
+                        .noneMatch(e -> e.getErrorCode().startsWith("SYNTAX")),
+                "File should parse without syntax errors");
+
+        // Lint does not run as part of validation; run the lint rule set on the file directly
+        String fileName = file.toString();
+        ParseTree tree = new SysMLv2ParserFacade().parseString(Files.readString(file), fileName).getParseTree();
+        List<ValidationWarning> lint = LintAnalyzer.withDefaultRules()
+                .analyze(tree, SymbolTableBuilder.build(tree, fileName), fileName);
+        List<String> codes = lint.stream().map(ValidationWarning::getErrorCode).toList();
+
+        assertTrue(codes.contains("LINT020"), "Should detect LINT020 (unit mismatch): " + codes);
+        assertTrue(codes.contains("LINT021"), "Should detect LINT021 (missing unit): " + codes);
+        assertTrue(codes.contains("LINT022"), "Should detect LINT022 (generic type with unit): " + codes);
+    }
+
+    @Test
     @DisplayName("All lint test files exist")
     public void testAllLintFilesExist() {
         if (!Files.exists(lintTestDir)) {
@@ -177,7 +207,8 @@ public class LintTestFilesTest {
                 "naming_conventions.sysml",
                 "unused_elements.sysml",
                 "good_practices.sysml",
-                "refactoring_example.sysml"
+                "refactoring_example.sysml",
+                "unit_mismatches.sysml"
         };
 
         for (String fileName : expectedFiles) {

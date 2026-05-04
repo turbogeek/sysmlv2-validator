@@ -115,6 +115,38 @@ public class LintContext {
     }
 
     /**
+     * Gets symbols defined only in the current file.
+     * Use this instead of symbolTable.getAllSymbols() for rules
+     * that should only analyze local elements.
+     */
+    public java.util.Collection<com.validator.semantic.Symbol> getLocalSymbols() {
+        if (symbolTable == null) return java.util.Collections.emptyList();
+        java.util.List<com.validator.semantic.Symbol> locals = new java.util.ArrayList<>();
+        for (com.validator.semantic.Symbol s : symbolTable.getAllSymbols()) {
+            if (s.getLocation() != null && filePath.equals(s.getLocation().getFileName())) {
+                locals.add(s);
+            }
+        }
+        return locals;
+    }
+
+    /**
+     * Gets imports defined only in the current file.
+     * Use this instead of globalScope.getAllImports() for rules
+     * that should only analyze local imports.
+     */
+    public java.util.Collection<com.validator.semantic.ImportStatement> getLocalImports() {
+        if (symbolTable == null) return java.util.Collections.emptyList();
+        java.util.List<com.validator.semantic.ImportStatement> locals = new java.util.ArrayList<>();
+        for (com.validator.semantic.ImportStatement imp : symbolTable.getGlobalScope().getAllImports()) {
+            if (imp.getLocation() != null && filePath.equals(imp.getLocation().getFileName())) {
+                locals.add(imp);
+            }
+        }
+        return locals;
+    }
+
+    /**
      * Gets the file name without directory path.
      */
     public String getFileName() {

@@ -100,20 +100,22 @@ class LintAnalyzerTest {
     void testDefaultRules() {
         LintAnalyzer analyzer = LintAnalyzer.withDefaultRules();
         List<String> ids = analyzer.getRules().stream().map(LintRule::getRuleId).toList();
-        assertEquals(5, ids.size(), ids.toString());
+        assertEquals(7, ids.size(), ids.toString());
         assertTrue(ids.contains("wildcard-imports"));
+        assertTrue(ids.contains("unit-correctness"));
+        assertTrue(ids.contains("unit-completeness"));
         assertNotNull(analyzer.getRule("wildcard-imports"));
         assertNull(analyzer.getRule("no-such-rule"));
 
         LintRule first = analyzer.getRules().get(0);
         analyzer.registerRule(first);
         analyzer.registerRule(null);
-        assertEquals(5, analyzer.getRules().size(), "Registering a rule again or null changes nothing");
+        assertEquals(7, analyzer.getRules().size(), "Registering a rule again or null changes nothing");
         assertThrows(UnsupportedOperationException.class, () -> analyzer.getRules().add(first));
 
         analyzer.unregisterRule("wildcard-imports");
         assertNull(analyzer.getRule("wildcard-imports"));
-        assertEquals(4, analyzer.getRules().size());
+        assertEquals(6, analyzer.getRules().size());
 
         LintConfig strict = LintConfig.strict();
         assertSame(strict, LintAnalyzer.withDefaultRules(strict).getConfig());
