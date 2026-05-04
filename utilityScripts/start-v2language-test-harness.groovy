@@ -227,7 +227,18 @@ class SysMLv2TestHarness {
                         def buildResult = modelBuilder.build(sysmlText, allRoots)
                         Element transientNs = buildResult.getTransientRootNs()
                         
-                        if (transientNs != null) {
+                        def diags = buildResult.getDiagnostics() ?: []
+                        def errors = diags.findAll { it.getSeverity().toString() == "ERROR" }
+                        
+                        if (!errors.isEmpty()) {
+                            String errorList = errors.collect { "[" + it.getSeverity() + "] line " + it.getLine() + ": " + it.getMessage() }.join("\\n")
+                            // Replace characters that could break JSON
+                            errorList = errorList.replace("\"", "'").replace("\r", "")
+                            if (SessionManager.getInstance().isSessionCreated(project)) {
+                                SessionManager.getInstance().cancelSession(project)
+                            }
+                            sendResponse(exchange, 400, Jzon.encode([success: false, error: "Semantic errors found:\\n" + errorList]))
+                        } else if (transientNs != null) {
                             Element persistentNs = SysMLTextualProjectModelBasedHelper.copyTransientModelToPersistent(project, transientNs)
                             KerMLProjectFeature projectFeature = KerMLProjectFeature.getPrimaryProjectFeature(project)
                             projectFeature.addCommonData(persistentNs)
@@ -235,12 +246,17 @@ class SysMLv2TestHarness {
                             success = true
                             sendResponse(exchange, 200, Jzon.encode([success: true, message: "SysML loaded successfully"]))
                         } else {
-                            SessionManager.getInstance().cancelSession(project)
+                            if (SessionManager.getInstance().isSessionCreated(project)) {
+                                SessionManager.getInstance().cancelSession(project)
+                            }
                             sendResponse(exchange, 400, Jzon.encode([success: false, error: "Failed to parse SysML (returned null root)"]))
                         }
                     } catch (Exception parseEx) {
-                        SessionManager.getInstance().cancelSession(project)
                         sendResponse(exchange, 400, Jzon.encode([success: false, error: parseEx.message, stackTrace: getStackTrace(parseEx)]))
+                    } finally {
+                        if (SessionManager.getInstance().isSessionCreated(project)) {
+                            SessionManager.getInstance().cancelSession(project)
+                        }
                     }
                 } catch (Exception e) {
                     logMsg("Error processing /load-sysml request: " + e.getMessage(), e)
