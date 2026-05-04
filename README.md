@@ -6,9 +6,10 @@ ANTLR-based semantic validator for SysML v2 and KerML with intelligent error rep
 
 ### Current (v0.1.0-SNAPSHOT)
 - Maven multi-module project structure
-- ANTLR 4.13.2 runtime integration
-- Sireum HAMR parser integration (planned)
-- Multi-layer validation architecture (planned)
+- Native ANTLR 4.13.2 runtime integration (Standard Library loading supported via AST caching)
+- Semantic validation engine (Type matching, resolving scopes, dependencies)
+- Value/Unit correctness and completeness checking (LINT020-LINT022)
+- Multi-layer intelligent error reporting (Spelling, unreferenced elements, etc.)
 
 ### Planned Features
 
@@ -146,28 +147,46 @@ java -jar validator-cli/target/sysml-validator.jar validate --format json --outp
 
 ## Development Roadmap
 
-### Phase 1: Parser + Symbol Table (Weeks 1-3)
+### Phase 1: Parser + Symbol Table (Completed)
 - [x] Project structure
 - [x] Maven setup with ANTLR dependencies
-- [ ] Integrate Sireum HAMR ANTLR parser
-- [ ] Build AST visitor framework
-- [ ] Implement symbol table and scope management
-- [ ] Create basic CLI interface
-- [ ] Write 50+ initial test cases
+- [x] Custom ANTLR parsing of SysMLv2 and robust Standard Library loading
+- [x] Build AST visitor framework
+- [x] Implement symbol table and scope management
+- [x] Create basic CLI interface
+- [x] Write 50+ initial test cases
 
-### Phase 2: Semantic Validation (Weeks 4-7)
-- [ ] Implement type system
-- [ ] Build reference resolution engine
-- [ ] Add feature validation (redefinition, visibility)
-- [ ] Implement multiplicity and constraint validation
-- [ ] Write 100+ semantic test cases
+### Phase 2: Semantic Validation (Completed)
+- [x] Implement type system
+- [x] Build reference resolution engine
+- [x] Add feature validation (redefinition, visibility)
+- [x] Implement multiplicity and constraint validation
+- [x] Write 100+ semantic test cases
 
-### Phase 3: Smart Error Reporting (Weeks 8-10)
-- [ ] Build spelling suggestion system
-- [ ] Create import suggestion engine
-- [ ] Implement type error explainer
-- [ ] Add enhanced error formatting
-- [ ] Write error reporting test cases
+### Phase 3: Smart Error Reporting (Completed)
+- [x] Build spelling suggestion system
+- [x] Create import suggestion engine
+- [x] Implement type error explainer
+- [x] Enhanced error formatting (with specification references e.g. LINT020)
+- [x] Common Correctness and Completeness Checks (Unit mismatches, missing values)
+
+#### Correctness and Completeness Patterns Identified
+1. **Value/Unit Compatibility**: Warning when typed values don't match provided units (e.g., `LengthValue = 4[kg]`).
+2. **Missing Units**: Warning when dimensional types are given raw scalars.
+3. **Missing Typing**: Warning when generic types are given specific units.
+4. **Conflicting Multiplicities**: E.g., a part usage `[1..3]` redefined to `[4..5]`.
+5. **Circular Redefinitions/Subsettings**: Element A redefines B, and B redefines A.
+6. **Invalid Feature Directions**: Connecting `out` to `in` with incompatible payloads.
+7. **Action/State Parameter Mismatches**: Invoking an action with parameters that don't match the target `action def`.
+8. **Dangling/Unsatisfied Requirements**: `satisfy` pointing to non-requirements, or instantiated requirements lacking `satisfy` relations.
+9. **Disconnected Ports**: Interfaces modeled but never connected.
+10. **State Machines without Transitions**: States with no valid pathways.
+11. **Missing Allocations**: Behavioral actions with no structural component allocated to execute them.
+
+### Phase 4: HAMR Integration & AADL (In Progress)
+- [ ] Integrate Sireum HAMR models and architecture.
+- [ ] Implement robust AADL code generation.
+- [ ] Map SysMLv2 structural components to AADL systems.
 
 ### Phase 4: KerML Support (Weeks 11-13)
 - [ ] Integrate KerML validator
@@ -198,11 +217,11 @@ java -jar validator-cli/target/sysml-validator.jar validate --format json --outp
 
 ## Contributing
 
-This is currently in early development (v0.1.0-SNAPSHOT). Contributions welcome once Phase 1 is complete.
+This project is in active development.
 
 ## License
 
-TBD
+MIT License
 
 ## Related Projects
 
@@ -213,5 +232,5 @@ TBD
 ## Status
 
 **Current Version**: 0.1.0-SNAPSHOT
-**Status**: Early Development - Phase 1 in progress
-**Last Updated**: November 18, 2025
+**Status**: Active Development - Phase 4 (HAMR Integration / AADL) in progress
+**Last Updated**: May 2026
