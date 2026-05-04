@@ -251,6 +251,11 @@ mvn test
 - [ ] CI/CD setup
 - [ ] Release packaging
 
+### Phase 6: Sireum HAMR Integration (Weeks 16-18)
+- [ ] AADL code generation engine
+- [ ] Sireum HAMR bridge
+- [ ] AADL validation and verification
+
 ---
 
 ## Key Design Decisions

@@ -325,6 +325,7 @@ Located in `test-suite/lint/`:
 - [ ] Phase 4: Full KerML support
 - [ ] Phase 5: LSP server for IDE integration
 - [ ] Phase 6: Maven/Gradle plugins
+- [ ] Phase 7: Sireum HAMR Integration for AADL Generation
 
 ---
 
