@@ -5,6 +5,7 @@ ANTLR-based semantic validator for SysML v2 and KerML with intelligent error rep
 ## Features
 
 ### Current (v0.1.0-SNAPSHOT)
+
 - Maven multi-module project structure
 - Native ANTLR 4.13.2 runtime integration (Standard Library loading supported via AST caching)
 - Semantic validation engine (Type matching, resolving scopes, dependencies)
@@ -14,11 +15,13 @@ ANTLR-based semantic validator for SysML v2 and KerML with intelligent error rep
 ### Planned Features
 
 #### Layer 1: Syntax Validation
+
 - Full ANTLR-based parsing
 - Complete grammar coverage
 - Parse tree generation
 
 #### Layer 2: Semantic Validation
+
 - Symbol table and scope management
 - Type system with inference
 - Reference resolution
@@ -27,6 +30,7 @@ ANTLR-based semantic validator for SysML v2 and KerML with intelligent error rep
 - Cross-file dependency checking
 
 #### Layer 3: Intelligent Error Reporting
+
 - Spelling suggestions (Levenshtein distance)
 - Import recommendations with standard library index
 - Type error explanations
@@ -34,11 +38,13 @@ ANTLR-based semantic validator for SysML v2 and KerML with intelligent error rep
 - Multi-line context display
 
 #### KerML Support
+
 - Unified SysML v2 / KerML validation
 - Cross-language validation
 - Shared symbol tables
 
 #### Build Integration
+
 - Maven plugin
 - Gradle plugin
 - CI/CD support (GitHub Actions)
@@ -109,6 +115,7 @@ sysml-validator/
 ## Building
 
 Requires:
+
 - Java 11+
 - Maven 3.8+
 
@@ -148,6 +155,7 @@ java -jar validator-cli/target/sysml-validator.jar validate --format json --outp
 ## Development Roadmap
 
 ### Phase 1: Parser + Symbol Table (Completed)
+
 - [x] Project structure
 - [x] Maven setup with ANTLR dependencies
 - [x] Custom ANTLR parsing of SysMLv2 and robust Standard Library loading
@@ -157,6 +165,7 @@ java -jar validator-cli/target/sysml-validator.jar validate --format json --outp
 - [x] Write 50+ initial test cases
 
 ### Phase 2: Semantic Validation (Completed)
+
 - [x] Implement type system
 - [x] Build reference resolution engine
 - [x] Add feature validation (redefinition, visibility)
@@ -164,6 +173,7 @@ java -jar validator-cli/target/sysml-validator.jar validate --format json --outp
 - [x] Write 100+ semantic test cases
 
 ### Phase 3: Smart Error Reporting (Completed)
+
 - [x] Build spelling suggestion system
 - [x] Create import suggestion engine
 - [x] Implement type error explainer
@@ -171,6 +181,7 @@ java -jar validator-cli/target/sysml-validator.jar validate --format json --outp
 - [x] Common Correctness and Completeness Checks (Unit mismatches, missing values)
 
 #### Correctness and Completeness Patterns Identified
+
 1. **Value/Unit Compatibility**: Warning when typed values don't match provided units (e.g., `LengthValue = 4[kg]`).
 2. **Missing Units**: Warning when dimensional types are given raw scalars.
 3. **Missing Typing**: Warning when generic types are given specific units.
@@ -184,17 +195,20 @@ java -jar validator-cli/target/sysml-validator.jar validate --format json --outp
 11. **Missing Allocations**: Behavioral actions with no structural component allocated to execute them.
 
 ### Phase 4: HAMR Integration & AADL (In Progress)
+
 - [ ] Integrate Sireum HAMR models and architecture.
 - [ ] Implement robust AADL code generation.
 - [ ] Map SysMLv2 structural components to AADL systems.
 
 ### Phase 4: KerML Support (Weeks 11-13)
+
 - [ ] Integrate KerML validator
 - [ ] Build unified validation engine
 - [ ] Cross-language validation
 - [ ] Write 50+ KerML test cases
 
 ### Phase 5: Build Integration (Weeks 14-15)
+
 - [ ] Create Maven plugin
 - [ ] Create Gradle plugin
 - [ ] Setup GitHub Actions CI/CD
@@ -203,6 +217,7 @@ java -jar validator-cli/target/sysml-validator.jar validate --format json --outp
 ## Dependencies
 
 ### Core Libraries
+
 - ANTLR 4.13.2 - Parser generator and runtime
 - Sireum HAMR - SysML v2 ANTLR parser
 - Apache Commons Text 1.14.0 - Spelling suggestions (Levenshtein distance)
@@ -210,9 +225,11 @@ java -jar validator-cli/target/sysml-validator.jar validate --format json --outp
 - SLF4J 2.0.9 - Logging
 
 ### CLI
+
 - Picocli 4.7.5 - Command-line interface framework
 
 ### Testing
+
 - JUnit 5.10.1 - Unit testing
 
 ## Contributing
