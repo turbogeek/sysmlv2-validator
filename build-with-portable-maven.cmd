@@ -83,7 +83,7 @@ echo.
 
 REM Run Maven build
 cd /d "%~dp0"
-call "%MVN_CMD%" clean test
+call "%MVN_CMD%" clean package
 
 set "BUILD_RESULT=%ERRORLEVEL%"
 
