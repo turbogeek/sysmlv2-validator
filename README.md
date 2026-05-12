@@ -14,5 +14,10 @@ Requirements:
 
 Run `mvn clean install` to build the parser and core libraries.
 
+## IDE Setup (VS Code)
+To develop and use this project within Visual Studio Code, it is recommended to install the following extensions:
+- **vscjava** (Extension Pack for Java)
+- **Red Hat** (Language Support for Java by Red Hat)
+
 ## Usage
 The validator can be run from the CLI or integrated as a library in other tools, such as the `SysMLv2-Editor-for-VSCode`.
