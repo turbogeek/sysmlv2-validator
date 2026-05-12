@@ -1,0 +1,1645 @@
+﻿SysML v2 Semantic Validator v0.1.0-SNAPSHOT
+===========================================
+
+Validating: Dynamics.sysml
+========================================
+[WARNING] Dynamics.sysml:5:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Dynamics.sysml:24:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Dynamics.sysml:51:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: Turbojet Stage Analysis.sysml
+========================================
+[ERROR] Turbojet Stage Analysis.sysml:12:34
+  SYNTAX_ERROR: no viable alternative at input '(p_2/ p_1)^(1/'
+
+[ERROR] Turbojet Stage Analysis.sysml:12:34
+  SYNTAX_ERROR: extraneous input '/ p_1)^(1/' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'default', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', '::>', ':>>', ':>', ':=', ':', '=', '(', '{', '}', '[', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] Turbojet Stage Analysis.sysml:12:49
+  SYNTAX_ERROR: extraneous input ')' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'default', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', '::>', ':>>', ':>', ':=', ':', '=', '(', '{', '}', '[', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] Turbojet Stage Analysis.sysml:16:30
+  SYNTAX_ERROR: no viable alternative at input '(p_2/ p_1)**((gamma - 1) /'
+
+[ERROR] Turbojet Stage Analysis.sysml:16:30
+  SYNTAX_ERROR: extraneous input '/ p_1)**((gamma - 1) /' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'default', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', '::>', ':>>', ':>', ':=', ':', '=', '(', '{', '}', '[', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] Turbojet Stage Analysis.sysml:16:58
+  SYNTAX_ERROR: extraneous input ')' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'default', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', '::>', ':>>', ':>', ':=', ':', '=', '(', '{', '}', '[', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[WARNING] Turbojet Stage Analysis.sysml:23:5
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Turbojet Stage Analysis.sysml:67:41
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Turbojet Stage Analysis.sysml:87:10
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Turbojet Stage Analysis.sysml:94:10
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Turbojet Stage Analysis.sysml:101:13
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Turbojet Stage Analysis.sysml:104:13
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: Vehicle Analysis Demo.sysml
+========================================
+[ERROR] Vehicle Analysis Demo.sysml:92:9
+  SYNTAX_ERROR: extraneous input ':>>' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] Vehicle Analysis Demo.sysml:92:33
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] Vehicle Analysis Demo.sysml:96:9
+  SYNTAX_ERROR: extraneous input ':>>' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] Vehicle Analysis Demo.sysml:96:33
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] Vehicle Analysis Demo.sysml:98:1
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: AHFCoreLib.sysml
+========================================
+[ERROR] AHFCoreLib.sysml:23:23
+  SYNTAX_ERROR: no viable alternative at input '#cloudddArrowheadCore{'
+
+[ERROR] AHFCoreLib.sysml:27:2
+  SYNTAX_ERROR: extraneous input '#' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] AHFCoreLib.sysml:27:10
+  SYNTAX_ERROR: mismatched input 'service_registry' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] AHFCoreLib.sysml:28:3
+  SYNTAX_ERROR: extraneous input '#' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] AHFCoreLib.sysml:28:12
+  SYNTAX_ERROR: mismatched input 'serviceDiscovery' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] AHFCoreLib.sysml:28:29
+  SYNTAX_ERROR: extraneous input ':' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] AHFCoreLib.sysml:31:23
+  SYNTAX_ERROR: no viable alternative at input '#systemauthorization{'
+
+[ERROR] AHFCoreLib.sysml:32:3
+  SYNTAX_ERROR: extraneous input '#' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] AHFCoreLib.sysml:32:12
+  SYNTAX_ERROR: mismatched input 'authorisation' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] AHFCoreLib.sysml:32:26
+  SYNTAX_ERROR: mismatched input ':' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[WARNING] AHFCoreLib.sysml:1:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:8:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:9:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:16:30
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:24:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:25:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:36:31
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:38:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:41:32
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:42:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:43:33
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:49:30
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFCoreLib.sysml:50:30
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: AHFNorwayTopics.sysml
+========================================
+[ERROR] AHFNorwayTopics.sysml:11:14
+  SYNTAX_ERROR: no viable alternative at input '#servicedefAPISService'
+
+[ERROR] AHFNorwayTopics.sysml:12:2
+  SYNTAX_ERROR: mismatched input 'doc' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] AHFNorwayTopics.sysml:47:50
+  SYNTAX_ERROR: no viable alternative at input 'ArrowheadCore{'
+
+[ERROR] AHFNorwayTopics.sysml:48:2
+  SYNTAX_ERROR: extraneous input '#' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] AHFNorwayTopics.sysml:48:12
+  SYNTAX_ERROR: mismatched input 'TellUConsumer' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] AHFNorwayTopics.sysml:49:3
+  SYNTAX_ERROR: extraneous input '#' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] AHFNorwayTopics.sysml:49:14
+  SYNTAX_ERROR: mismatched input 'serviceDiscovery' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] AHFNorwayTopics.sysml:49:30
+  SYNTAX_ERROR: mismatched input ':' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[WARNING] AHFNorwayTopics.sysml:3:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:4:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:5:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:23:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:29:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:36:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:43:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:49:53
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:56:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:57:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:64:5
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:71:53
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:72:30
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:73:30
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:105:51
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:111:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:117:5
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:131:6
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:136:6
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:151:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFNorwayTopics.sysml:156:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: AHFProfileLib.sysml
+========================================
+[WARNING] AHFProfileLib.sysml:2:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:5:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:11:37
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:17:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:21:42
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:38:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:48:20
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:54:41
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:65:30
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:75:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:76:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:90:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:94:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:96:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:101:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:112:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFProfileLib.sysml:113:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: AHFSequences.sysml
+========================================
+[ERROR] AHFSequences.sysml:14:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:16:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:20:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:21:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:22:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:23:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:24:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:25:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:29:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:30:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:31:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:35:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:36:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:61:9
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] AHFSequences.sysml:68:6
+  SYNTAX_ERROR: no viable alternative at input 'inevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[WARNING] AHFSequences.sysml:1:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:3:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:11:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:47:46
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:53:46
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:68:27
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:78:65
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:98:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:99:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:102:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:109:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] AHFSequences.sysml:116:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: ProductSelection_N_ary.sysml
+========================================
+[WARNING] ProductSelection_N_ary.sysml:7:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] ProductSelection_N_ary.sysml:14:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: ProductSelection_OwnedEnds.sysml
+========================================
+[WARNING] ProductSelection_OwnedEnds.sysml:7:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] ProductSelection_OwnedEnds.sysml:15:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: CauseAndEffectExample.sysml
+========================================
+[ERROR] CauseAndEffectExample.sysml:26:11
+  SYNTAX_ERROR: no viable alternative at input '(cause1::>'
+
+[ERROR] CauseAndEffectExample.sysml:35:13
+  SYNTAX_ERROR: no viable alternative at input '#cause::>'
+
+[ERROR] CauseAndEffectExample.sysml:35:13
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] CauseAndEffectExample.sysml:36:13
+  SYNTAX_ERROR: no viable alternative at input '#cause::>'
+
+[ERROR] CauseAndEffectExample.sysml:36:13
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] CauseAndEffectExample.sysml:37:14
+  SYNTAX_ERROR: no viable alternative at input '#effect::>'
+
+[ERROR] CauseAndEffectExample.sysml:37:14
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] CauseAndEffectExample.sysml:38:14
+  SYNTAX_ERROR: no viable alternative at input '#effect::>'
+
+[ERROR] CauseAndEffectExample.sysml:38:14
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] CauseAndEffectExample.sysml:46:61
+  SYNTAX_ERROR: mismatched input ';' expecting {'istype', 'hastype', 'as', 'to', 'xor', 'implies', 'meta', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] CauseAndEffectExample.sysml:50:2
+  SYNTAX_ERROR: extraneous input '@' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] CauseAndEffectExample.sysml:50:21
+  SYNTAX_ERROR: mismatched input '{' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] CauseAndEffectExample.sysml:51:15
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] CauseAndEffectExample.sysml:51:21
+  SYNTAX_ERROR: mismatched input ';' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] CauseAndEffectExample.sysml:54:1
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: MedicalDeviceFailure.sysml
+========================================
+[ERROR] MedicalDeviceFailure.sysml:17:14
+  SYNTAX_ERROR: no viable alternative at input '#cause::>'
+
+[ERROR] MedicalDeviceFailure.sysml:17:14
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] MedicalDeviceFailure.sysml:18:14
+  SYNTAX_ERROR: no viable alternative at input '#cause::>'
+
+[ERROR] MedicalDeviceFailure.sysml:18:14
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] MedicalDeviceFailure.sysml:19:15
+  SYNTAX_ERROR: no viable alternative at input '#effect::>'
+
+[ERROR] MedicalDeviceFailure.sysml:19:15
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: Flashlight Example.sysml
+========================================
+[ERROR] Flashlight Example.sysml:18:4
+  SYNTAX_ERROR: no viable alternative at input '{out'
+
+[ERROR] Flashlight Example.sysml:30:4
+  SYNTAX_ERROR: no viable alternative at input '{in'
+
+[ERROR] Flashlight Example.sysml:40:4
+  SYNTAX_ERROR: no viable alternative at input '{in'
+
+[ERROR] Flashlight Example.sysml:42:2
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: CarWithShapeAndCSG.sysml
+========================================
+[ERROR] CarWithShapeAndCSG.sysml:25:11
+  SYNTAX_ERROR: no viable alternative at input ':>>ecf{'
+
+[ERROR] CarWithShapeAndCSG.sysml:26:4
+  SYNTAX_ERROR: no viable alternative at input '{:>>'
+
+[ERROR] CarWithShapeAndCSG.sysml:27:53
+  SYNTAX_ERROR: mismatched input '{' expecting {'default', 'meta', ':=', ';', '='}
+
+[ERROR] CarWithShapeAndCSG.sysml:33:1
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: SimpleQuadcopter.sysml
+========================================
+[ERROR] SimpleQuadcopter.sysml:33:65
+  SYNTAX_ERROR: mismatched input '{' expecting {'default', 'meta', ':=', ';', '='}
+
+[ERROR] SimpleQuadcopter.sysml:43:65
+  SYNTAX_ERROR: mismatched input '{' expecting {'default', 'meta', ':=', ';', '='}
+
+[ERROR] SimpleQuadcopter.sysml:53:4
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[WARNING] SimpleQuadcopter.sysml:22:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:23:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:56:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:57:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:81:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:85:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:86:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:111:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:159:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:160:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:161:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SimpleQuadcopter.sysml:164:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: VehicleGeometryAndCoordinateFrames.sysml
+========================================
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:41:24
+  SYNTAX_ERROR: extraneous input 'wheelCoordinateFrame' expecting {'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'default', '::>', ':>>', ':>', ':=', ':', ';', '=', '{', '[', '~'}
+
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:50:25
+  SYNTAX_ERROR: extraneous input 'lugBoltPlacementRadius' expecting {'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'default', '::>', ':>>', ':>', ':=', ':', ';', '=', '{', '[', '~'}
+
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:52:74
+  SYNTAX_ERROR: no viable alternative at input '(pi/180); /'
+
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:52:74
+  SYNTAX_ERROR: extraneous input '/180); /' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'default', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', '::>', ':>>', ':>', ':=', ':', '=', '(', '{', '}', '[', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:53:2
+  SYNTAX_ERROR: no viable alternative at input 'inradianassert'
+
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:54:5
+  SYNTAX_ERROR: no viable alternative at input '{(1..'
+
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:54:5
+  SYNTAX_ERROR: extraneous input '..' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'default', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', '::>', ':>>', ':>', ':=', ':', '=', '(', '{', '}', '[', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:54:20
+  SYNTAX_ERROR: extraneous input ')' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'default', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', '::>', ':>>', ':>', ':=', ':', '=', '(', '{', '}', '[', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:55:4
+  SYNTAX_ERROR: no viable alternative at input '{in'
+
+[ERROR] VehicleGeometryAndCoordinateFrames.sysml:65:4
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: CircularImport.sysml
+========================================
+[WARNING] CircularImport.sysml:24:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: PrivateImportTest.sysml
+========================================
+[WARNING] PrivateImportTest.sysml:12:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] PrivateImportTest.sysml:13:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] PrivateImportTest.sysml:14:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] PrivateImportTest.sysml:15:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] PrivateImportTest.sysml:23:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] PrivateImportTest.sysml:24:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] PrivateImportTest.sysml:30:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: QualifiedNameImportTest.sysml
+========================================
+[WARNING] QualifiedNameImportTest.sysml:9:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] QualifiedNameImportTest.sysml:10:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: ServerSequenceModel.sysml
+========================================
+[ERROR] ServerSequenceModel.sysml:30:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceModel.sysml:31:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceModel.sysml:39:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+
+Validating: ServerSequenceModelOutside.sysml
+========================================
+[ERROR] ServerSequenceModelOutside.sysml:11:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceModelOutside.sysml:12:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceModelOutside.sysml:17:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+
+Validating: ServerSequenceOutsideRealization-2.sysml
+========================================
+[ERROR] ServerSequenceOutsideRealization-2.sysml:35:4
+  SYNTAX_ERROR: no viable alternative at input '{entry'
+
+[ERROR] ServerSequenceOutsideRealization-2.sysml:63:25
+  SYNTAX_ERROR: no viable alternative at input 'thenactiondeliveryaccept'
+
+[ERROR] ServerSequenceOutsideRealization-2.sysml:74:55
+  SYNTAX_ERROR: mismatched input '{' expecting {'default', 'meta', ':=', ';', '='}
+
+[ERROR] ServerSequenceOutsideRealization-2.sysml:78:7
+  SYNTAX_ERROR: mismatched input ':>>' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'from', 'of', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', ';', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: ServerSequenceOutsideRealization-3.sysml
+========================================
+[ERROR] ServerSequenceOutsideRealization-3.sysml:141:27
+  SYNTAX_ERROR: no viable alternative at input ':>>publish_messagefrom'
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:141:27
+  SYNTAX_ERROR: extraneous input 'from' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:141:74
+  SYNTAX_ERROR: extraneous input 'to' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:142:3
+  SYNTAX_ERROR: no viable alternative at input '{event'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:143:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:144:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:147:7
+  SYNTAX_ERROR: extraneous input ':>>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:147:78
+  SYNTAX_ERROR: mismatched input 'to' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:147:123
+  SYNTAX_ERROR: missing 'transition' at '{'
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:148:3
+  SYNTAX_ERROR: extraneous input 'event' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:148:38
+  SYNTAX_ERROR: missing '}' at ';'
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:149:8
+  SYNTAX_ERROR: extraneous input 'event' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:150:8
+  SYNTAX_ERROR: extraneous input 'event' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceOutsideRealization-3.sysml:153:7
+  SYNTAX_ERROR: mismatched input ':>>' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'from', 'of', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', ';', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: ServerSequenceRealization-2.sysml
+========================================
+[ERROR] ServerSequenceRealization-2.sysml:30:4
+  SYNTAX_ERROR: no viable alternative at input '{entry'
+
+[ERROR] ServerSequenceRealization-2.sysml:57:25
+  SYNTAX_ERROR: no viable alternative at input 'thenactiondeliveryaccept'
+
+[ERROR] ServerSequenceRealization-2.sysml:79:55
+  SYNTAX_ERROR: mismatched input '{' expecting {'default', 'meta', ':=', ';', '='}
+
+[ERROR] ServerSequenceRealization-2.sysml:83:7
+  SYNTAX_ERROR: mismatched input ':>>' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'from', 'of', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', ';', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: ServerSequenceRealization-3.sysml
+========================================
+[ERROR] ServerSequenceRealization-3.sysml:133:27
+  SYNTAX_ERROR: no viable alternative at input ':>>publish_messagefrom'
+
+[ERROR] ServerSequenceRealization-3.sysml:133:27
+  SYNTAX_ERROR: extraneous input 'from' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] ServerSequenceRealization-3.sysml:133:74
+  SYNTAX_ERROR: extraneous input 'to' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] ServerSequenceRealization-3.sysml:134:3
+  SYNTAX_ERROR: no viable alternative at input '{event'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceRealization-3.sysml:135:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceRealization-3.sysml:136:8
+  SYNTAX_ERROR: no viable alternative at input 'thenevent'
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceRealization-3.sysml:139:7
+  SYNTAX_ERROR: extraneous input ':>>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] ServerSequenceRealization-3.sysml:139:78
+  SYNTAX_ERROR: mismatched input 'to' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] ServerSequenceRealization-3.sysml:139:123
+  SYNTAX_ERROR: missing 'transition' at '{'
+
+[ERROR] ServerSequenceRealization-3.sysml:140:3
+  SYNTAX_ERROR: extraneous input 'event' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceRealization-3.sysml:140:38
+  SYNTAX_ERROR: missing '}' at ';'
+
+[ERROR] ServerSequenceRealization-3.sysml:141:8
+  SYNTAX_ERROR: extraneous input 'event' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceRealization-3.sysml:142:8
+  SYNTAX_ERROR: extraneous input 'event' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+  Suggestions:
+    - Extend
+    - Set
+    - send
+    - exit
+    - end
+
+[ERROR] ServerSequenceRealization-3.sysml:145:7
+  SYNTAX_ERROR: mismatched input ':>>' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'from', 'of', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', ';', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: MassRollup.sysml
+========================================
+[ERROR] MassRollup.sysml:24:38
+  SYNTAX_ERROR: no viable alternative at input 'attributeredefinestotalMass=mass+sum(subcomponents.totalMass.?'
+
+[ERROR] MassRollup.sysml:24:38
+  SYNTAX_ERROR: no viable alternative at input '(subcomponents.totalMass.?'
+
+[ERROR] MassRollup.sysml:24:71
+  SYNTAX_ERROR: extraneous input ')' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] MassRollup.sysml:27:0
+  SYNTAX_ERROR: extraneous input '}' expecting <EOF>
+
+
+Validating: Vehicles.sysml
+========================================
+[ERROR] Vehicles.sysml:26:2
+  SYNTAX_ERROR: extraneous input 'redefines' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] Vehicles.sysml:26:17
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] Vehicles.sysml:28:3
+  SYNTAX_ERROR: extraneous input 'redefines' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] Vehicles.sysml:28:18
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] Vehicles.sysml:32:3
+  SYNTAX_ERROR: extraneous input 'redefines' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] Vehicles.sysml:32:18
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] Vehicles.sysml:33:2
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[WARNING] Vehicles.sysml:15:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Vehicles.sysml:19:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Vehicles.sysml:23:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Vehicles.sysml:36:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: IssueMetadataExample.sysml
+========================================
+[ERROR] IssueMetadataExample.sysml:6:49
+  SYNTAX_ERROR: extraneous input 'about' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] IssueMetadataExample.sysml:7:10
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] IssueMetadataExample.sysml:30:0
+  SYNTAX_ERROR: extraneous input '}' expecting <EOF>
+
+[WARNING] IssueMetadataExample.sysml:4:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: RationaleMetadataExample.sysml
+========================================
+[ERROR] RationaleMetadataExample.sysml:11:50
+  SYNTAX_ERROR: extraneous input 'about' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RationaleMetadataExample.sysml:12:10
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] RationaleMetadataExample.sysml:24:0
+  SYNTAX_ERROR: extraneous input '}' expecting <EOF>
+
+
+Validating: RequirementMetadataExample.sysml
+========================================
+[ERROR] RequirementMetadataExample.sysml:8:38
+  SYNTAX_ERROR: no viable alternative at input 'nonunique;'
+
+[ERROR] RequirementMetadataExample.sysml:13:45
+  SYNTAX_ERROR: no viable alternative at input 'vehicleMassRequirement{'
+
+[ERROR] RequirementMetadataExample.sysml:14:8
+  SYNTAX_ERROR: mismatched input 'doc' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RequirementMetadataExample.sysml:18:17
+  SYNTAX_ERROR: no viable alternative at input '@StatusInfo{status=StatusKind::tbd;risk{'
+
+[ERROR] RequirementMetadataExample.sysml:17:19
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] RequirementMetadataExample.sysml:18:17
+  SYNTAX_ERROR: no viable alternative at input 'risk{'
+
+[ERROR] RequirementMetadataExample.sysml:19:17
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] RequirementMetadataExample.sysml:26:8
+  SYNTAX_ERROR: mismatched input '}' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', ';', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+
+Validating: RiskMetadataExample.sysml
+========================================
+[ERROR] RiskMetadataExample.sysml:12:19
+  SYNTAX_ERROR: no viable alternative at input '{totalRisk{'
+
+[ERROR] RiskMetadataExample.sysml:13:22
+  SYNTAX_ERROR: no viable alternative at input '{probability='
+
+[ERROR] RiskMetadataExample.sysml:17:4
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: HSUVRequirements.sysml
+========================================
+[ERROR] HSUVRequirements.sysml:4:27
+  SYNTAX_ERROR: no viable alternative at input 'Load:'
+
+[ERROR] HSUVRequirements.sysml:6:2
+  SYNTAX_ERROR: extraneous input 'requirement' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] HSUVRequirements.sysml:6:24
+  SYNTAX_ERROR: mismatched input ';' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] HSUVRequirements.sysml:11:38
+  SYNTAX_ERROR: no viable alternative at input 'EcoFriendliness:'
+
+[ERROR] HSUVRequirements.sysml:12:2
+  SYNTAX_ERROR: mismatched input 'requirement' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] HSUVRequirements.sysml:12:36
+  SYNTAX_ERROR: no viable alternative at input 'Emissions:'
+
+[ERROR] HSUVRequirements.sysml:14:2
+  SYNTAX_ERROR: mismatched input '}' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] HSUVRequirements.sysml:15:1
+  SYNTAX_ERROR: mismatched input '}' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] HSUVRequirements.sysml:17:34
+  SYNTAX_ERROR: no viable alternative at input 'Performance:'
+
+[ERROR] HSUVRequirements.sysml:18:2
+  SYNTAX_ERROR: extraneous input 'requirement' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] HSUVRequirements.sysml:18:26
+  SYNTAX_ERROR: mismatched input ';' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] HSUVRequirements.sysml:19:37
+  SYNTAX_ERROR: no viable alternative at input 'FuelEconomy:'
+
+[ERROR] HSUVRequirements.sysml:23:2
+  SYNTAX_ERROR: mismatched input '}' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] HSUVRequirements.sysml:24:2
+  SYNTAX_ERROR: mismatched input 'requirement' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] HSUVRequirements.sysml:27:1
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[WARNING] HSUVRequirements.sysml:5:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] HSUVRequirements.sysml:31:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] HSUVRequirements.sysml:33:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: RequirementDerivationExample.sysml
+========================================
+[ERROR] RequirementDerivationExample.sysml:27:10
+  SYNTAX_ERROR: extraneous input 'requirement' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RequirementDerivationExample.sysml:27:27
+  SYNTAX_ERROR: extraneous input ':' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RequirementDerivationExample.sysml:27:34
+  SYNTAX_ERROR: extraneous input 'by' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RequirementDerivationExample.sysml:28:10
+  SYNTAX_ERROR: extraneous input 'requirement' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RequirementDerivationExample.sysml:28:29
+  SYNTAX_ERROR: extraneous input ':' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RequirementDerivationExample.sysml:28:38
+  SYNTAX_ERROR: extraneous input 'by' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RequirementDerivationExample.sysml:29:10
+  SYNTAX_ERROR: extraneous input 'requirement' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RequirementDerivationExample.sysml:29:29
+  SYNTAX_ERROR: extraneous input ':' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] RequirementDerivationExample.sysml:29:38
+  SYNTAX_ERROR: extraneous input 'by' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: VehicleRequirementDerivation.sysml
+========================================
+[ERROR] VehicleRequirementDerivation.sysml:35:16
+  SYNTAX_ERROR: no viable alternative at input '#original::>'
+
+[ERROR] VehicleRequirementDerivation.sysml:35:16
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] VehicleRequirementDerivation.sysml:36:14
+  SYNTAX_ERROR: no viable alternative at input '#derive::>'
+
+[ERROR] VehicleRequirementDerivation.sysml:36:14
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] VehicleRequirementDerivation.sysml:37:14
+  SYNTAX_ERROR: no viable alternative at input '#derive::>'
+
+[ERROR] VehicleRequirementDerivation.sysml:37:14
+  SYNTAX_ERROR: extraneous input '::>' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'if', 'while', 'loop', 'terminate', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'do', 'not', 'subject', 'for', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'inv', 'individual', 'return', 'snapshot', 'timeslice', ':>>', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+
+Validating: RoomModel.sysml
+========================================
+[WARNING] RoomModel.sysml:1:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] RoomModel.sysml:7:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] RoomModel.sysml:15:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] RoomModel.sysml:22:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] RoomModel.sysml:29:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] RoomModel.sysml:35:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] RoomModel.sysml:43:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] RoomModel.sysml:53:6
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: AliasTest.sysml
+========================================
+[WARNING] AliasTest.sysml:2:39
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: CommentTest.sysml
+========================================
+[WARNING] CommentTest.sysml:2:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] CommentTest.sysml:4:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: EnumerationTest.sysml
+========================================
+[WARNING] EnumerationTest.sysml:27:32
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: FeaturePathTest.sysml
+========================================
+[WARNING] FeaturePathTest.sysml:32:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: ViewTest.sysml
+========================================
+[WARNING] ViewTest.sysml:41:3
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: CartSample.sysml
+========================================
+[WARNING] CartSample.sysml:1:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: EVSample.sysml
+========================================
+[ERROR] EVSample.sysml:6:22
+  SYNTAX_ERROR: extraneous input ''ampere hour'' expecting {'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', 'default', '::>', ':>>', ':>', ':=', ':', ';', '=', '{', '[', '~'}
+
+[ERROR] EVSample.sysml:110:12
+  SYNTAX_ERROR: extraneous input 'require' expecting {PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '}', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] EVSample.sysml:111:16
+  SYNTAX_ERROR: extraneous input ':>>' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] EVSample.sysml:111:32
+  SYNTAX_ERROR: mismatched input '=' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] EVSample.sysml:114:4
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[WARNING] EVSample.sysml:1:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: TimeVaryingAttribute.sysml
+========================================
+[ERROR] TimeVaryingAttribute.sysml:19:26
+  SYNTAX_ERROR: no viable alternative at input ':>>pwrCmd.'
+
+[ERROR] TimeVaryingAttribute.sysml:23:26
+  SYNTAX_ERROR: no viable alternative at input ':>>pwrCmd.'
+
+[ERROR] TimeVaryingAttribute.sysml:41:21
+  SYNTAX_ERROR: no viable alternative at input ':>>pwrCmd.'
+
+[WARNING] TimeVaryingAttribute.sysml:15:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:27:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:28:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:29:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:30:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:31:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:32:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:44:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:45:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:46:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:47:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:48:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] TimeVaryingAttribute.sysml:49:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: Wheel Package - Updated.sysml
+========================================
+[WARNING] Wheel Package - Updated.sysml:9:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Wheel Package - Updated.sysml:13:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Wheel Package - Updated.sysml:22:20
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Wheel Package - Updated.sysml:43:27
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Wheel Package - Updated.sysml:68:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: Vehicle Decomposition - Updated.sysml
+========================================
+[WARNING] Vehicle Decomposition - Updated.sysml:8:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Vehicle Decomposition - Updated.sysml:26:1
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Vehicle Decomposition - Updated.sysml:52:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] Vehicle Decomposition - Updated.sysml:60:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: Vehicle Decomposition.sysml
+========================================
+[WARNING] Vehicle Decomposition.sysml:53:35
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: HSUVDynamics.sysml
+========================================
+[ERROR] HSUVDynamics.sysml:26:26
+  SYNTAX_ERROR: no viable alternative at input 'attributev:Vel[0..*]ordered'
+
+[ERROR] HSUVDynamics.sysml:26:19
+  SYNTAX_ERROR: mismatched input '[' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '**', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '<', '>', '+', '-', '*', '/', '%', '?', '@', '^'}
+
+[ERROR] HSUVDynamics.sysml:26:21
+  SYNTAX_ERROR: mismatched input '..' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '**', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '<', '>', '+', '-', '*', '/', '%', '?', '@', '^'}
+
+[ERROR] HSUVDynamics.sysml:27:27
+  SYNTAX_ERROR: extraneous input 'ordered' expecting {'default', ':=', ';', '=', '{'}
+
+[ERROR] HSUVDynamics.sysml:29:4
+  SYNTAX_ERROR: no viable alternative at input '(1..'
+
+[ERROR] HSUVDynamics.sysml:29:4
+  SYNTAX_ERROR: mismatched input '..' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] HSUVDynamics.sysml:29:15
+  SYNTAX_ERROR: mismatched input ')' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] HSUVDynamics.sysml:29:26
+  SYNTAX_ERROR: extraneous input 'in' expecting {'start', 'done', 'new', 'not', 'this', '(', '{', '-', '!', '~', 'true', 'false', 'null', ID, QUOTED_ID, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[ERROR] HSUVDynamics.sysml:29:31
+  SYNTAX_ERROR: mismatched input ':' expecting {'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '}', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] HSUVDynamics.sysml:29:87
+  SYNTAX_ERROR: mismatched input '}' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+[ERROR] HSUVDynamics.sysml:30:1
+  SYNTAX_ERROR: mismatched input '}' expecting {'transition', 'istype', 'hastype', 'as', 'xor', 'implies', 'meta', '::', '**', '->', '<=', '>=', '==', '!=', '===', '!==', AND, OR, '??', '.', '(', '[', '<', '>', '+', '-', '*', '/', '%', '?', '@', '#', '^'}
+
+
+Validating: VehicleVariabilityModel.sysml
+========================================
+[WARNING] VehicleVariabilityModel.sysml:69:6
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] VehicleVariabilityModel.sysml:95:6
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] VehicleVariabilityModel.sysml:98:7
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] VehicleVariabilityModel.sysml:101:10
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] VehicleVariabilityModel.sysml:112:10
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] VehicleVariabilityModel.sysml:124:6
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] VehicleVariabilityModel.sysml:152:2
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: SysML v2 Spec Annex A SimpleVehicleModel.sysml
+========================================
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:41:53
+  SYNTAX_ERROR: missing 'state' at '{'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:44:30
+  SYNTAX_ERROR: no viable alternative at input 'entryaction'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:76:30
+  SYNTAX_ERROR: no viable alternative at input 'entryaction'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:77:43
+  SYNTAX_ERROR: no viable alternative at input 'dosenseTemperature{'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:89:35
+  SYNTAX_ERROR: no viable alternative at input 'transitionnormal_To_maintenancefirstnormalacceptat'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:94:35
+  SYNTAX_ERROR: no viable alternative at input 'transitionnormal_To_degradedfirstnormalacceptwhen'
+  Suggestions:
+    - then
+    - W
+    - View
+    - view
+    - join
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:96:28
+  SYNTAX_ERROR: missing ';' at 'then'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:164:56
+  SYNTAX_ERROR: extraneous input '{' expecting 'state'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:166:30
+  SYNTAX_ERROR: no viable alternative at input 'entryaction'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:371:35
+  SYNTAX_ERROR: mismatched input ';' expecting {'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', '::>', ':>>', ':>', ':', '{', '~'}
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:372:38
+  SYNTAX_ERROR: mismatched input ';' expecting {'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', '::>', ':>>', ':>', ':', '{', '~'}
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:373:44
+  SYNTAX_ERROR: mismatched input ';' expecting {'specializes', 'redefines', 'subsets', 'references', 'conjugates', 'unions', 'intersects', 'differences', 'disjoint', '::>', ':>>', ':>', ':', '{', '~'}
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:416:21
+  SYNTAX_ERROR: no viable alternative at input 'enum='
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:417:21
+  SYNTAX_ERROR: no viable alternative at input 'enum='
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:418:21
+  SYNTAX_ERROR: no viable alternative at input 'enum='
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:424:30
+  SYNTAX_ERROR: no viable alternative at input 'distancePerVolume:>'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:425:28
+  SYNTAX_ERROR: no viable alternative at input 'timePerDistance:>'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:426:30
+  SYNTAX_ERROR: no viable alternative at input 'volumePerDistance:>'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:427:26
+  SYNTAX_ERROR: no viable alternative at input 'volumePerTime:>'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:430:16
+  SYNTAX_ERROR: no viable alternative at input 'kpl:'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:431:16
+  SYNTAX_ERROR: no viable alternative at input 'rpm:'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:432:15
+  SYNTAX_ERROR: no viable alternative at input 'kW:'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:456:43
+  SYNTAX_ERROR: no viable alternative at input 'nonunique;'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:463:55
+  SYNTAX_ERROR: no viable alternative at input 'nonunique;'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:469:56
+  SYNTAX_ERROR: no viable alternative at input 'nonunique;'
+
+[ERROR] SysML v2 Spec Annex A SimpleVehicleModel.sysml:484:4
+  SYNTAX_ERROR: mismatched input '}' expecting {<EOF>, PART_DEF, ACTION_DEF, STATE_DEF, REQUIREMENT_DEF, USE_CASE_DEF, VIEW_DEF, VIEWPOINT_DEF, CONSTRAINT_DEF, ATTRIBUTE_DEF, ENUM_DEF, CONNECTION_DEF, INTERFACE_DEF, ALLOCATION_DEF, PORT_DEF, ITEM_DEF, CALC_DEF, ANALYSIS_DEF, CASE_DEF, VERIFICATION_DEF, CONCERN_DEF, RENDERING_DEF, OCCURRENCE_DEF, FLOW_DEF, METADATA_DEF, INDIVIDUAL_DEF, ASSOC_STRUCT, USE_CASE, 'package', 'import', 'public', 'private', 'protected', 'namespace', 'datatype', 'class', 'struct', 'assoc', 'behavior', 'step', 'function', 'predicate', 'interaction', 'metaclass', 'classifier', 'type', 'feature', 'connector', 'binding', 'part', 'action', 'state', 'requirement', 'view', 'viewpoint', 'constraint', 'attribute', 'enum', 'connection', 'interface', 'allocation', 'port', 'item', 'calc', 'analysis', 'case', 'verification', 'concern', 'rendering', 'occurrence', 'first', 'then', 'start', 'done', 'succession', 'transition', 'decide', 'merge', 'fork', 'join', 'perform', 'exhibit', 'satisfy', 'allocate', 'connect', 'bind', 'flow', 'message', 'include', 'actor', 'stakeholder', 'dependency', 'abstract', 'variation', 'variant', 'readonly', 'derived', 'end', 'ordered', 'nonunique', 'parallel', 'composite', 'portion', 'in', 'out', 'inout', 'ref', 'constant', 'doc', 'comment', 'metadata', 'rep', 'language', 'locale', 'assert', 'objective', 'accept', 'send', 'new', 'not', 'subject', 'alias', 'assign', 'event', 'this', 'library', 'standard', 'individual', 'snapshot', 'timeslice', '(', '{', '-', '!', '~', '@', '#', 'true', 'false', 'null', ID, QUOTED_ID, UNRESTRICTED_NAME, HEX_INTEGER, BINARY_INTEGER, INTEGER, REAL, DECIMAL, STRING}
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:2:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:218:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:408:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:429:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:455:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:458:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:549:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:552:47
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:575:20
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:680:20
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:695:20
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:736:20
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:738:20
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:799:40
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:836:40
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:861:51
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:890:28
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:891:28
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:917:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:926:47
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:940:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:955:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:973:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1019:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1102:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1126:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1143:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1206:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1223:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1266:24
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1283:24
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1300:24
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1325:20
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1330:20
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1383:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1403:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1405:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1418:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1427:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1449:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1492:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1504:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1506:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1508:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] SysML v2 Spec Annex A SimpleVehicleModel.sysml:1556:12
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+
+========================================
+VALIDATION SUMMARY
+========================================
+Files validated: 95
+Files with errors: 30
+Total errors: 231
+Total warnings: 197
+
+? VALIDATION FAILED

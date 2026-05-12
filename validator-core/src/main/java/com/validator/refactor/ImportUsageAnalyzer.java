@@ -75,6 +75,11 @@ public class ImportUsageAnalyzer {
             return;
         }
 
+        // Skip import declarations to avoid counting the imported symbol itself as "used"
+        if (tree.getClass().getSimpleName().equals("ImportDeclarationContext")) {
+            return;
+        }
+
         // If this is a terminal node, check if it's an identifier
         if (tree instanceof TerminalNode) {
             String text = tree.getText();

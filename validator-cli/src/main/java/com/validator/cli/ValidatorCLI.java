@@ -44,7 +44,9 @@ public class ValidatorCLI implements Callable<Integer> {
 
     @Option(
         names = {"-s", "--suggestions"},
-        description = "Enable intelligent error suggestions (spelling, imports, types)"
+        negatable = true,
+        fallbackValue = "true",
+        description = "Enable intelligent error suggestions (spelling, imports, types) (default: true)"
     )
     private boolean suggestions = true;
 
