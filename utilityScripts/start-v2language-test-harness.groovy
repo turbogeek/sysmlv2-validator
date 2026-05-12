@@ -73,7 +73,7 @@ import com.nomagic.magicdraw.openapi.uml.SessionManager
 class SysMLv2TestHarness {
     
     static final int DEFAULT_PORT = 8770
-    static final String SCRIPTS_DIR = "E:\\_Documents\\git\\SysMLv2ClientAPI\\scripts"
+    static final String SCRIPTS_DIR = new File(System.getProperty("user.home"), "Documents/GitHub/sysmlv2-validator/utilityScripts").getAbsolutePath()
     
     static HttpServer server
     static boolean serverRunning = false
