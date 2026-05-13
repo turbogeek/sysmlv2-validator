@@ -5,7 +5,7 @@
  * lint warnings at the element, package, and file level.
  */
 package LintExamples {
-    import Validation::*;
+     private import Validation::*;
 
     /* ========================================================================
      * Example 1: Suppressing warnings for a specific element
@@ -60,6 +60,7 @@ package LintExamples {
         maxNestingDepth = 3;
     }
     package PublicAPI {
+        private import Validation::*;
         doc /* Public API for vehicle systems */
 
         part def Vehicle {
@@ -68,7 +69,7 @@ package LintExamples {
             attribute mass : Real;
             part engine : Engine;
         }
-
+// this is a single line comment
         part def Engine {
             doc /* Engine providing propulsion */
 
@@ -133,7 +134,7 @@ package LintExamples {
         category = "documentation";
         severity = "error";
     }
-    package StrictDocumentation {
+    package StrictDocumentation{
         doc /* This package requires full documentation */
 
         /**
@@ -142,7 +143,38 @@ package LintExamples {
         part def WellDocumented {
             doc /* This part demonstrates proper documentation */
 
-            attribute value : Real;
+            attribute value1 : Real;
+            attribute  'value' : Real{
+            doc /* this is an attribute named value that without the quotes would be a reserved word.
+            From the sysmlv2 specification:
+            
+            An unrestricted name provides a way to represent a name that contains any character. 
+            It is represented as a non-empty sequence of characters surrounded by single quotes. 
+            The name consists of the characters within the single quotes – the single quotes are 
+            not included as part of the represented name. The characters within the single quotes 
+            may not include non-printable characters (including backspace, tab and newline).
+            However, these characters may be included as part of the name itself through use 
+            of an escape sequence. In addition, the single quote character or the backslash 
+            character may only be included within the name by using an escape sequence.
+
+            Examples:
+                '+'
+                'circuits in line'
+                'On/Off Switch'
+                'Ångström'
+
+            An escape sequence is a sequence of two text characters starting with a backslash 
+            as an escape character, which actually denotes only a single character (except for 
+            the newline escape sequence, which represents however many characters is necessary 
+            to represent an end of line in a specific implementation). See [KerML, 8.2.2.3] 
+            for a complete description of unrestricted names and escape sequences.
+
+            */
+
+            }
+            attribute 'attribute': Real{
+            doc /* this is an attribute named attribute that without the quotes would be a reserved word*/
+            }
         }
     }
 

@@ -45,11 +45,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                 Center;
                 Right;
             }
-            enum def LineJumpsToEnum {
-                None;
-                HorizontalLine;
-                VerticalLine;
-            }
             view def SymbolStyle {
                 attribute lineWidth : Integer default 1 {
                     doc locale "en" /* Specify the width of the symbol's outline.*/
@@ -81,16 +76,11 @@ library package <DS_Styles> DassaultSystemesStyles {
                 attribute textVerticalPosition : TextVerticalPositionEnum default textVerticalPosition::Top {
                     doc /* Specify the element name position for the symbol. */
                 }
-                attribute compartmentFillColor : Color default "#FFF0F0F0" {
-                    doc /* Specify the color of the symbol's compartments.*/
-                }
-                attribute compartmentTextColor : Color default "#000000" {
-                    doc /* Specify the color for the text in the symbol's compartments.*/
-                }
+                attribute compartmentFillColor : Color default "#FFF0F0F0";
+                attribute compartmentTextColor : Color default "#000000";
             }
-            view def SymbolicViewStyle :> SymbolStyle, ElementStyle {
+            view def SymbolicViewStyle :> SymbolStyle {
                 attribute useGradientFill : Boolean default false;
-                attribute showLineJumpsTo : LineJumpsToEnum default showLineJumpsTo::HorizontalLine;
             }
             view def BarShapeStyle :> ShapeStyle {
                 attribute orientation : OrientationEnum default orientation::Horizontal {
@@ -109,11 +99,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                 }
                 attribute showName : Boolean default true {
                     doc /* Specify whether the element's declared name should be displayed on the element symbol.*/
-                }
-            }
-            view def CommentStyle :> ElementStyle {
-                attribute showLocale : Boolean default true {
-                    doc /* Specify whether the comment's locale should be displayed on the element symbol.*/
                 }
             }
             view def ElementTrimmableTextStyle :> ElementStyle {
@@ -178,22 +163,11 @@ library package <DS_Styles> DassaultSystemesStyles {
                     doc /* Specify whether the rectangular shape symbol's corners should be rounded. */
                 }
             }
-            view def NoteStyle :> ShapeStyle {
-                #InvisibleInDialog attribute :>> contentFillColor;
-                #InvisibleInDialog attribute :>> textVerticalPosition;
-                #InvisibleInDialog attribute :>> compartmentFillColor;
-                #InvisibleInDialog attribute :>> compartmentTextColor;
-            }
-            view def AnchorStyle :> PathStyle;
         }
         package SysMLStyles {
             private import KerMLStyles::*;
             private import ScalarValues::Boolean;
-            view def SwimlanesStyle :> ShapeStyle {
-                attribute lineStyle : LineStyleEnum default lineStyle::Dashed {
-                    doc /* Specify the line style for the swimlane symbol. */
-                }
-            }
+            view def SwimlanesStyle :> ShapeStyle;
             view def MetadataCompartmentStyle :> CompartmentStyle, ElementTrimmableTextStyle;
             view def FeaturesOfMetadataCompartmentStyle :> CompartmentStyle, ElementTrimmableTextStyle;
             view def DocumentationCompartmentStyle :> CompartmentStyle, ElementTrimmableTextStyle;
@@ -247,9 +221,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                     return : ScalarValues::Boolean;
                 }
             }
-            part def ByElementCondition :> Condition {
-                ref item dependencyOwner : KerML::Element;
-            }
         }
         part def Policy {
             part rule [*];
@@ -279,22 +250,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                     ref item :>> elementMetaclass = (SysML::Systems::ViewUsage.metadata, SysML::Systems::ViewDefinition.metadata);
                 }
                 view :>> style : AbstractLightBlueStyle;
-            }
-            /* ---------STYLE SHEET---------- */
-            part styleSheetRule :> rule {
-                part :>> condition : FreeFormCondition {
-                    calc :>> test {
-                        DS_Functions::IsSpecific(element, StyleSheet.metadata)
-                    }
-                }
-                view :>> style : ShapeStyle, TypeStyle {
-                    attribute :>> useFillColor default false;
-                    attribute :>> showSpecialization default false;
-                    part rulesCompartment : StyleSheetRulesCompartmentStyle {
-                        attribute :>> showCompartment default true;
-                        attribute :>> showSpecialization default false;
-                    }
-                }
             }
             /* -------------PART/PORT---------*/
             part partPortRule :> rule {
@@ -432,6 +387,7 @@ library package <DS_Styles> DassaultSystemesStyles {
                 view :>> style : BarShapeStyle, FeatureStyle {
                     #InvisibleInDialog attribute :>> fillColor default "#FFFFFF";
                     #InvisibleInDialog attribute :>> useFillColor;
+                    attribute :>> fillColor default "#FFFFFF";
                     attribute :>> textColor default "#000000";
                     attribute :>> penColor default "#424242";
                     #InvisibleInDialog attribute :>> contentFillColor;
@@ -582,7 +538,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                     attribute :>> penColor default "#123D15";
                     attribute :>> lineWidth default 1;
                     attribute :>> textColor default "#000000";
-                    attribute :>> compartmentFillColor default "#F6FBF6";
                     part :>> metadataCompartment {
                         :>> showCompartment default true;
                         :>> showFullText default true;
@@ -596,8 +551,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                 }
                 view :>> style : AbstractGreyStyle {
                     #InvisibleInDialog attribute :>> contentFillColor;
-                    #InvisibleInDialog attribute :>> compartmentFillColor;
-                    #InvisibleInDialog attribute :>> compartmentTextColor;
                 }
             }
             part docRule :> rule {
@@ -607,8 +560,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                 view :>> style : AbstractWhiteStyle {
                     attribute :>> wrap default true;
                     #InvisibleInDialog attribute :>> contentFillColor;
-                    #InvisibleInDialog attribute :>> compartmentFillColor;
-                    #InvisibleInDialog attribute :>> compartmentTextColor;
                 }
             }
             part commentRule :> rule {
@@ -618,8 +569,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                 view :>> style : AbstractYellowStyle {
                     attribute :>> wrap default true;
                     #InvisibleInDialog attribute :>> contentFillColor;
-                    #InvisibleInDialog attribute :>> compartmentFillColor;
-                    #InvisibleInDialog attribute :>> compartmentTextColor;
                 }
             }
             /* -----------------TEXTBOX-------------*/
@@ -627,16 +576,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                 part :>> style : TextBoxStyle {
                     attribute :>> useFillColor default false;
                     #InvisibleInDialog attribute :>> contentFillColor;
-                    #InvisibleInDialog attribute :>> compartmentFillColor;
-                    #InvisibleInDialog attribute :>> compartmentTextColor;
-                }
-            }
-            /* ---------------------NOTE-------------------*/
-            part noteRule :> rule {
-                view :>> style : NoteStyle {
-                    attribute :>> penColor default "#8C4600";
-                    attribute :>> fillColor default "#FFE0B3";
-                    attribute :>> wrap default true;
                 }
             }
             /* -----------------SEPARATORS------------- */
@@ -693,18 +632,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                     #InvisibleInDialog attribute :>> showName;
                     #InvisibleInDialog attribute :>> fillColor;
                     #InvisibleInDialog attribute :>> useFillColor;
-                }
-            }
-            part removePropertiesSymbolicView :> rule {
-                view :>> style : SymbolicViewStyle, ElementStyle {
-                    #InvisibleInDialog attribute :>> showShortName;
-                    #InvisibleInDialog attribute :>> showName;
-                    #InvisibleInDialog attribute :>> fillColor;
-                    #InvisibleInDialog attribute :>> useFillColor;
-                    #InvisibleInDialog attribute :>> textColor;
-                    #InvisibleInDialog attribute :>> font;
-                    #InvisibleInDialog attribute :>> wrap;
-                    #InvisibleInDialog attribute :>> lineWidth;
                 }
             }
             /* -----------suppress compartment rules for usage/definition---------- */
@@ -819,10 +746,6 @@ library package <DS_Styles> DassaultSystemesStyles {
             view def AbstractWhiteOnBorderStyle :> ShapeOnBorderStyle {
                 attribute :>> fillColor default "#FFFFFF";
                 attribute :>> penColor default "#FF424242";
-            }
-            view def AbstractLightOrangeStyle :> SymbolStyle {
-                attribute :>> penColor default "#8C4600";
-                attribute :>> fillColor default "#FFE0B3";
             }
         }
         package CompartmentVisibilityDefinitions {

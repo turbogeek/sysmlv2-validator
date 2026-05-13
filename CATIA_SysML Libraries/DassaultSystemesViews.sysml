@@ -10,13 +10,12 @@ library package <DS_Views> DassaultSystemesViews {
             part effectiveStyleSheets : StyleSheet [*] default (explicitlyAppliedStyleSheets, projectActiveStyleSheets);
             part explicitlyAppliedStyleSheets : StyleSheet [*];
             part projectActiveStyleSheets : StyleSheet [*] = ByProjectStyleSheetCollector(self);
-            render Views::asInterconnectionDiagram;
             calc def ByProjectStyleSheetCollector {
-                in cd [1];
+                in cd;
                 return : StyleSheet [*];
                 rep projectStyleSheetCollectorScript language "Groovy" /* com.dassault_systemes.modeler.sysml.diagram.ModelBasedStyleSheetCollector.findStyleSheetsByProject(cd); */
-                rep projectStyleSheetCollectorScriptJava language "JavaMethod" /* com.dassault_systemes.modeler.sysml.diagram.ModelBasedStyleSheetCollector.findStyleSheetsByProject */
             }
+            render Views::asInterconnectionDiagram;
         }
         abstract view def <bsv> 'Base Symbolic View' :> sv {
             part baseViewPalette : ViewPalettes::BasePalette :>> palette;
@@ -36,10 +35,6 @@ library package <DS_Views> DassaultSystemesViews {
         rendering def StringCellRendering :> TableCellRendering;
         abstract view def ColumnView {
             attribute isMultiline [0..1] : Boolean;
-            attribute pinning : ColumnPinning [0..1];
-            attribute sorting : ColumnSorting [0..1];
-            attribute sortingOrder : Integer [0..1];
-            attribute width : Integer [0..1];
         }
         view def ColumnByFeatureView :> ColumnView {
             ref item columnFeature [0..1] : KerML::Core::Feature;
@@ -52,21 +47,6 @@ library package <DS_Views> DassaultSystemesViews {
         }
         abstract view def <bt> 'Base Table' :> bgv {
             render asTable;
-            part creationDialog [0..1] : Dialogs::Dialog;
-            attribute isCompact [0..1] : Boolean;
-            attribute isHierarchical [0..1] : Boolean;
-            part featureByCondition [0..1] : Predicates::Condition {
-                attribute isSubclassifiersIncluded [0..1] : Boolean;
-            }
-            attribute maxDisplayedValues [0..1] : Integer;
-        }
-        enum def ColumnSorting {
-            asc;
-            desc;
-        }
-        enum def ColumnPinning {
-            left;
-            right;
         }
     }
     package SymbolicViews {
@@ -92,6 +72,14 @@ library package <DS_Views> DassaultSystemesViews {
         private import Actions::ForLoopAction::*;
         private import Actions::WhileLoopAction::*;
         private import SequenceFunctions::*;
+        view def NonStandardLibraryElementFilter {
+            filter DS_Functions::IsNonStandardLibraryElement();
+            doc /* This view definition excludes elements from the standard library.*/
+        }
+        view def EssentialElementsFilter {
+            filter DS_Functions::IsEssentialElement();
+            doc /* This view definition filters out various elements that are not supposed to be exposed.*/
+        }
         view def TreeView :> EssentialElementsFilter, NonStandardLibraryElementFilter {
             doc /* This view definition displays the common elements in a tree view style.*/
             render Views::asTreeDiagram;
@@ -135,14 +123,6 @@ library package <DS_Views> DassaultSystemesViews {
             doc /* This view definition displays the states as nested shapes, with transitions between them represented as paths.*/
             filter istype StateUsage | istype StateDefinition | istype TransitionUsage | istype ActionUsage | istype SuccessionAsUsage;
         }
-        view def EssentialElementsFilter {
-            filter DS_Functions::IsEssentialElement(self);
-            doc /* This view definition filters out various elements that are not supposed to be exposed.*/
-        }
-        view def NonStandardLibraryElementFilter {
-            filter DS_Functions::IsNonStandardLibraryElement(self);
-            doc /* This view definition excludes elements from the standard library.*/
-        }
     }
     package TabularViews {
         private import CoreViews::*;
@@ -157,7 +137,7 @@ library package <DS_Views> DassaultSystemesViews {
                 view 'Declared Short Name' : ColumnByFeatureView :> column {
                     ref item :>> columnFeature = declaredShortName meta Feature;
                 }
-                view 'Documentation Body' : ColumnByExpressionView :> column {
+                view Documentation : ColumnByExpressionView :> column {
                     attribute :>> isMultiline default true;
                     render rendering : StringCellRendering :>> asTableCell {
                         calc :>> getValue {
@@ -176,9 +156,6 @@ library package <DS_Views> DassaultSystemesViews {
                     ref item :>> columnFeature = ownedElement meta Feature;
                 }
             }
-            part : DS_Styles::CoreStylesComponents::Predicates::ByElementMetaclassCondition :>> featureByCondition {
-                ref item :>> elementMetaclass default (Element.metadata, Feature.metadata, Type.metadata);
-            }
         }
         view def <rt> 'Requirements Table' :> bt, NonStandardLibraryElementFilter {
             filter @RequirementUsage or @RequirementDefinition;
@@ -186,10 +163,10 @@ library package <DS_Views> DassaultSystemesViews {
                 view 'Declared Name' : ColumnByFeatureView :> column {
                     ref item :>> columnFeature = declaredName meta Feature;
                 }
-                view 'Req ID' : ColumnByFeatureView :> column {
+                view 'Req Id' : ColumnByFeatureView :> column {
                     ref item :>> columnFeature = declaredShortName meta Feature;
                 }
-                view 'Documentation Body' : ColumnByExpressionView :> column {
+                view Documentation : ColumnByExpressionView :> column {
                     attribute :>> isMultiline default true;
                     render rendering : StringCellRendering :>> asTableCell {
                         calc :>> getValue {
@@ -198,9 +175,6 @@ library package <DS_Views> DassaultSystemesViews {
                         }
                     }
                 }
-            }
-            part : DS_Styles::CoreStylesComponents::Predicates::ByElementMetaclassCondition :>> featureByCondition {
-                ref item :>> elementMetaclass default (Element.metadata, Feature.metadata, Type.metadata, RequirementDefinition.metadata, RequirementUsage.metadata);
             }
         }
     }
@@ -256,14 +230,6 @@ library package <DS_Views> DassaultSystemesViews {
             attribute :>> hasVisibleLabels default true;
             attribute :>> label default "Common";
             attribute :>> description default "Common";
-            part noteMenu : Palette::ButtonsCategory :> abstractButtons {
-                part noteButton : Palette::Button :> abstractButtons {
-                    perform action : Operations::OperationFromCode :>> operation { in ref = noteAction; }
-                }
-                part noteAnchorButton : Palette::Button :> abstractButtons {
-                    perform action : Operations::OperationFromCode :>> operation { in ref = noteAnchorAction; }
-                }
-            }
             part textBoxMenu : Palette::ButtonsCategory :> abstractButtons {
                 part textBoxButton : Palette::Button :> abstractButtons {
                     perform action : Operations::OperationFromCode :>> operation { in ref = textBoxAction; }
@@ -290,13 +256,8 @@ library package <DS_Views> DassaultSystemesViews {
             part commentButton : Palette::Button :> abstractButtons {
                 perform action : Operations::OperationFromCode :>> operation { in ref = commentAction; }
             }
-            part imageMenu : Palette::ButtonsCategory :> abstractButtons {
-                part imageButton : Palette::Button :> abstractButtons {
-                    perform action : Operations::OperationFromCode :>> operation { in ref = imageAction; }
-                }
-                part imageAttributeDefButton : Palette::Button :> abstractButtons {
-                    perform action : Operations::OperationFromCode :>> operation { in ref = imageAttributeDefAction; }
-                }
+            part imageButton : Palette::Button :> abstractButtons {
+                perform action : Operations::OperationFromCode :>> operation { in ref = imageAction; }
             }
         }
         part def BasePalette :> Palette::Palette {
@@ -501,13 +462,8 @@ library package <DS_Views> DassaultSystemesViews {
                         perform action : Operations::OperationFromCode :>> operation { in ref = actionDefAction; }
                     }
                 }
-                part performActionMenu : Palette::ButtonsCategory :> abstractButtons {
-                    part performActionAsPathButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = performActionAsPathAction; }
-                    }
-                    part performActionButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = performActionAction; }
-                    }
+                part performActionButton : Palette::Button :> abstractButtons {
+                    perform action : Operations::OperationFromCode :>> operation { in ref = performActionAction; }
                 }
                 part inputMenu : Palette::ButtonsCategory :> abstractButtons {
                     part inRefButton : Palette::Button :> abstractButtons {
@@ -604,19 +560,11 @@ library package <DS_Views> DassaultSystemesViews {
                         perform action : Operations::OperationFromCode :>> operation { in ref = stateDefAction; }
                     }
                 }
-                part exhibitStateMenu : Palette::ButtonsCategory :> abstractButtons {
-                    part exhibitStateAsPathButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = exhibitStateAsPathAction; }
-                    }
-                    part exhibitStateButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = exhibitStateAction; }
-                    }
+                part exhibitStateButton : Palette::Button :> abstractButtons {
+                    perform action : Operations::OperationFromCode :>> operation { in ref = exhibitStateAction; }
                 }
                 part transitionButton : Palette::Button :> abstractButtons {
                     perform action : Operations::OperationFromCode :>> operation { in ref = transitionAction; }
-                }
-                part startButton : Palette::Button :> abstractButtons {
-                    perform action : Operations::OperationFromCode :>> operation { in ref = startAction; }
                 }
             }
             part casesCategory : Palette::ButtonsCategory :> buttonCategories {
@@ -633,24 +581,8 @@ library package <DS_Views> DassaultSystemesViews {
                     }
                     :>> focusedButton default useCaseButton;
                 }
-                part includeUseCaseMenu : Palette::ButtonsCategory :> abstractButtons {
-                    part includeUseCaseAsPathButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = includeUseCaseAsPathAction; }
-                    }
-                    part includeUseCaseButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = includeUseCaseAction; }
-                    }
-                }
-                part verificationMenu : Palette::ButtonsCategory :> abstractButtons {
-                    part verificationButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = verificationAction; }
-                    }
-                    part verificationDefButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = verificationDefAction; }
-                    }
-                }
-                part verificationAsPathButton : Palette::Button :> abstractButtons {
-                    perform action : Operations::OperationFromCode :>> operation { in ref = verificationAsPathAction; }
+                part includeUseCaseButton : Palette::Button :> abstractButtons {
+                    perform action : Operations::OperationFromCode :>> operation { in ref = includeUseCaseAction; }
                 }
             }
             part requirementsConstraintsCategory : Palette::ButtonsCategory :> buttonCategories {
@@ -667,13 +599,8 @@ library package <DS_Views> DassaultSystemesViews {
                     }
                     :>> focusedButton default requirementButton;
                 }
-                part satisfyRequirementMenu : Palette::ButtonsCategory :> abstractButtons {
-                    part satisfyRequirementAsPathButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = satisfyRequirementAsPathAction; }
-                    }
-                    part satisfyRequirementButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = satisfyRequirementAction; }
-                    }
+                part satisfyRequirementButton : Palette::Button :> abstractButtons {
+                    perform action : Operations::OperationFromCode :>> operation { in ref = satisfyRequirementAction; }
                 }
                 part concernMenu : Palette::ButtonsCategory :> abstractButtons {
                     part concernButton : Palette::Button :> abstractButtons {
@@ -693,16 +620,8 @@ library package <DS_Views> DassaultSystemesViews {
                     }
                     :>> focusedButton default constraintButton;
                 }
-                part assertConstraintMenu : Palette::ButtonsCategory :> abstractButtons {
-                    part assertConstraintAsPathButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = assertConstraintAsPathAction; }
-                    }
-                    part assertConstraintButton : Palette::Button :> abstractButtons {
-                        perform action : Operations::OperationFromCode :>> operation { in ref = assertConstraintAction; }
-                    }
-                }
-                part requirementConstraintAsPathButton : Palette::Button :> abstractButtons {
-                    perform action : Operations::OperationFromCode :>> operation { in ref = requirementConstraintAsPath; }
+                part assertConstraintButton : Palette::Button :> abstractButtons {
+                    perform action : Operations::OperationFromCode :>> operation { in ref = assertConstraintAction; }
                 }
             }
         }
@@ -779,8 +698,6 @@ library package <DS_Views> DassaultSystemesViews {
             attribute magnetAction : String = "MAGNET_ACTION";
             attribute textBoxAction : String = "ADD_TEXT_BOX";
             attribute textBoxHtmlAction : String = "ADD_HTML_TEXT_BOX";
-            attribute noteAction : String = "ADD_NOTE";
-            attribute noteAnchorAction : String = "ADD_NOTE_ANCHOR";
             attribute horizontalSeparatorAction : String = "ADD_SEPARATOR";
             attribute verticalSeparatorAction : String = "ADD_SEPARATOR_VERTICAL";
             attribute rectangularSeparatorAction : String = "ADD_RECTANGULAR_SHAPE";
@@ -824,7 +741,6 @@ library package <DS_Views> DassaultSystemesViews {
             attribute actionAction : String = "ADD_ACTION";
             attribute actionDefAction : String = "ADD_ACTION_DEF";
             attribute performActionAction : String = "ADD_PERFORM_ACTION";
-            attribute performActionAsPathAction : String = "ADD_PERFORM_ACTION_AS_PATH";
             attribute inputRefAction : String = "ADD_INPUT_REF";
             attribute inputItemAction : String = "ADD_INPUT_ITEM";
             attribute inputAttributeAction : String = "ADD_INPUT_ATTRIBUTE";
@@ -850,30 +766,21 @@ library package <DS_Views> DassaultSystemesViews {
             attribute stateAction : String = "ADD_STATE";
             attribute stateDefAction : String = "ADD_STATE_DEF";
             attribute exhibitStateAction : String = "ADD_EXHIBIT_STATE";
-            attribute exhibitStateAsPathAction : String = "ADD_EXHIBIT_STATE_AS_PATH";
             attribute transitionAction : String = "ADD_TRANSITION";
             attribute useCaseAction : String = "ADD_USE_CASE";
             attribute useCaseDefAction : String = "ADD_USE_CASE_DEF";
             attribute includeUseCaseAction : String = "ADD_INCLUDE_USE_CASE";
-            attribute includeUseCaseAsPathAction : String = "ADD_INCLUDE_USE_CASE_AS_PATH";
             attribute requirementAction : String = "ADD_REQUIREMENT";
             attribute requirementDefAction : String = "ADD_REQUIREMENT_DEF";
             attribute satisfyRequirementAction : String = "ADD_SATISFY_REQUIREMENT";
-            attribute satisfyRequirementAsPathAction : String = "ADD_SATISFY_REQUIREMENT_AS_PATH";
             attribute concernAction : String = "ADD_CONCERN";
             attribute concernDefAction : String = "ADD_CONCERN_DEF";
             attribute constraintAction : String = "ADD_CONSTRAINT";
             attribute constraintDefAction : String = "ADD_CONSTRAINT_DEF";
             attribute assertConstraintAction : String = "ADD_ASSERT_CONSTRAINT";
-            attribute assertConstraintAsPathAction : String = "ADD_ASSERT_CONSTRAINT_AS_PATH";
-            attribute verificationAction : String = "ADD_VERIFICATION_CASE";
-            attribute verificationDefAction : String = "ADD_VERIFICATION_CASE_DEF";
-            attribute verificationAsPathAction : String = "ADD_VERIFY_AS_PATH";
             attribute metadataDefAction : String = "ADD_METADATA_DEF";
             attribute imageAction : String = "ADD_IMAGE";
-            attribute imageAttributeDefAction : String = "ADD_IMAGE_ATTRIBUTE_DEF";
             attribute entryAction : String = "ADD_ENTRY_ACTION";
-            attribute requirementConstraintAsPath : String = "ADD_REQUIREMENT_CONSTRAINT_AS_PATH";
         }
         package ElementTemplates {
             private import RequirementDerivation::*;

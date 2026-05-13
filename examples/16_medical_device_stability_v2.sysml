@@ -228,9 +228,16 @@ package MedicalDeviceStability {
 		objective : MaximizeObjective;
 
 		calc :>> evaluationFunction {
+			in wheelBase : WheelBase;
+			return : Real = wheelBase.baseRadius * 10.0;
+		}
+		/* Error test for using keyword part as a variable name
+		
+		calc :>> evaluationFunction {
 			in part : WheelBase;
 			return : Real = part.baseRadius * 10.0;
 		}
+*/
 
 		return part : WheelBase;
 	}
