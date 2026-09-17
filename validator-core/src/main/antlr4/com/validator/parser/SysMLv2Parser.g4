@@ -35,15 +35,15 @@ namespaceBodyElement
     ;
 
 packageDeclaration
-    : prefixes? PACKAGE qualifiedName packageBody
+    : prefixes? PACKAGE shortName? qualifiedName? packageBody
     ;
 
 libraryPackageDeclaration
-    : prefixes? STANDARD? LIBRARY PACKAGE qualifiedName packageBody
+    : prefixes? STANDARD? LIBRARY PACKAGE shortName? qualifiedName? packageBody
     ;
 
 namespaceDeclaration
-    : prefixes? NAMESPACE qualifiedName namespaceBody
+    : prefixes? NAMESPACE shortName? qualifiedName? namespaceBody
     ;
 
 packageBody
@@ -270,27 +270,27 @@ member
 // ============================================================================
 
 partDefinition
-    : PART_DEF declarationName typeRelationships? definitionBody
+    : PART_DEF declarationName? typeRelationships? definitionBody
     ;
 
 actionDefinition
-    : ACTION_DEF declarationName typeRelationships? definitionBody
+    : ACTION_DEF declarationName? typeRelationships? definitionBody
     ;
 
 stateDefinition
-    : STATE_DEF declarationName typeRelationships? stateDefinitionBody
+    : STATE_DEF declarationName? typeRelationships? stateDefinitionBody
     ;
 
 requirementDefinition
-    : REQUIREMENT_DEF declarationName typeRelationships? requirementBody
+    : REQUIREMENT_DEF declarationName? typeRelationships? requirementBody
     ;
 
 viewDefinition
-    : VIEW_DEF declarationName typeRelationships? viewBody
+    : VIEW_DEF declarationName? typeRelationships? viewBody
     ;
 
 viewpointDefinition
-    : VIEWPOINT_DEF declarationName typeRelationships? viewpointBody
+    : VIEWPOINT_DEF declarationName? typeRelationships? viewpointBody
     ;
 
 viewpointBody
@@ -305,7 +305,7 @@ viewpointBodyElement
     ;
 
 constraintDefinition
-    : CONSTRAINT_DEF declarationName typeRelationships? constraintDefBody
+    : CONSTRAINT_DEF declarationName? typeRelationships? constraintDefBody
     ;
 
 constraintDefBody
@@ -326,64 +326,64 @@ attributeDefinition
     ;
 
 portDefinition
-    : PORT_DEF declarationName typeRelationships? definitionBody
+    : PORT_DEF declarationName? typeRelationships? definitionBody
     ;
 
 connectionDefinition
-    : CONNECTION_DEF declarationName typeRelationships? definitionBody
+    : CONNECTION_DEF declarationName? typeRelationships? definitionBody
     ;
 
 interfaceDefinition
-    : INTERFACE_DEF declarationName typeRelationships? definitionBody
+    : INTERFACE_DEF declarationName? typeRelationships? definitionBody
     ;
 
 allocationDefinition
-    : ALLOCATION_DEF declarationName typeRelationships? definitionBody
+    : ALLOCATION_DEF declarationName? typeRelationships? definitionBody
     ;
 
 itemDefinition
-    : INDIVIDUAL? ITEM_DEF declarationName typeRelationships? definitionBody
+    : INDIVIDUAL? ITEM_DEF declarationName? typeRelationships? definitionBody
     ;
 
 enumDefinition
-    : ENUM_DEF declarationName typeRelationships? enumBody
-    | ENUM_DEF declarationName typeRelationships? SEMICOLON
+    : ENUM_DEF declarationName? typeRelationships? enumBody
+    | ENUM_DEF declarationName? typeRelationships? SEMICOLON
     ;
 
 calcDefinition
-    : CALC_DEF declarationName typeRelationships? definitionBody
+    : CALC_DEF declarationName? typeRelationships? definitionBody
     ;
 
 analysisDefinition
-    : ANALYSIS_DEF declarationName typeRelationships? definitionBody
+    : ANALYSIS_DEF declarationName? typeRelationships? definitionBody
     ;
 
 caseDefinition
-    : CASE_DEF declarationName typeRelationships? definitionBody
+    : CASE_DEF declarationName? typeRelationships? definitionBody
     ;
 
 useCaseDefinition
-    : USE_CASE_DEF declarationName typeRelationships? definitionBody
+    : USE_CASE_DEF declarationName? typeRelationships? definitionBody
     ;
 
 verificationDefinition
-    : VERIFICATION_DEF declarationName typeRelationships? definitionBody
+    : VERIFICATION_DEF declarationName? typeRelationships? definitionBody
     ;
 
 concernDefinition
-    : CONCERN_DEF declarationName typeRelationships? definitionBody
+    : CONCERN_DEF declarationName? typeRelationships? definitionBody
     ;
 
 renderingDefinition
-    : RENDERING_DEF declarationName typeRelationships? definitionBody
+    : RENDERING_DEF declarationName? typeRelationships? definitionBody
     ;
 
 occurrenceDefinition
-    : INDIVIDUAL? OCCURRENCE_DEF declarationName typeRelationships? definitionBody
+    : INDIVIDUAL? OCCURRENCE_DEF declarationName? typeRelationships? definitionBody
     ;
 
 flowDefinition
-    : FLOW_DEF declarationName typeRelationships? definitionBody
+    : FLOW_DEF declarationName? typeRelationships? definitionBody
     ;
 
 metadataDefinition
