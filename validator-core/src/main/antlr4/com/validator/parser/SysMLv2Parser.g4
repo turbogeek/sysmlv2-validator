@@ -98,9 +98,9 @@ hashAnnotation
     ;
 
 metadataAnnotation
-    : AT_SIGN qualifiedName (ABOUT qualifiedName)? (LPAREN annotationArguments RPAREN)?
-    | AT_SIGN qualifiedName (ABOUT qualifiedName)? metadataBody
-    | AT_SIGN qualifiedName (ABOUT qualifiedName)? SEMICOLON?
+    : AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? (LPAREN annotationArguments RPAREN)?
+    | AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? metadataBody
+    | AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? SEMICOLON?
     ;
 
 annotationArguments
@@ -1531,7 +1531,7 @@ positionalArgument
 // ============================================================================
 
 comment
-    : COMMENT_KW usageName? (ABOUT qualifiedName)? (LOCALE STRING)? documentationBody? SEMICOLON?
+    : COMMENT_KW usageName? (ABOUT qualifiedName (COMMA qualifiedName)*)? (LOCALE STRING)? documentationBody? SEMICOLON?
     ;
 
 documentation
