@@ -783,8 +783,10 @@ messageUsage
     | MESSAGE usageName? featureRelationships? flowEndpoints? SEMICOLON
     ;
 
+// SysML v2 8.2.2.3: 'dependency' ( Identification 'from' )? client ( ',' client )* 'to' supplier ( ',' supplier )*
+// RelationshipBody, where RelationshipBody = ';' | '{' ... '}' (e.g. an owned doc)
 dependencyDeclaration
-    : DEPENDENCY usageName? (FROM expression)? TO expression (COMMA expression)* SEMICOLON
+    : DEPENDENCY usageName? (FROM expression (COMMA expression)*)? TO expression (COMMA expression)* usageBody
     ;
 
 metadataUsage
