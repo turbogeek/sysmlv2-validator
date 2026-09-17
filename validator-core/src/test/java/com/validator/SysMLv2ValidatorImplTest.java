@@ -50,7 +50,7 @@ public class SysMLv2ValidatorImplTest {
     @Test
     public void testValidateInvalidFile(@TempDir Path tempDir) throws IOException {
         // Create invalid SysML file (syntax error)
-        String content = "package ;"; // Missing package name
+        String content = "package P { item def A :> ; }"; // Invalid: specialization without a target
 
         Path testFile = tempDir.resolve("invalid.sysml");
         Files.writeString(testFile, content);
@@ -74,7 +74,7 @@ public class SysMLv2ValidatorImplTest {
 
     @Test
     public void testValidateInvalidString() {
-        String invalidSource = "package ;";
+        String invalidSource = "package P { item def A :> ; }";
 
         ValidationResult result = validator.validate(invalidSource, "test.sysml");
 
@@ -93,7 +93,7 @@ public class SysMLv2ValidatorImplTest {
         Files.writeString(file2, "package File2;");
 
         Path file3 = tempDir.resolve("file3.sysml");
-        Files.writeString(file3, "package ;"); // Invalid
+        Files.writeString(file3, "package P { item def A :> ; }"); // Invalid
 
         List<File> files = Arrays.asList(
             file1.toFile(),

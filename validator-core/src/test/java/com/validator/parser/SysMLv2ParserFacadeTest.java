@@ -120,7 +120,9 @@ public class SysMLv2ParserFacadeTest {
 
     @Test
     public void testParseSyntaxError() {
-        String source = "package ;"; // Missing package name
+        // "package ;" is legal: PackageDeclaration = 'package' Identification, and both parts of
+        // Identification are optional (SysML v2 8.2.2.2, 8.2.2.1). A specialization without a target is not.
+        String source = "package P { item def A :> ; }";
 
         SysMLv2ParserFacade.ParseResult result = facade.parseString(source, "test.sysml");
 

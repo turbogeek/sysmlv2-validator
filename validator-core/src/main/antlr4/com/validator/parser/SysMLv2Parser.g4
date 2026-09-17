@@ -1255,9 +1255,9 @@ exposeStatement
     ;
 
 renderStatement
-    : RENDER (AS qualifiedName | ID)? SEMICOLON
-    | RENDER RENDERING usageName? featureRelationships? SEMICOLON
-    | RENDER expression SEMICOLON
+    : RENDER (AS qualifiedName | ID)? (SEMICOLON | usageBody)
+    | RENDER RENDERING usageName? featureRelationships? (SEMICOLON | usageBody)
+    | RENDER expression (SEMICOLON | usageBody)
     ;
 
 filterStatement

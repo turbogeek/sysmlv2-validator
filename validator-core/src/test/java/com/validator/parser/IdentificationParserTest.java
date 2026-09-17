@@ -92,6 +92,27 @@ class IdentificationParserTest {
     }
 
     @Test
+    @DisplayName("A render statement may own a body (SysML v2 8.2.2.26: ViewRenderingUsage ends with UsageBody)")
+    void testRenderWithBody() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                private import Views::*;
+                view def V {
+                    render rendering compactRendering :>> asTreeDiagram, asInterconnectionDiagram {
+                        doc /* The rendering of this view. */
+                    }
+                }
+                view def W {
+                    render asTreeDiagram {
+                        doc /* A referenced rendering with documentation. */
+                    }
+                }
+            }
+            """);
+        assertFalse(result.hasErrors(), "A render statement with a body should parse: " + result.getSyntaxErrors());
+    }
+
+    @Test
     @DisplayName("A definition body without braces or a semicolon is still a syntax error")
     void testMissingBodyRejected() {
         SysMLv2ParserFacade.ParseResult result = parse("""
