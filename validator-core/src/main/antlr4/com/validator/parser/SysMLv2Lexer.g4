@@ -1,43 +1,56 @@
 lexer grammar SysMLv2Lexer;
 
+@members {
+    /**
+     * True when the character after the current token cannot continue an identifier (ID is
+     * [a-zA-Z_][a-zA-Z0-9_]*). Compound keywords such as 'attribute def' end with this check: without it ANTLR's
+     * longest match took 'attribute def' out of 'attribute defaultForm' and left 'aultForm', which parsed silently
+     * as a definition with a clipped name.
+     */
+    private boolean atWordEnd() {
+        int c = _input.LA(1);
+        return !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_');
+    }
+}
+
 // ============================================================================
 // COMPOUND KEYWORDS (must come before simple keywords due to longest match)
 // ============================================================================
 
 // Definition compound keywords
-PART_DEF: 'part' WS+ 'def';
-ACTION_DEF: 'action' WS+ 'def';
-STATE_DEF: 'state' WS+ 'def';
-REQUIREMENT_DEF: 'requirement' WS+ 'def';
-USE_CASE_DEF: 'use' WS+ 'case' WS+ 'def';
-VIEW_DEF: 'view' WS+ 'def';
-VIEWPOINT_DEF: 'viewpoint' WS+ 'def';
-CONSTRAINT_DEF: 'constraint' WS+ 'def';
-ATTRIBUTE_DEF: 'attribute' WS+ 'def';
-ENUM_DEF: 'enum' WS+ 'def';
-CONNECTION_DEF: 'connection' WS+ 'def';
-INTERFACE_DEF: 'interface' WS+ 'def';
-ALLOCATION_DEF: 'allocation' WS+ 'def';
-PORT_DEF: 'port' WS+ 'def';
-ITEM_DEF: 'item' WS+ 'def';
-CALC_DEF: 'calc' WS+ 'def';
-ANALYSIS_DEF: 'analysis' WS+ 'def';
-CASE_DEF: 'case' WS+ 'def';
-VERIFICATION_DEF: 'verification' WS+ 'def';
-CONCERN_DEF: 'concern' WS+ 'def';
-RENDERING_DEF: 'rendering' WS+ 'def';
-OCCURRENCE_DEF: 'occurrence' WS+ 'def';
-FLOW_DEF: 'flow' WS+ 'def';
-METADATA_DEF: 'metadata' WS+ 'def';
-INDIVIDUAL_DEF: 'individual' WS+ 'def';
+PART_DEF: 'part' WS+ 'def' {atWordEnd()}?;
+ACTION_DEF: 'action' WS+ 'def' {atWordEnd()}?;
+STATE_DEF: 'state' WS+ 'def' {atWordEnd()}?;
+REQUIREMENT_DEF: 'requirement' WS+ 'def' {atWordEnd()}?;
+USE_CASE_DEF: 'use' WS+ 'case' WS+ 'def' {atWordEnd()}?;
+VIEW_DEF: 'view' WS+ 'def' {atWordEnd()}?;
+VIEWPOINT_DEF: 'viewpoint' WS+ 'def' {atWordEnd()}?;
+CONSTRAINT_DEF: 'constraint' WS+ 'def' {atWordEnd()}?;
+ATTRIBUTE_DEF: 'attribute' WS+ 'def' {atWordEnd()}?;
+ENUM_DEF: 'enum' WS+ 'def' {atWordEnd()}?;
+CONNECTION_DEF: 'connection' WS+ 'def' {atWordEnd()}?;
+INTERFACE_DEF: 'interface' WS+ 'def' {atWordEnd()}?;
+ALLOCATION_DEF: 'allocation' WS+ 'def' {atWordEnd()}?;
+PORT_DEF: 'port' WS+ 'def' {atWordEnd()}?;
+ITEM_DEF: 'item' WS+ 'def' {atWordEnd()}?;
+CALC_DEF: 'calc' WS+ 'def' {atWordEnd()}?;
+ANALYSIS_DEF: 'analysis' WS+ 'def' {atWordEnd()}?;
+CASE_DEF: 'case' WS+ 'def' {atWordEnd()}?;
+VERIFICATION_DEF: 'verification' WS+ 'def' {atWordEnd()}?;
+CONCERN_DEF: 'concern' WS+ 'def' {atWordEnd()}?;
+RENDERING_DEF: 'rendering' WS+ 'def' {atWordEnd()}?;
+OCCURRENCE_DEF: 'occurrence' WS+ 'def' {atWordEnd()}?;
+FLOW_DEF: 'flow' WS+ 'def' {atWordEnd()}?;
+METADATA_DEF: 'metadata' WS+ 'def' {atWordEnd()}?;
+INDIVIDUAL_DEF: 'individual' WS+ 'def' {atWordEnd()}?;
 
 // KerML compound keywords
-ASSOC_STRUCT: 'assoc' WS+ 'struct';
+ASSOC_STRUCT: 'assoc' WS+ 'struct' {atWordEnd()}?;
 
 // Other compound keywords
-USE_CASE: 'use' WS+ 'case';
-DEFINED_BY: 'defined' WS+ 'by';
-TYPED_BY: 'typed' WS+ 'by';
+USE_CASE: 'use' WS+ 'case' {atWordEnd()}?;
+DEFINED_BY: 'defined' WS+ 'by' {atWordEnd()}?;
+TYPED_BY: 'typed' WS+ 'by' {atWordEnd()}?;
 
 // ============================================================================
 // KEYWORDS - Core Structure
