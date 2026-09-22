@@ -854,6 +854,21 @@ name
     | QUOTED_ID
     | DONE
     | START
+    | nonReservedKeyword
+    ;
+
+// Words that the lexer has keyword tokens for although no parser rule uses them and SysML v2 does not reserve them
+// (SysML v2 8.2.2.1.2), so they are ordinary names: 'attribute value : String;' is valid SysML v2.
+// NonReservedWordNameTest keeps this list to exactly the keyword tokens that no other rule refers to.
+nonReservedKeyword
+    : ANY
+    | CHAINS
+    | FEATURING
+    | INVERSES
+    | MULTIPLICITY
+    | SEQUENCE
+    | TYPING
+    | VALUE
     ;
 
 shortName
