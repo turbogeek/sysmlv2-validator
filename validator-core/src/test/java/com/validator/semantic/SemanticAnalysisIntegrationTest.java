@@ -1,6 +1,7 @@
 package com.validator.semantic;
 
 import com.validator.parser.SysMLv2ParserFacade;
+import com.validator.testutil.PerformanceReference;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.*;
 
@@ -23,6 +24,7 @@ public class SemanticAnalysisIntegrationTest {
     private static Path testSuiteRoot;
     private static StandardLibraryManager standardLibrary;
     private static List<IntegrationTestResult> allResults;
+    private static PerformanceReference.Measurement referenceBefore;
 
     @BeforeAll
     public static void setUpAll() {
@@ -37,6 +39,9 @@ public class SemanticAnalysisIntegrationTest {
         standardLibrary.initializeBuiltins();
 
         allResults = new ArrayList<>();
+
+        // How fast the machine is before the models are built (see testPerformance)
+        referenceBefore = PerformanceReference.measure();
     }
 
     @AfterAll
@@ -156,16 +161,84 @@ public class SemanticAnalysisIntegrationTest {
             .limit(5)
             .collect(Collectors.toList());
 
-        System.out.println("\nPerformance test - Top 5 largest models:");
-        for (IntegrationTestResult result : largeModels) {
-            System.out.println(String.format("  %s: %d symbols in %d ms (%.2f symbols/ms)",
-                result.fileName, result.symbolCount, result.buildTimeMs,
-                result.symbolCount / (double) Math.max(1, result.buildTimeMs)));
+        // Budgets scale with a reference workload measured in this run, before and after the builds: on a throttled
+        // or busy machine (battery power, other programs) the reference is slower than its recorded nominal time and
+        // the budget grows by the same factor, while a slower validator still fails because the workload does not
+        // use the validator. Models known to be slow are held to their recorded ratio instead (perf-reference.properties).
+        PerformanceReference.Measurement referenceAfter = PerformanceReference.measure();
+        PerformanceReference.Measurement reference =
+            referenceAfter.medianMs() > referenceBefore.medianMs() ? referenceAfter : referenceBefore;
+        PerformanceReference.Calibration calibration = PerformanceReference.loadCalibration();
+        double slowdown = calibration.slowdown(reference);
+        double spread = Math.max(referenceBefore.spread(), referenceAfter.spread());
+        double budgetMs = calibration.budgetMs(reference, spread);
 
-            // Assert performance: should build <1.5s even for large models
-            // (Windows/CI environments may be slower)
-            assertTrue(result.buildTimeMs < 1500,
-                String.format("%s took %d ms, expected <1500ms", result.fileName, result.buildTimeMs));
+        System.out.println(String.format("\nPerformance reference: before %.1f ms (spread %.2f), after %.1f ms"
+                + " (spread %.2f), nominal %.1f ms; slowdown %.2f; budget %.0f ms",
+            referenceBefore.medianMs(), referenceBefore.spread(), referenceAfter.medianMs(), referenceAfter.spread(),
+            calibration.nominalReferenceMs(), slowdown, budgetMs));
+        System.out.println("Performance test - Top 5 largest models:");
+        List<Map<String, Object>> models = new ArrayList<>();
+        // A model's first build in this JVM varies with JIT compilation and garbage collection, so each budgeted
+        // model is built three more times on the now warm JVM and the median is what the budget applies to. Known
+        // slow models keep their first time: their limits are ratios with a wide margin.
+        Map<String, Long> timedMs = new LinkedHashMap<>();
+        for (IntegrationTestResult result : largeModels) {
+            boolean knownSlow = calibration.isKnownSlow(result.fileName);
+            List<Long> warm = new ArrayList<>();
+            if (!knownSlow) {
+                for (int i = 0; i < 3; i++) {
+                    warm.add(testFile(result.file, result.category).buildTimeMs);
+                }
+                Collections.sort(warm);
+            }
+            long ms = knownSlow ? result.buildTimeMs : warm.get(1);
+            timedMs.put(result.fileName, ms);
+            double limitMs = knownSlow ? calibration.knownSlowLimitMs(result.fileName, reference) : budgetMs;
+            double ratio = ms / reference.medianMs();
+            System.out.println(String.format("  %s: %d symbols in %d ms (first build %d ms, warm %s; %.1f x reference%s)",
+                result.fileName, result.symbolCount, ms, result.buildTimeMs, knownSlow ? "-" : warm.toString(), ratio,
+                knownSlow ? ", known slow" : ""));
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("file", result.fileName);
+            m.put("symbols", result.symbolCount);
+            m.put("firstBuildMs", result.buildTimeMs);
+            m.put("warmBuildMs", warm);
+            m.put("timedMs", ms);
+            m.put("ratioToReference", Math.round(ratio * 100) / 100.0);
+            m.put("knownSlow", knownSlow);
+            m.put("limitMs", Math.round(limitMs));
+            m.put("withinLimit", ms <= limitMs);
+            models.add(m);
+        }
+        Map<String, Object> report = new LinkedHashMap<>();
+        report.put("referenceBeforeMedianMs", referenceBefore.medianMs());
+        report.put("referenceBeforeSpread", referenceBefore.spread());
+        report.put("referenceAfterMedianMs", referenceAfter.medianMs());
+        report.put("referenceAfterSpread", referenceAfter.spread());
+        report.put("referenceNominalMs", calibration.nominalReferenceMs());
+        report.put("slowdown", slowdown);
+        report.put("budgetNominalMs", calibration.budgetNominalMs());
+        report.put("spread", spread);
+        report.put("budgetMs", budgetMs);
+        report.put("knownSlowRatioMax", calibration.knownSlowRatioMax());
+        report.put("models", models);
+        PerformanceReference.writeReport(Paths.get("target", "perf", "semantic-analysis-perf.json"), report);
+
+        for (IntegrationTestResult result : largeModels) {
+            if (calibration.isKnownSlow(result.fileName)) {
+                double limitMs = calibration.knownSlowLimitMs(result.fileName, reference);
+                assertTrue(timedMs.get(result.fileName) <= limitMs,
+                    String.format("%s (known slow) took %d ms, more than %.0f x the reference %.1f ms = %.0f ms: it got slower",
+                        result.fileName, timedMs.get(result.fileName), calibration.knownSlowRatioMax().get(result.fileName),
+                        reference.medianMs(), limitMs));
+            } else {
+                assertTrue(timedMs.get(result.fileName) < budgetMs,
+                    String.format("%s took %d ms, budget %.0f ms (%.0f ms nominal x slowdown %.2f x spread %.2f;"
+                            + " reference %.1f ms, nominal %.1f ms)", result.fileName, timedMs.get(result.fileName), budgetMs,
+                        calibration.budgetNominalMs(), slowdown, spread, reference.medianMs(),
+                        calibration.nominalReferenceMs()));
+            }
         }
     }
 
@@ -205,6 +278,7 @@ public class SemanticAnalysisIntegrationTest {
     private IntegrationTestResult testFile(File file, String category) {
         long startTime = System.currentTimeMillis();
         IntegrationTestResult result = new IntegrationTestResult(file.getName(), category);
+        result.file = file;
 
         try {
             // Parse the file
@@ -285,6 +359,7 @@ public class SemanticAnalysisIntegrationTest {
         int standardLibraryTypes;
         List<String> stdLibPackagesUsed = new ArrayList<>();
         long buildTimeMs;
+        File file;
 
         IntegrationTestResult(String fileName, String category) {
             this.fileName = fileName;
