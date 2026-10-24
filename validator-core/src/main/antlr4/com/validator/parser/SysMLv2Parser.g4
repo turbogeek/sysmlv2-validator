@@ -283,7 +283,7 @@ actionDefinition
     ;
 
 stateDefinition
-    : STATE_DEF declarationName? typeRelationships? stateDefinitionBody
+    : STATE_DEF declarationName? typeRelationships? PARALLEL? stateDefinitionBody
     ;
 
 requirementDefinition
@@ -518,7 +518,7 @@ actionKeyword
     ;
 
 stateUsage
-    : PARALLEL? STATE usageName? PARALLEL? featureRelationships? stateUsageBody?
+    : PARALLEL? STATE usageName? PARALLEL? featureRelationships? PARALLEL? stateUsageBody?
     ;
 
 requirementUsage
@@ -1294,7 +1294,7 @@ guardClause
     ;
 
 effectClause
-    : DO ACTION usageName? featureRelationships?
+    : DO ACTION usageName? featureRelationships? (LBRACE usageBodyElement* RBRACE)?
     | DO SEND actionPayload? (VIA expression)? (TO expression)?
     | DO expression
     ;

@@ -7,7 +7,7 @@ library package <DS_Validation> DassaultSystemesValidation {
                 attribute severity : SeverityLevel;
             }
             abstract part templateRule :> rule [*] {
-                attribute :>> severity = severity::error;
+                attribute :>> severity default severity::error;
                 part :>> effect : DS_Validation::CoreValidationComponents::Failure {
                     attribute :>> 'message';
                 }
@@ -70,5 +70,6 @@ library package <DS_Validation> DassaultSystemesValidation {
     package Suites {
         part def SysMLConstraintsSuite :> CoreValidationComponents::Suite;
         part def DassaultSystemesValidationSuite :> CoreValidationComponents::Suite;
+        part def DassaultSystemesCompositionIntegrityValidationSuite :> CoreValidationComponents::Suite;
     }
 }

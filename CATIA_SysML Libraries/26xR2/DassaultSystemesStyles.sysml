@@ -17,6 +17,16 @@ library package <DS_Styles> DassaultSystemesStyles {
                 Horizontal;
                 Vertical;
             }
+            enum def LabelPositionEnum {
+                Outside;
+                Inside;
+                InsideEnclosingShape;
+            }
+            enum def LabelOrientationEnum {
+                Horizontal;
+                Vertical;
+                Automatic;
+            }
             enum def LineStyleEnum {
                 Solid;
                 Dashed;
@@ -44,6 +54,16 @@ library package <DS_Styles> DassaultSystemesStyles {
                 Left;
                 Center;
                 Right;
+            }
+            enum def LineJumpsToEnum {
+                None;
+                HorizontalLine;
+                VerticalLine;
+            }
+            enum def ProxyLabelDisplayModeEnum {
+                Complete;
+                Compact;
+                None;
             }
             view def SymbolStyle {
                 attribute lineWidth : Integer default 1 {
@@ -76,21 +96,47 @@ library package <DS_Styles> DassaultSystemesStyles {
                 attribute textVerticalPosition : TextVerticalPositionEnum default textVerticalPosition::Top {
                     doc /* Specify the element name position for the symbol. */
                 }
-                attribute compartmentFillColor : Color default "#FFF0F0F0";
-                attribute compartmentTextColor : Color default "#000000";
+                attribute compartmentFillColor : Color default "#FFF0F0F0" {
+                    doc /* Specify the color of the symbol's compartments.*/
+                }
+                attribute compartmentTextColor : Color default "#000000" {
+                    doc /* Specify the color for the text in the symbol's compartments.*/
+                }
             }
-            view def SymbolicViewStyle :> SymbolStyle {
+            view def SymbolicViewStyle :> SymbolStyle, ElementStyle {
                 attribute useGradientFill : Boolean default false;
+                attribute showLineJumpsTo : LineJumpsToEnum default showLineJumpsTo::HorizontalLine;
             }
             view def BarShapeStyle :> ShapeStyle {
                 attribute orientation : OrientationEnum default orientation::Horizontal {
                     doc /* Specify the orientation for the symbol. */
                 }
             }
-            view def ShapeOnBorderStyle :> SymbolStyle;
+            view def ShapeOnBorderStyle :> SymbolStyle {
+                attribute labelPosition : LabelPositionEnum default labelPosition::Outside {
+                    doc /* Specify the position of labels relative to the shape. Outside: outside the shape and not within its enclosing shape. Inside: within the shape. Inside Enclosing Shape: outside the shape but within its enclosing shape.*/
+                }
+                attribute labelOrientation : LabelOrientationEnum default labelOrientation::Horizontal {
+                    doc /* Specify the orientation of labels. Horizontal: displays labels horizontally. Vertical: displays labels vertically. Automatic: adjusts the label to match the orientation of the symbol it belongs to.*/
+                }
+                attribute showDirectionIcon : Boolean default true {
+                    doc /* Specify whether the direction icon should be displayed on the element symbol.*/
+                }
+            }
             view def PathStyle :> SymbolStyle {
                 attribute pathStyle : PathStyleEnum default pathStyle::Rectilinear {
                     doc /* Specify the style of the path. */
+                }
+                attribute labelOrientation : LabelOrientationEnum default labelOrientation::Horizontal {
+                    doc /* Specify the orientation of labels. Horizontal: displays labels horizontally. Vertical: displays labels vertically. Automatic: adjusts the label to match the orientation of the symbol it belongs to.*/
+                }
+            }
+            view def PathEndShapeStyle :> SymbolStyle {
+                attribute labelPosition : LabelPositionEnum default labelPosition::Outside {
+                    doc /* Specify the position of labels relative to the shape. Outside: outside the shape and not within its enclosing shape. Insid / Inside Enclosing Shape: outside the shape but within its enclosing shape.*/
+                }
+                attribute labelOrientation : LabelOrientationEnum default labelOrientation::Horizontal {
+                    doc /* Specify the orientation of labels. Horizontal: displays labels horizontally. Vertical: displays labels vertically. Automatic: adjusts the label to match the orientation of the symbol it belongs to.*/
                 }
             }
             view def ElementStyle {
@@ -99,6 +145,17 @@ library package <DS_Styles> DassaultSystemesStyles {
                 }
                 attribute showName : Boolean default true {
                     doc /* Specify whether the element's declared name should be displayed on the element symbol.*/
+                }
+                attribute showAliasShortName : Boolean default false {
+                    doc /* Specify whether the element's alias short name should be displayed on the element symbol.*/
+                }
+                attribute showAliasName : Boolean default false {
+                    doc /* Specify whether the element's alias name should be displayed on the element symbol.*/
+                }
+            }
+            view def CommentStyle :> ElementStyle {
+                attribute showLocale : Boolean default true {
+                    doc /* Specify whether the comment's locale should be displayed on the element symbol.*/
                 }
             }
             view def ElementTrimmableTextStyle :> ElementStyle {
@@ -132,6 +189,14 @@ library package <DS_Styles> DassaultSystemesStyles {
                     doc /* Specify whether the inherited sign should be displayed on the symbol. */
                 }
             }
+            view def ConnectorEndStyle :> FeatureStyle {
+                attribute proxyLabelDisplayMode : ProxyLabelDisplayModeEnum default ProxyLabelDisplayModeEnum::Complete {
+                    doc /* Specify how to display the feature chain that identifies the actual connected feature at a connector end. "Complete" displays the full feature chain, "Compact" displays only the actual connected feature, and "None" hides the feature chain. */
+                }
+                attribute showProxyDot : Boolean default true {
+                    doc /* Specify whether the connector end proxy dot is displayed. */
+                }
+            }
             view def CompartmentStyle {
                 attribute showCompartment : Boolean default true {
                     doc /* Specify whether the compartment should be displayed or suppressed.*/
@@ -163,11 +228,27 @@ library package <DS_Styles> DassaultSystemesStyles {
                     doc /* Specify whether the rectangular shape symbol's corners should be rounded. */
                 }
             }
+            view def NoteStyle :> ShapeStyle {
+                #InvisibleInDialog attribute :>> contentFillColor;
+                #InvisibleInDialog attribute :>> textVerticalPosition;
+                #InvisibleInDialog attribute :>> compartmentFillColor;
+                #InvisibleInDialog attribute :>> compartmentTextColor;
+            }
+            view def AnchorStyle :> PathStyle;
+            view def PackageShapeStyle :> ShapeStyle {
+                attribute showNameInTab : Boolean default true {
+                    doc /* Specify whether the package name should be displayed in the tab. */
+                }
+            }
         }
         package SysMLStyles {
             private import KerMLStyles::*;
             private import ScalarValues::Boolean;
-            view def SwimlanesStyle :> ShapeStyle;
+            view def SwimlanesStyle :> ShapeStyle {
+                attribute lineStyle : LineStyleEnum default lineStyle::Dashed {
+                    doc /* Specify the line style for the swimlane symbol. */
+                }
+            }
             view def MetadataCompartmentStyle :> CompartmentStyle, ElementTrimmableTextStyle;
             view def FeaturesOfMetadataCompartmentStyle :> CompartmentStyle, ElementTrimmableTextStyle;
             view def DocumentationCompartmentStyle :> CompartmentStyle, ElementTrimmableTextStyle;
@@ -190,6 +271,8 @@ library package <DS_Styles> DassaultSystemesStyles {
             view def FramesCompartmentStyle :> FeatureCompartmentStyle;
             view def EnumsCompartmentStyle :> BasicFeatureCompartmentStyle;
             view def EndsCompartmentStyle :> FeatureCompartmentStyle;
+            view def ResultCompartmentStyle :> FeatureCompartmentStyle;
+            view def FilterCompartmentStyle :> FeatureCompartmentStyle;
             view def PartsCompartmentStyle :> FeatureCompartmentStyle;
             view def PortsCompartmentStyle :> FeatureCompartmentStyle;
             view def WhileConditionCompartmentStyle :> CompartmentStyle, ElementTrimmableTextStyle;
@@ -221,6 +304,9 @@ library package <DS_Styles> DassaultSystemesStyles {
                     return : ScalarValues::Boolean;
                 }
             }
+            part def ByElementCondition :> Condition {
+                ref item dependencyOwner : KerML::Element;
+            }
         }
         part def Policy {
             part rule [*];
@@ -250,6 +336,22 @@ library package <DS_Styles> DassaultSystemesStyles {
                     ref item :>> elementMetaclass = (SysML::Systems::ViewUsage.metadata, SysML::Systems::ViewDefinition.metadata);
                 }
                 view :>> style : AbstractLightBlueStyle;
+            }
+            /* ---------STYLE SHEET---------- */
+            part styleSheetRule :> rule {
+                part :>> condition : FreeFormCondition {
+                    calc :>> test {
+                        DS_Functions::IsSpecific(element, StyleSheet.metadata)
+                    }
+                }
+                view :>> style : ShapeStyle, TypeStyle {
+                    attribute :>> useFillColor default false;
+                    attribute :>> showSpecialization default false;
+                    part rulesCompartment : StyleSheetRulesCompartmentStyle {
+                        attribute :>> showCompartment default true;
+                        attribute :>> showSpecialization default false;
+                    }
+                }
             }
             /* -------------PART/PORT---------*/
             part partPortRule :> rule {
@@ -290,7 +392,12 @@ library package <DS_Styles> DassaultSystemesStyles {
                 part :>> condition : ByElementMetaclassCondition {
                     ref item :>> elementMetaclass = (SysML::Systems::CalculationUsage.metadata, SysML::Systems::CalculationDefinition.metadata);
                 }
-                view :>> style : AbstractCyanStyle;
+                view :>> style : AbstractCyanStyle {
+                    part resultCompartment : ResultCompartmentStyle {
+                        attribute :>> showCompartment default true;
+                        #InvisibleInDialog attribute :>> showInheritedSign;
+                    }
+                }
             }
             /* ------STATE-------- */
             part stateRule :> rule {
@@ -387,7 +494,6 @@ library package <DS_Styles> DassaultSystemesStyles {
                 view :>> style : BarShapeStyle, FeatureStyle {
                     #InvisibleInDialog attribute :>> fillColor default "#FFFFFF";
                     #InvisibleInDialog attribute :>> useFillColor;
-                    attribute :>> fillColor default "#FFFFFF";
                     attribute :>> textColor default "#000000";
                     attribute :>> penColor default "#424242";
                     #InvisibleInDialog attribute :>> contentFillColor;
@@ -509,7 +615,12 @@ library package <DS_Styles> DassaultSystemesStyles {
                     ref item :>> elementMetaclass = (SysML::Systems::ConstraintUsage.metadata, SysML::Systems::ConstraintDefinition.metadata,
                                                      KerML::Kernel::OperatorExpression.metadata);
                 }
-                view :>> style : AbstractBlueStyle;
+                view :>> style : AbstractBlueStyle {
+                    part resultCompartment : ResultCompartmentStyle {
+                        attribute :>> showCompartment default true;
+                        #InvisibleInDialog attribute :>> showInheritedSign;
+                    }
+                }
             }
             /* -------------OCCURRENCE---------*/
             part occurrenceRule :> rule {
@@ -538,6 +649,7 @@ library package <DS_Styles> DassaultSystemesStyles {
                     attribute :>> penColor default "#123D15";
                     attribute :>> lineWidth default 1;
                     attribute :>> textColor default "#000000";
+                    attribute :>> compartmentFillColor default "#F6FBF6";
                     part :>> metadataCompartment {
                         :>> showCompartment default true;
                         :>> showFullText default true;
@@ -551,6 +663,8 @@ library package <DS_Styles> DassaultSystemesStyles {
                 }
                 view :>> style : AbstractGreyStyle {
                     #InvisibleInDialog attribute :>> contentFillColor;
+                    #InvisibleInDialog attribute :>> compartmentFillColor;
+                    #InvisibleInDialog attribute :>> compartmentTextColor;
                 }
             }
             part docRule :> rule {
@@ -560,6 +674,8 @@ library package <DS_Styles> DassaultSystemesStyles {
                 view :>> style : AbstractWhiteStyle {
                     attribute :>> wrap default true;
                     #InvisibleInDialog attribute :>> contentFillColor;
+                    #InvisibleInDialog attribute :>> compartmentFillColor;
+                    #InvisibleInDialog attribute :>> compartmentTextColor;
                 }
             }
             part commentRule :> rule {
@@ -569,6 +685,8 @@ library package <DS_Styles> DassaultSystemesStyles {
                 view :>> style : AbstractYellowStyle {
                     attribute :>> wrap default true;
                     #InvisibleInDialog attribute :>> contentFillColor;
+                    #InvisibleInDialog attribute :>> compartmentFillColor;
+                    #InvisibleInDialog attribute :>> compartmentTextColor;
                 }
             }
             /* -----------------TEXTBOX-------------*/
@@ -576,6 +694,16 @@ library package <DS_Styles> DassaultSystemesStyles {
                 part :>> style : TextBoxStyle {
                     attribute :>> useFillColor default false;
                     #InvisibleInDialog attribute :>> contentFillColor;
+                    #InvisibleInDialog attribute :>> compartmentFillColor;
+                    #InvisibleInDialog attribute :>> compartmentTextColor;
+                }
+            }
+            /* ---------------------NOTE-------------------*/
+            part noteRule :> rule {
+                view :>> style : NoteStyle {
+                    attribute :>> penColor default "#8C4600";
+                    attribute :>> fillColor default "#FFE0B3";
+                    attribute :>> wrap default true;
                 }
             }
             /* -----------------SEPARATORS------------- */
@@ -611,7 +739,7 @@ library package <DS_Styles> DassaultSystemesStyles {
             /* -----Removing from styles UI-------- */
             part removePropertiesPathsRule :> rule {
                 part :>> condition : ByElementMetaclassCondition {
-                    ref item :>> elementMetaclass = (KerML::Root::Annotation.metadata, KerML::Root::Membership.metadata, KerML::Core::Specialization.metadata);
+                    ref item :>> elementMetaclass = (KerML::Root::Annotation.metadata, KerML::Root::OwningMembership.metadata, KerML::Core::Specialization.metadata);
                 }
                 view :>> style : PathStyle, ElementStyle {
                     #InvisibleInDialog attribute :>> showShortName;
@@ -632,6 +760,18 @@ library package <DS_Styles> DassaultSystemesStyles {
                     #InvisibleInDialog attribute :>> showName;
                     #InvisibleInDialog attribute :>> fillColor;
                     #InvisibleInDialog attribute :>> useFillColor;
+                }
+            }
+            part removePropertiesSymbolicView :> rule {
+                view :>> style : SymbolicViewStyle, ElementStyle {
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> fillColor;
+                    #InvisibleInDialog attribute :>> useFillColor;
+                    #InvisibleInDialog attribute :>> textColor;
+                    #InvisibleInDialog attribute :>> font;
+                    #InvisibleInDialog attribute :>> wrap;
+                    #InvisibleInDialog attribute :>> lineWidth;
                 }
             }
             /* -----------suppress compartment rules for usage/definition---------- */
@@ -747,6 +887,10 @@ library package <DS_Styles> DassaultSystemesStyles {
                 attribute :>> fillColor default "#FFFFFF";
                 attribute :>> penColor default "#FF424242";
             }
+            view def AbstractLightOrangeStyle :> SymbolStyle {
+                attribute :>> penColor default "#8C4600";
+                attribute :>> fillColor default "#FFE0B3";
+            }
         }
         package CompartmentVisibilityDefinitions {
             part def UsagesAndDefCompartments {
@@ -833,17 +977,56 @@ library package <DS_Styles> DassaultSystemesStyles {
                 part endsCompartment : EndsCompartmentStyle {
                     attribute :>> showCompartment default false;
                 }
+                part resultCompartment : ResultCompartmentStyle {
+                    attribute :>> showCompartment default false;
+                    #InvisibleInDialog attribute :>> showModifiers;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
+                    #InvisibleInDialog attribute :>> showSpecialization;
+                    #InvisibleInDialog attribute :>> showQualifiedNameForSpecialization;
+                    #InvisibleInDialog attribute :>> showValue;
+                }
+                part filterCompartment : FilterCompartmentStyle {
+                    attribute :>> showCompartment default false;
+                    #InvisibleInDialog attribute :>> showInheritedSign;
+                    #InvisibleInDialog attribute :>> showModifiers;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
+                    #InvisibleInDialog attribute :>> showSpecialization;
+                    #InvisibleInDialog attribute :>> showQualifiedNameForSpecialization;
+                    #InvisibleInDialog attribute :>> showValue;
+                }
                 part whileConditionCompartment : WhileConditionCompartmentStyle {
                     attribute :>> showCompartment default true;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
                 }
                 part untilConditionCompartment : UntilConditionCompartmentStyle {
                     attribute :>> showCompartment default true;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
                 }
                 part forIterationCompartment : ForIterationCompartmentStyle {
                     attribute :>> showCompartment default true;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
                 }
                 part ifConditionCompartment : IfConditionCompartmentStyle {
                     attribute :>> showCompartment default true;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
                 }
                 part membersCompartment : MembersCompartmentStyle {
                     attribute :>> showCompartment default false;
@@ -926,17 +1109,56 @@ library package <DS_Styles> DassaultSystemesStyles {
                 part endsCompartment : EndsCompartmentStyle {
                     attribute :>> showCompartment default false;
                 }
+                part resultCompartment : ResultCompartmentStyle {
+                    attribute :>> showCompartment default false;
+                    #InvisibleInDialog attribute :>> showModifiers;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
+                    #InvisibleInDialog attribute :>> showSpecialization;
+                    #InvisibleInDialog attribute :>> showQualifiedNameForSpecialization;
+                    #InvisibleInDialog attribute :>> showValue;
+                }
+                part filterCompartment : FilterCompartmentStyle {
+                    attribute :>> showCompartment default false;
+                    #InvisibleInDialog attribute :>> showInheritedSign;
+                    #InvisibleInDialog attribute :>> showModifiers;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
+                    #InvisibleInDialog attribute :>> showSpecialization;
+                    #InvisibleInDialog attribute :>> showQualifiedNameForSpecialization;
+                    #InvisibleInDialog attribute :>> showValue;
+                }
                 part whileConditionCompartment : WhileConditionCompartmentStyle {
                     attribute :>> showCompartment default false;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
                 }
                 part untilConditionCompartment : UntilConditionCompartmentStyle {
                     attribute :>> showCompartment default false;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
                 }
                 part forIterationCompartment : ForIterationCompartmentStyle {
                     attribute :>> showCompartment default false;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
                 }
                 part ifConditionCompartment : IfConditionCompartmentStyle {
                     attribute :>> showCompartment default false;
+                    #InvisibleInDialog attribute :>> showName;
+                    #InvisibleInDialog attribute :>> showShortName;
+                    #InvisibleInDialog attribute :>> showAliasName;
+                    #InvisibleInDialog attribute :>> showAliasShortName;
                 }
                 part membersCompartment : MembersCompartmentStyle {
                     attribute :>> showCompartment default false;
