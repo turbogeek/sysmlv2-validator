@@ -1,5 +1,10 @@
 package com.validator.parser;
 
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+
 import com.validator.suggestions.SpellingSuggestionEngine;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -269,14 +274,29 @@ public class SysMLv2ParserFacade {
         // Create token stream
         CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-        // Create parser
+        // Two-stage parse (ANTLR 4 recommended practice): try the fast SLL prediction mode with a
+        // bail-out error strategy; only if that fails, re-parse with full LL prediction and normal
+        // error recovery. Valid input gets the same tree; invalid input gets the same errors.
+        long startTime = System.currentTimeMillis();
         SysMLv2Parser parser = new SysMLv2Parser(tokens);
         parser.removeErrorListeners();
-        parser.addErrorListener(errorListener);
-
-        // Parse
-        long startTime = System.currentTimeMillis();
-        ParseTree tree = parser.compilationUnit();
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+        parser.setErrorHandler(new BailErrorStrategy());
+        ParseTree tree;
+        try {
+            tree = parser.compilationUnit();
+        } catch (ParseCancellationException e) {
+            tree = null;
+        }
+        if (tree == null) {
+            LOGGER.debug("SLL parse of {} failed; re-parsing with full LL prediction", fileName);
+            tokens.seek(0);
+            parser.reset();
+            parser.addErrorListener(errorListener);
+            parser.setErrorHandler(new DefaultErrorStrategy());
+            parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+            tree = parser.compilationUnit();
+        }
         long parseTime = System.currentTimeMillis() - startTime;
 
         // Collect line comments from channel 1
