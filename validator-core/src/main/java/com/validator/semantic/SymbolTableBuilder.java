@@ -796,7 +796,7 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
 
     @Override
     public void enterFeatureDefinition(SysMLv2Parser.FeatureDefinitionContext ctx) {
-        String name = extractDeclarationName(ctx.declarationName());
+        String name = extractUsageName(ctx.usageName());
         if (name == null) {
             return;
         }
@@ -809,7 +809,7 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
 
     @Override
     public void enterConnectorDefinition(SysMLv2Parser.ConnectorDefinitionContext ctx) {
-        String name = extractDeclarationName(ctx.declarationName());
+        String name = extractUsageName(ctx.usageName());
         if (name == null) {
             return;
         }
@@ -823,7 +823,7 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
 
     @Override
     public void exitConnectorDefinition(SysMLv2Parser.ConnectorDefinitionContext ctx) {
-        String name = extractDeclarationName(ctx.declarationName());
+        String name = extractUsageName(ctx.usageName());
         if (name != null) {
             symbolTable.exitScope();
         }

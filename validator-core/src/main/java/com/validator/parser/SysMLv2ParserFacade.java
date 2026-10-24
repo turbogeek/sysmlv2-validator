@@ -1,18 +1,19 @@
 package com.validator.parser;
 
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.DefaultErrorStrategy;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
-
 import com.validator.suggestions.SpellingSuggestionEngine;
+import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.Vocabulary;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Facade for parsing SysML v2 files using ANTLR 4.
@@ -274,6 +276,10 @@ public class SysMLv2ParserFacade {
         // Create token stream
         CommonTokenStream tokens = new CommonTokenStream(lexer);
 
+        if (fileName != null && fileName.endsWith(".kerml")) {
+            demoteSysMLOnlyKeywords(tokens);
+        }
+
         // Two-stage parse (ANTLR 4 recommended practice): try the fast SLL prediction mode with a
         // bail-out error strategy; only if that fails, re-parse with full LL prediction and normal
         // error recovery. Valid input gets the same tree; invalid input gets the same errors.
@@ -306,6 +312,46 @@ public class SysMLv2ParserFacade {
             parseTime, errorListener.getErrors().size(), lineComments.size());
 
         return new ParseResult(tree, errorListener.getErrors(), lineComments);
+    }
+
+    /**
+     * KerML reserved words (KerML 8.2.2.1.2). The lexer is shared with SysML, whose additional
+     * reserved words ('part', 'state', 'entry', 'frame', 'accept', ...) are ordinary names in a
+     * .kerml file; the standard library's kernel files rely on that.
+     */
+    private static final Set<String> KERML_KEYWORDS = Set.of(
+        "about", "abstract", "alias", "all", "and", "as", "assoc", "behavior", "binding", "bool", "by",
+        "chains", "class", "classifier", "comment", "composite", "conjugate", "conjugates", "conjugation",
+        "connector", "const", "crosses", "datatype", "default", "dependency", "derived", "differences",
+        "disjoining", "disjoint", "doc", "else", "end", "expr", "false", "feature", "featured", "featuring",
+        "filter", "first", "flow", "for", "from", "function", "hastype", "if", "implies", "import", "in",
+        "inout", "interaction", "intersects", "inv", "inverse", "inverting", "istype", "language", "library",
+        "locale", "loop", "member", "meta", "metaclass", "metadata", "multiplicity", "namespace", "new",
+        "nonunique", "not", "null", "of", "or", "ordered", "out", "package", "portion", "predicate", "private",
+        "protected", "public", "redefines", "redefinition", "references", "rep", "return", "specialization",
+        "specializes", "standard", "step", "struct", "subclassifier", "subset", "subsets", "subtype",
+        "succession", "then", "to", "true", "type", "typed", "typing", "unions", "var", "xor");
+
+    /**
+     * In a .kerml file, turn keyword tokens that KerML does not reserve into identifiers.
+     */
+    private static void demoteSysMLOnlyKeywords(CommonTokenStream tokens) {
+        tokens.fill();
+        Vocabulary vocabulary = SysMLv2Lexer.VOCABULARY;
+        for (Token token : tokens.getTokens()) {
+            if (token.getType() == Token.EOF || token.getType() == SysMLv2Lexer.ID) {
+                continue;
+            }
+            String literal = vocabulary.getLiteralName(token.getType());
+            if (literal == null || literal.length() < 3) {
+                continue;
+            }
+            String word = literal.substring(1, literal.length() - 1);
+            if (word.chars().allMatch(Character::isLetter) && !KERML_KEYWORDS.contains(word)
+                    && token instanceof CommonToken commonToken) {
+                commonToken.setType(SysMLv2Lexer.ID);
+            }
+        }
     }
 
     /**

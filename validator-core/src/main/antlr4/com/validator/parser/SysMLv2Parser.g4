@@ -61,7 +61,7 @@ namespaceBody
 // ============================================================================
 
 aliasDeclaration
-    : ALIAS aliasName FOR qualifiedName SEMICOLON
+    : ALIAS aliasName FOR qualifiedName (SEMICOLON | LBRACE (documentation | comment | metadataAnnotation)* RBRACE)
     ;
 
 implicitFeatureDeclaration
@@ -115,6 +115,8 @@ annotationArgument
 featurePrefix
     : definitionPrefix
     | usagePrefix
+    | directionPrefix
+    | VAR                                                 // KerML 'var'
     ;
 
 definitionPrefix
@@ -198,6 +200,8 @@ member
       | classifierDefinition
       | typeDefinition
       | featureDefinition
+      | multiplicityMember
+      | kermlRelationshipMember
       | connectorDefinition
       | bindingConnectorDefinition
         // Usages
@@ -262,6 +266,7 @@ member
         // Other elements
       | comment
       | documentation
+      | invariantStatement
       )
     ;
 
@@ -318,6 +323,9 @@ constraintDefBodyElement
     | attributeUsage
     | inParameter
     | outParameter
+    | inoutParameter
+    | returnFeature
+    | anonymousRedefines
     ;
 
 attributeDefinition
@@ -411,7 +419,7 @@ metadataDefBodyElement
 // ============================================================================
 
 datatypeDefinition
-    : DATATYPE declarationName typeRelationships? (definitionBody | SEMICOLON)
+    : DATATYPE ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 classDefinition
@@ -419,51 +427,65 @@ classDefinition
     ;
 
 structDefinition
-    : STRUCT declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : STRUCT ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 assocDefinition
-    : (ASSOC_STRUCT | ASSOC) declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : (ASSOC_STRUCT | ASSOC) ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 behaviorDefinition
-    : BEHAVIOR declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : BEHAVIOR ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 functionDefinition
-    : FUNCTION declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : FUNCTION ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 predicateDefinition
-    : PREDICATE declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : PREDICATE ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 interactionDefinition
-    : INTERACTION declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : INTERACTION ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 metaclassDefinition
-    : METACLASS declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : METACLASS ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 classifierDefinition
-    : CLASSIFIER declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : CLASSIFIER ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 typeDefinition
-    : TYPE declarationName typeRelationships? (definitionBody | SEMICOLON)
+    : TYPE ALL? declarationName? multiplicityClause? typeRelationships? (definitionBody | SEMICOLON)?
     ;
 
 featureDefinition
-    : FEATURE declarationName featureRelationships? (definitionBody | SEMICOLON)?
+    : (FEATURE | kermlFeatureKeyword) ALL? usageName? featureRelationships? usageBody?
+    ;
+
+// KerML 'bool' and 'expr' features
+kermlFeatureKeyword
+    : BOOL
+    | EXPR
+    ;
+
+multiplicityMember
+    : MULTIPLICITY usageName? multiplicityClause? featureRelationships? usageBody
     ;
 
 connectorDefinition
-    : CONNECTOR declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : CONNECTOR ALL? connectionEnd TO connectionEnd usageBody
+    | CONNECTOR ALL? usageName? featureRelationships?
+      (FROM connectionEnd TO connectionEnd | LPAREN connectionEnd (COMMA connectionEnd)* RPAREN)? usageBody
     ;
 
+// KerML 'binding [decl of] a = b' and SysML 'binding [decl] bind a = b'
 bindingConnectorDefinition
-    : BINDING declarationName typeRelationships? (definitionBody | SEMICOLON)?
+    : BINDING ALL? (usageName? featureRelationships? (OF | BIND))? connectionEnd EQUALS connectionEnd usageBody
+    | BINDING ALL? usageName? featureRelationships? usageBody
     ;
 
 // ============================================================================
@@ -477,7 +499,10 @@ partUsage
     ;
 
 actionUsage
-    : directionPrefix? ACTION usageName? featureRelationships? (actionKeyword | SEND actionPayload? (VIA expression)? (TO expression)? | ACCEPT actionPayload? (VIA expression)?)? usageBody?
+    : directionPrefix? ACTION usageName? featureRelationships? ASSIGN expression COLON_EQUALS expression SEMICOLON?
+    | directionPrefix? ACTION usageName? featureRelationships? WHILE expression LBRACE usageBodyElement* RBRACE (UNTIL expression)? SEMICOLON?
+    | directionPrefix? ACTION usageName? featureRelationships? LOOP LBRACE usageBodyElement* RBRACE (UNTIL expression)? SEMICOLON?
+    | directionPrefix? ACTION usageName? featureRelationships? (actionKeyword | SEND actionPayload? (VIA expression)? (TO expression)? | ACCEPT actionPayload? (VIA expression)?)? usageBody?
     | directionPrefix? ACTION usageName? featureRelationships? (actionKeyword | SEND actionPayload? (VIA expression)? (TO expression)? | ACCEPT actionPayload? (VIA expression)?)? SEMICOLON
     ;
 
@@ -571,6 +596,22 @@ refKind
     | ATTRIBUTE
     | PORT
     | ITEM
+    | OCCURRENCE
+    | EVENT OCCURRENCE?
+    | CALC
+    | CONSTRAINT
+    | REQUIREMENT
+    | CONNECTION
+    | INTERFACE
+    | ALLOCATION
+    | FLOW
+    | VIEW
+    | RENDERING
+    | CONCERN
+    | ANALYSIS
+    | CASE
+    | VERIFICATION
+    | METADATA
     ;
 
 connectionUsage // Reference: SysMLv2.md, Section 7.13.2 / Line 2416
@@ -588,7 +629,7 @@ flowConnectionUsage
 successionUsage // Reference: SysMLv2.md, Section 7.17.4 / Line 3317
     : FIRST expression (THEN expression)? SEMICOLON?
     | THEN expression SEMICOLON?
-    | SUCCESSION FLOW? usageName? featureRelationships? successionFlowOf? successionEndpoints? SEMICOLON?
+    | SUCCESSION FLOW? ALL? usageName? featureRelationships? successionFlowOf? successionEndpoints? (SEMICOLON | usageBody)?
     ;
 
 successionFlowOf
@@ -602,8 +643,8 @@ transitionUsage
     ;
 
 satisfyRequirement
-      : ASSERT? NOT? SATISFY REQUIREMENT? usageName? featureRelationships? (BY expression)? usageBody?
-      | ASSERT? NOT? SATISFY expression (BY expression)? featureRelationships? usageBody?
+      : ASSERT? NOT? SATISFY REQUIREMENT? usageName? featureRelationships? (BY expression)? requirementBody?
+      | ASSERT? NOT? SATISFY expression (BY expression)? featureRelationships? requirementBody?
       ;
 
 allocateUsage
@@ -855,6 +896,7 @@ name
     | QUOTED_ID
     | DONE
     | START
+    | THIS
     | nonReservedKeyword
     | kermlOnlyKeyword
     ;
@@ -864,6 +906,15 @@ name
 kermlOnlyKeyword
     : NAMESPACE | DATATYPE | CLASS | STRUCT | ASSOC | BEHAVIOR | STEP | FUNCTION | PREDICATE
     | INTERACTION | METACLASS | CLASSIFIER | TYPE | FEATURE | CONNECTOR | INV
+    | BOOL | EXPR | VAR | INVERSE | SUBSET | SUBCLASSIFIER | SUBTYPE | SPECIALIZATION | REDEFINITION
+    ;
+
+// KerML relationship members (KerML 8.2.3.3): 'subset a.b subsets c.d;', 'subclassifier A specializes B;'
+kermlRelationshipMember
+    : (SPECIALIZATION usageName?)? (SUBTYPE | SUBCLASSIFIER) featureChain (SPECIALIZES | SPECIALIZES_OP) featureChain usageBody
+    | (SPECIALIZATION usageName?)? SUBSET featureChain (SUBSETS | SPECIALIZES_OP) featureChain usageBody
+    | (SPECIALIZATION usageName?)? REDEFINITION featureChain (REDEFINES | REDEFINES_OP) featureChain usageBody
+    | DISJOINT featureChain FROM featureChain usageBody
     ;
 
 // Words that the lexer has keyword tokens for although no parser rule uses them and SysML v2 does not reserve them
@@ -919,6 +970,7 @@ featureRelationships
 
 featureRelationship
     : typeRelationship
+    | INVERSE OF (featureChain | qualifiedName)
     | multiplicityClause
     | valueInit
     | READONLY
@@ -1005,9 +1057,9 @@ flowEndpoints
     ;
 
 successionEndpoints
-    : FIRST expression THEN expression
-    | FROM expression TO expression
-    | expression THEN expression
+    : FIRST connectionEnd THEN connectionEnd
+    | FROM connectionEnd TO connectionEnd
+    | connectionEnd THEN connectionEnd
     ;
 
 transitionRelationships
@@ -1042,7 +1094,7 @@ simpleFeature
     ;
 
 returnFeature
-    : RETURN (PART | ATTRIBUTE | PORT | ITEM | ACTION | STATE | REQUIREMENT | CALC | CONSTRAINT | EVENT | OCCURRENCE)? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
+    : RETURN (REF | FEATURE | PART | ATTRIBUTE | PORT | ITEM | ACTION | STATE | REQUIREMENT | CALC | CONSTRAINT | EVENT | OCCURRENCE)? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
     ;
 
 inParameter
@@ -1090,12 +1142,16 @@ simpleParameter
     ;
 
 anonymousRedefines
-    : (REDEFINES | REDEFINES_OP) qualifiedName DEFAULT? valueInit? metaExpression? (SEMICOLON | usageBody)
-    | (REDEFINES | REDEFINES_OP) qualifiedName featureRelationships? valueInit? metaExpression? (SEMICOLON | usageBody)
+    : (REDEFINES | REDEFINES_OP) redefinedList DEFAULT? valueInit? metaExpression? (SEMICOLON | usageBody)
+    | (REDEFINES | REDEFINES_OP) redefinedList featureRelationships? valueInit? metaExpression? (SEMICOLON | usageBody)
     ;
 
 metaExpression
     : META qualifiedName
+    ;
+
+redefinedList
+    : (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 stateDefinitionBody
@@ -1116,6 +1172,9 @@ stateBodyElement // Reference: SysMLv2.md, Section 7.18.2 / Line 4035
     | transitionUsage
     | acceptTransition
     | thenStatement
+    | inParameter
+    | outParameter
+    | inoutParameter
     ;
 
 acceptTransition
@@ -1346,11 +1405,12 @@ thenStatement
     | THEN WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
     | THEN (ACTION usageName? featureRelationships?)? ASSIGN expression COLON_EQUALS expression SEMICOLON?
     | THEN ifStatement
+    | THEN visibility? member
     | THEN expression SEMICOLON?
     ;
 
 invariantStatement
-    : INV usageBody
+    : INV NOT? usageName? usageBody
     ;
 
 flowStatement
@@ -1487,6 +1547,7 @@ sequenceSuffix
     : DOT name                                            // Member access
     | DOT METADATA                                        // Metadata access: Type.metadata (KerML MetadataAccessExpression)
     | ARROW name (LPAREN argumentList? RPAREN)? bodyExpression? // Arrow operation
+    | ARROW name qualifiedName                            // Arrow operation with a function reference
     | DOT QUESTION (LPAREN argumentList? RPAREN)? bodyExpression? // Filter operation
     | HASH LPAREN expression RPAREN                       // Positional Index
     | LBRACK expression RBRACK                            // Index
