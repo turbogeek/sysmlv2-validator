@@ -1483,6 +1483,7 @@ primaryExpression
 
 sequenceSuffix
     : DOT name                                            // Member access
+    | DOT METADATA                                        // Metadata access: Type.metadata (KerML MetadataAccessExpression)
     | ARROW name (LPAREN argumentList? RPAREN)? bodyExpression? // Arrow operation
     | DOT QUESTION (LPAREN argumentList? RPAREN)? bodyExpression? // Filter operation
     | HASH LPAREN expression RPAREN                       // Positional Index

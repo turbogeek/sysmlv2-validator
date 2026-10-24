@@ -3,7 +3,8 @@ package com.validator.cli;
 import com.validator.SysMLv2ValidatorImpl;
 import com.validator.ValidationError;
 import com.validator.ValidationResult;
-import com.validator.Validator;
+import com.validator.library.LibraryCache;
+import com.validator.library.LibraryLoader;
 import com.validator.refactor.RefactoringEngine;
 import com.validator.refactor.RefactoringEngine.RefactoringPlan;
 import com.validator.refactor.RefactoringEngine.ApplyResult;
@@ -98,6 +99,12 @@ public class ValidatorCLI implements Callable<Integer> {
     )
     private boolean errorFreeOnly = true;
 
+    @Option(
+        names = {"--clear-cache"},
+        description = "Delete the parsed-library cache before validating"
+    )
+    private boolean clearCache = false;
+
     @Override
     public Integer call() throws Exception {
         System.out.println("SysML v2 Semantic Validator v0.1.0-SNAPSHOT");
@@ -123,8 +130,23 @@ public class ValidatorCLI implements Callable<Integer> {
             System.out.println();
         }
 
+        if (clearCache) {
+            int deleted = new LibraryCache().clear();
+            System.out.println("Cleared " + deleted + " library cache entries");
+        }
+
         // Create validator
-        Validator validator = new SysMLv2ValidatorImpl();
+        SysMLv2ValidatorImpl validator = new SysMLv2ValidatorImpl();
+
+        List<LibraryLoader.LibraryDiagnostic> libraryDiagnostics = validator.getLibraryDiagnostics();
+        if (!libraryDiagnostics.isEmpty()) {
+            System.out.println("LIBRARY SYNTAX ERRORS (" + libraryDiagnostics.size()
+                + ") - symbols from these files may be incomplete:");
+            for (LibraryLoader.LibraryDiagnostic diagnostic : libraryDiagnostics) {
+                System.out.println("  " + diagnostic);
+            }
+            System.out.println();
+        }
 
         // Validate files
         List<ValidationResult> results;

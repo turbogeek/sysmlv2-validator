@@ -66,17 +66,36 @@ public final class StandardLibraryManager {
      * @param data the cached library data containing external symbols
      */
     public void loadFromCache(com.validator.library.LibraryCacheData data) {
+        registerSymbols(data);
+        wireRelationships(data);
+    }
+
+    /**
+     * Register the symbols of one cached library file without wiring their relationships.
+     * Call {@link #wireRelationships} once every library file is registered, so that
+     * relationships that cross library files resolve.
+     *
+     * @param data the cached library data
+     */
+    public void registerSymbols(com.validator.library.LibraryCacheData data) {
         if (data == null || data.getSymbols() == null) {
             return;
         }
-
-        // First pass: register all symbols
         for (com.validator.library.LibraryCacheData.CachedSymbol cs : data.getSymbols()) {
             Symbol symbol = new Symbol(cs.getName(), cs.getQualifiedName(), cs.getType(), null, cs.getVisibility());
             registerSymbolInstance(symbol);
         }
+    }
 
-        // Second pass: wire relationships
+    /**
+     * Wire specializations, redefinitions and subsettings recorded in one cached library file.
+     *
+     * @param data the cached library data
+     */
+    public void wireRelationships(com.validator.library.LibraryCacheData data) {
+        if (data == null || data.getSymbols() == null) {
+            return;
+        }
         for (com.validator.library.LibraryCacheData.CachedSymbol cs : data.getSymbols()) {
             Symbol symbol = resolveSymbol(cs.getQualifiedName());
             if (symbol != null) {

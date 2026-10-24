@@ -252,6 +252,19 @@ public class SysMLv2ValidatorImpl implements Validator {
         return results;
     }
 
+    /**
+     * Syntax errors found in the configured library files. Reported on every run, including runs
+     * that load those files from the cache.
+     */
+    public List<LibraryLoader.LibraryDiagnostic> getLibraryDiagnostics() {
+        return libraryLoader.getDiagnostics();
+    }
+
+    /** The library cache used by this validator. */
+    public LibraryCache getLibraryCache() {
+        return libraryCache;
+    }
+
     @Override
     public String getVersion() {
         return VERSION;

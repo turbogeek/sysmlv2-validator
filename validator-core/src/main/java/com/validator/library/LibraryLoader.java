@@ -2,7 +2,6 @@ package com.validator.library;
 
 import com.validator.parser.SysMLv2ParserFacade;
 import com.validator.parser.SysMLv2ParserFacade.ParseResult;
-import com.validator.semantic.ElementType;
 import com.validator.semantic.StandardLibraryManager;
 import com.validator.semantic.Symbol;
 import com.validator.semantic.SymbolTable;
@@ -17,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Stream;
@@ -26,6 +26,11 @@ import java.util.zip.ZipFile;
 /**
  * Loads external libraries by fully parsing them via ANTLR.
  * Utilizes LibraryCache to avoid re-parsing on subsequent runs.
+ *
+ * <p>All library files are registered first and their relationships wired afterwards, so a
+ * specialization that refers to a type in another library file resolves. Syntax errors found in a
+ * library file are kept in its cache entry and reported through {@link #getDiagnostics()} on every
+ * load, not only on the run that parsed it.</p>
  */
 public class LibraryLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(LibraryLoader.class);
@@ -33,6 +38,33 @@ public class LibraryLoader {
     private final LibraryCache cache;
     private final SysMLv2ParserFacade parserFacade;
     private final StandardLibraryManager standardLibraryManager;
+    private final List<LibraryCacheData> loaded = new ArrayList<>();
+    private final List<LibraryDiagnostic> diagnostics = new ArrayList<>();
+
+    /** A syntax error in a library file. */
+    public static final class LibraryDiagnostic {
+        private final String source;
+        private final int line;
+        private final int column;
+        private final String message;
+
+        public LibraryDiagnostic(String source, int line, int column, String message) {
+            this.source = source;
+            this.line = line;
+            this.column = column;
+            this.message = message;
+        }
+
+        public String getSource() { return source; }
+        public int getLine() { return line; }
+        public int getColumn() { return column; }
+        public String getMessage() { return message; }
+
+        @Override
+        public String toString() {
+            return source + ":" + line + ":" + column + ": " + message;
+        }
+    }
 
     public LibraryLoader(LibraryCache cache, StandardLibraryManager standardLibraryManager) {
         this.cache = cache;
@@ -50,6 +82,19 @@ public class LibraryLoader {
         for (Path path : config.getDSViewsPaths()) {
             loadPath(path);
         }
+        for (LibraryCacheData data : loaded) {
+            standardLibraryManager.wireRelationships(data);
+        }
+        LOGGER.info("Library cache: {} hits, {} hits by checksum, {} parsed",
+            cache.getHits(), cache.getRehashedHits(), cache.getMisses());
+        if (!diagnostics.isEmpty()) {
+            LOGGER.warn("{} syntax error(s) in library files; their symbols may be incomplete", diagnostics.size());
+        }
+    }
+
+    /** Syntax errors found in the loaded library files. */
+    public List<LibraryDiagnostic> getDiagnostics() {
+        return Collections.unmodifiableList(diagnostics);
     }
 
     private void loadPath(Path libraryPath) {
@@ -71,6 +116,7 @@ public class LibraryLoader {
         try (Stream<Path> paths = Files.walk(dirPath)) {
             paths.filter(Files::isRegularFile)
                  .filter(p -> p.toString().endsWith(".sysml") || p.toString().endsWith(".kerml"))
+                 .sorted()
                  .forEach(this::loadFile);
         } catch (IOException e) {
             LOGGER.error("Failed to read directory {}: {}", dirPath, e.getMessage());
@@ -80,19 +126,20 @@ public class LibraryLoader {
     private void loadFile(Path filePath) {
         File file = filePath.toFile();
         long lastModified = file.lastModified();
+        long size = file.length();
 
-        LibraryCacheData data = cache.loadCache(filePath, lastModified);
+        LibraryCacheData data = cache.lookup(filePath, lastModified, size, () -> Files.readAllBytes(filePath));
         if (data == null) {
             try {
-                String content = Files.readString(filePath, StandardCharsets.UTF_8);
-                data = parseAndCache(content, filePath.getFileName().toString(), filePath, lastModified);
+                byte[] bytes = Files.readAllBytes(filePath);
+                data = parseAndCache(bytes, filePath.getFileName().toString(), filePath, lastModified);
             } catch (IOException e) {
                 LOGGER.error("Failed to read file {}: {}", filePath, e.getMessage());
                 return;
             }
         }
-        
-        registerCacheData(data);
+
+        register(data, filePath.toString());
     }
 
     private void loadKpar(Path kparPath) {
@@ -105,23 +152,27 @@ public class LibraryLoader {
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 String name = entry.getName();
-                
+
                 if ((name.endsWith(".sysml") || name.endsWith(".kerml")) && !entry.isDirectory()) {
                     // Create a virtual path for caching purposes
                     Path virtualPath = kparPath.resolve(name);
-                    
-                    LibraryCacheData data = cache.loadCache(virtualPath, kparLastModified);
+                    long entryTime = entry.getTime() > 0 ? entry.getTime() : kparLastModified;
+
+                    LibraryCacheData data = cache.lookup(virtualPath, entryTime, entry.getSize(), () -> {
+                        try (InputStream is = zipFile.getInputStream(entry)) {
+                            return is.readAllBytes();
+                        }
+                    });
                     if (data == null) {
                         try (InputStream is = zipFile.getInputStream(entry)) {
-                            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-                            data = parseAndCache(content, name, virtualPath, kparLastModified);
+                            data = parseAndCache(is.readAllBytes(), name, virtualPath, entryTime);
                         } catch (Exception e) {
                             LOGGER.warn("Failed to read {} from {}: {}", name, kparPath, e.getMessage());
                             continue;
                         }
                     }
-                    
-                    registerCacheData(data);
+
+                    register(data, kparPath + "!" + name);
                 }
             }
         } catch (IOException e) {
@@ -129,26 +180,34 @@ public class LibraryLoader {
         }
     }
 
-    private LibraryCacheData parseAndCache(String content, String fileName, Path cacheKeyPath, long lastModified) {
+    private LibraryCacheData parseAndCache(byte[] bytes, String fileName, Path cacheKeyPath, long lastModified) {
         LOGGER.debug("Parsing library file: {}", fileName);
-        
+
+        String content = new String(bytes, StandardCharsets.UTF_8);
         ParseResult result = parserFacade.parseString(content, fileName);
-        
+
         LibraryCacheData data = new LibraryCacheData(fileName, lastModified);
-        
+        data.setSourcePath(cacheKeyPath.toString());
+        data.setSize(bytes.length);
+        data.setSha256(LibraryCache.sha256Hex(bytes));
+
+        for (SysMLv2ParserFacade.SyntaxError error : result.getSyntaxErrors()) {
+            data.getParseErrors().add(new LibraryCacheData.CachedDiagnostic(
+                error.getLine(), error.getCharPositionInLine(), error.getMessage()));
+        }
+
         if (result.getParseTree() != null) {
-            // Note: We use a dummy StandardLibraryManager just to fulfill the method signature, 
-            // since we don't need it to resolve built-ins for extracting basic symbols and specializations
+            // A fresh StandardLibraryManager fulfils the method signature; built-ins are not needed
+            // to extract a file's own symbols and the names of what they specialize.
             SymbolTable symbolTable = SymbolTableBuilder.build(result.getParseTree(), fileName, new StandardLibraryManager());
-            
+
             for (Symbol symbol : symbolTable.getAllSymbols()) {
-                // Skip generic package definitions that match filename if they have no contents or are redundant
                 LibraryCacheData.CachedSymbol cachedSymbol = new LibraryCacheData.CachedSymbol();
                 cachedSymbol.setName(symbol.getName());
                 cachedSymbol.setQualifiedName(symbol.getQualifiedName());
                 cachedSymbol.setType(symbol.getType());
                 cachedSymbol.setVisibility(symbol.getVisibility());
-                
+
                 for (Symbol spec : symbol.getSpecializations()) {
                     cachedSymbol.getSpecializations().add(spec.getQualifiedName());
                 }
@@ -158,23 +217,26 @@ public class LibraryLoader {
                 for (Symbol sub : symbol.getSubsettings()) {
                     cachedSymbol.getSubsettings().add(sub.getQualifiedName());
                 }
-                
+
                 data.getSymbols().add(cachedSymbol);
             }
         }
-        
+
         cache.saveCache(cacheKeyPath, data);
         return data;
     }
 
-    private void registerCacheData(LibraryCacheData data) {
-        if (data == null) return;
-        
-        for (LibraryCacheData.CachedSymbol cs : data.getSymbols()) {
-            Symbol symbol = new Symbol(cs.getName(), cs.getQualifiedName(), cs.getType(), null, cs.getVisibility());
-            
-            // Register it directly with the manager
-            standardLibraryManager.registerSymbolInstance(symbol);
+    private void register(LibraryCacheData data, String source) {
+        if (data == null) {
+            return;
+        }
+        standardLibraryManager.registerSymbols(data);
+        loaded.add(data);
+        for (LibraryCacheData.CachedDiagnostic error : data.getParseErrors()) {
+            LibraryDiagnostic diagnostic =
+                new LibraryDiagnostic(source, error.getLine(), error.getColumn(), error.getMessage());
+            diagnostics.add(diagnostic);
+            LOGGER.warn("Library syntax error {}", diagnostic);
         }
     }
 }
