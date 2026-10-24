@@ -2,6 +2,7 @@ package com.validator.library;
 
 import com.validator.semantic.ElementType;
 import com.validator.semantic.Visibility;
+import com.validator.semantic.index.IndexedElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class LibraryCacheData {
     private String cacheKey;
     private List<CachedSymbol> symbols = new ArrayList<>();
     private List<CachedDiagnostic> parseErrors = new ArrayList<>();
+    private List<IndexedElement> elements = new ArrayList<>();
 
     public LibraryCacheData() {}
 
@@ -53,6 +55,10 @@ public class LibraryCacheData {
 
     public List<CachedDiagnostic> getParseErrors() { return parseErrors; }
     public void setParseErrors(List<CachedDiagnostic> parseErrors) { this.parseErrors = parseErrors; }
+
+    /** Name-resolution index of the file (namespaces, members, imports, supertypes). */
+    public List<IndexedElement> getElements() { return elements; }
+    public void setElements(List<IndexedElement> elements) { this.elements = elements; }
 
     public static class CachedSymbol {
         private String name;

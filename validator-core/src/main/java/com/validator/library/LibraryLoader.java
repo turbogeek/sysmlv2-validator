@@ -6,6 +6,7 @@ import com.validator.semantic.StandardLibraryManager;
 import com.validator.semantic.Symbol;
 import com.validator.semantic.SymbolTable;
 import com.validator.semantic.SymbolTableBuilder;
+import com.validator.semantic.index.ModelIndexBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -76,6 +78,7 @@ public class LibraryLoader {
      * Loads all configured libraries into the provided StandardLibraryManager.
      */
     public void loadLibraries(LibraryConfig config) {
+        loadBundled(BUNDLED_LINT_LIBRARY);
         for (Path path : config.getLibraryPaths()) {
             loadPath(path);
         }
@@ -92,9 +95,41 @@ public class LibraryLoader {
         }
     }
 
+    /** The cache data of every loaded library file, in load order. */
+    public List<LibraryCacheData> getLoaded() {
+        return Collections.unmodifiableList(loaded);
+    }
+
     /** Syntax errors found in the loaded library files. */
     public List<LibraryDiagnostic> getDiagnostics() {
         return Collections.unmodifiableList(diagnostics);
+    }
+
+    /** The validator's own metadata library ({@code package Validation}: SuppressWarning, ...). */
+    private static final String BUNDLED_LINT_LIBRARY = "metadata/LintConfig.sysml";
+
+    /** Load a library file shipped inside the validator jar. */
+    private void loadBundled(String resource) {
+        byte[] bytes;
+        try (InputStream in = LibraryLoader.class.getClassLoader().getResourceAsStream(resource)) {
+            if (in == null) {
+                LOGGER.debug("Bundled library {} not found", resource);
+                return;
+            }
+            bytes = in.readAllBytes();
+        } catch (IOException e) {
+            LOGGER.warn("Failed to read bundled library {}: {}", resource, e.getMessage());
+            return;
+        }
+        Path virtualPath = Path.of("classpath", resource);
+        // The resource has no modification time; its content hash stands in for one.
+        long stamp = Arrays.hashCode(bytes);
+        LibraryCacheData data = cache.lookup(virtualPath, stamp, bytes.length, () -> bytes);
+        if (data == null) {
+            String name = virtualPath.getFileName().toString();
+            data = parseAndCache(bytes, name, virtualPath, stamp);
+        }
+        register(data, "classpath:" + resource);
     }
 
     private void loadPath(Path libraryPath) {
@@ -200,6 +235,9 @@ public class LibraryLoader {
             // A fresh StandardLibraryManager fulfils the method signature; built-ins are not needed
             // to extract a file's own symbols and the names of what they specialize.
             SymbolTable symbolTable = SymbolTableBuilder.build(result.getParseTree(), fileName, new StandardLibraryManager());
+
+            data.setElements(ModelIndexBuilder
+                .build(result.getParseTree(), cacheKeyPath.toString(), false).getElements());
 
             for (Symbol symbol : symbolTable.getAllSymbols()) {
                 LibraryCacheData.CachedSymbol cachedSymbol = new LibraryCacheData.CachedSymbol();

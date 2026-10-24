@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.validator.parser.SysMLv2Lexer;
 import com.validator.parser.SysMLv2Parser;
 import com.validator.semantic.SymbolTableBuilder;
+import com.validator.semantic.index.ModelIndexBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ public class LibraryCache {
     private static final String CACHE_DIR_PROPERTY = "sysml.validator.cache.dir";
 
     /** Bump when the layout of {@link LibraryCacheData} or its meaning changes. */
-    public static final int FORMAT_VERSION = 2;
+    public static final int FORMAT_VERSION = 3;
 
     private static volatile String cacheKey;
 
@@ -100,6 +101,7 @@ public class LibraryCache {
             md.update(SysMLv2Parser._serializedATN.getBytes(StandardCharsets.UTF_8));
             updateWithClassBytes(md, SymbolTableBuilder.class);
             updateWithClassBytes(md, LibraryLoader.class);
+            updateWithClassBytes(md, ModelIndexBuilder.class);
             key = HexFormat.of().formatHex(md.digest()).substring(0, 16);
             cacheKey = key;
         }

@@ -3,10 +3,15 @@ package com.validator;
 import com.validator.library.LibraryConfig;
 import com.validator.library.LibraryLoader;
 import com.validator.library.LibraryCache;
+import com.validator.library.LibraryCacheData;
 import com.validator.parser.SysMLv2ParserFacade;
 import com.validator.parser.SysMLv2ParserFacade.ParseResult;
 import com.validator.semantic.SemanticValidator;
 import com.validator.semantic.StandardLibraryManager;
+import com.validator.semantic.index.ModelIndex;
+import com.validator.semantic.index.ModelIndexBuilder;
+import com.validator.semantic.index.ReferenceChecker;
+import com.validator.semantic.index.ReferenceSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Main implementation of the SysML v2 validator.
@@ -32,6 +39,7 @@ public class SysMLv2ValidatorImpl implements Validator {
     private final LibraryLoader libraryLoader;
     private final StandardLibraryManager standardLibraryManager;
     private final boolean semanticValidationEnabled;
+    private final ModelIndex libraryIndex = new ModelIndex();
 
     public SysMLv2ValidatorImpl() {
         this.parserFacade = new SysMLv2ParserFacade();
@@ -46,6 +54,9 @@ public class SysMLv2ValidatorImpl implements Validator {
         // Load libraries if paths are configured
         if (libraryConfig.hasLibraryPaths()) {
             this.libraryLoader.loadLibraries(libraryConfig);
+            for (LibraryCacheData data : this.libraryLoader.getLoaded()) {
+                this.libraryIndex.addAll(data.getElements());
+            }
             this.semanticValidationEnabled = true;
             LOGGER.info("Semantic validation enabled with {} library symbols loaded",
                 this.standardLibraryManager.getStats().getSymbolCount());
@@ -69,11 +80,27 @@ public class SysMLv2ValidatorImpl implements Validator {
             LOGGER.warn("File does not have .sysml or .kerml extension: {}", file.getName());
         }
 
-        LOGGER.info("Validating file: {}", file.getAbsolutePath());
         long startTime = System.currentTimeMillis();
-
-        // Parse the file
         ParseResult parseResult = parserFacade.parseFile(file);
+        ModelIndex index = new ModelIndex(libraryIndex);
+        List<ReferenceSite> sites = indexFile(file, parseResult, index);
+        return validateParsed(file, parseResult, index, sites, startTime);
+    }
+
+    /** Add a parsed file to an index and return the names in it that must resolve. */
+    private List<ReferenceSite> indexFile(File file, ParseResult parseResult, ModelIndex index) {
+        if (parseResult.getParseTree() == null) {
+            return List.of();
+        }
+        ModelIndexBuilder.Result built =
+            ModelIndexBuilder.build(parseResult.getParseTree(), file.getAbsolutePath(), true);
+        index.addAll(built.getElements());
+        return built.getSites();
+    }
+
+    private ValidationResult validateParsed(File file, ParseResult parseResult, ModelIndex index,
+            List<ReferenceSite> sites, long startTime) {
+        LOGGER.info("Validating file: {}", file.getAbsolutePath());
 
         // Convert syntax errors to validation errors using streams (with suggestions)
         List<ValidationError> errors = new ArrayList<>(parseResult.getSyntaxErrors().stream()
@@ -118,6 +145,11 @@ public class SysMLv2ValidatorImpl implements Validator {
             List<ValidationError> semanticErrors =
                 semanticValidator.validate(parseResult.getParseTree());
             errors.addAll(semanticErrors);
+
+            // Names that must resolve: imports, typings, definition supertypes, metadata
+            if (index != null) {
+                errors.addAll(ReferenceChecker.check(sites, index, file.getAbsolutePath()));
+            }
 
             // Add semantic warnings
             for (String warning : semanticValidator.getWarnings()) {
@@ -218,35 +250,57 @@ public class SysMLv2ValidatorImpl implements Validator {
         return result;
     }
 
+    /**
+     * Validate several files together. Every file is parsed and indexed first, so a name in one file
+     * resolves against the others as well as against the libraries; names are checked once all files
+     * are indexed. Parse trees are not kept between the two passes.
+     */
     @Override
     public List<ValidationResult> validateAll(List<File> files) throws IOException {
         LOGGER.info("Validating {} files", files.size());
 
-        List<ValidationResult> results = files.stream()
-            .map(file -> {
-                try {
-                    return validate(file);
-                } catch (IOException e) {
-                    LOGGER.error("Error validating file: {}", file.getAbsolutePath(), e);
-                    // Create error result
-                    ValidationError error = new ValidationError.Builder()
-                        .filePath(file.getAbsolutePath())
-                        .line(0)
-                        .column(0)
-                        .message("Failed to read file: " + e.getMessage())
-                        .errorCode("IO_ERROR")
-                        .severity(ValidationError.Severity.ERROR)
-                        .build();
-
-                    return new ValidationResult(
-                        file.getAbsolutePath(),
-                        List.of(error),
-                        List.of(),
-                        0
-                    );
+        ModelIndex index = new ModelIndex(libraryIndex);
+        List<ValidationResult> results = new ArrayList<>();
+        Map<Integer, List<ReferenceSite>> pending = new LinkedHashMap<>();
+        for (File file : files) {
+            ValidationResult result;
+            try {
+                if (!file.exists()) {
+                    throw new IOException("File not found: " + file.getAbsolutePath());
                 }
-            })
-            .toList();
+                long start = System.currentTimeMillis();
+                ParseResult parsed = parserFacade.parseFile(file);
+                List<ReferenceSite> sites = indexFile(file, parsed, index);
+                result = validateParsed(file, parsed, null, List.of(), start);
+                if (semanticValidationEnabled && parsed.getSyntaxErrors().isEmpty() && !sites.isEmpty()) {
+                    pending.put(results.size(), sites);
+                }
+            } catch (IOException e) {
+                LOGGER.error("Error validating file: {}", file.getAbsolutePath(), e);
+                ValidationError error = new ValidationError.Builder()
+                    .filePath(file.getAbsolutePath())
+                    .line(0)
+                    .column(0)
+                    .message("Failed to read file: " + e.getMessage())
+                    .errorCode("IO_ERROR")
+                    .severity(ValidationError.Severity.ERROR)
+                    .build();
+                result = new ValidationResult(file.getAbsolutePath(), List.of(error), List.of(), 0);
+            }
+            results.add(result);
+        }
+
+        for (Map.Entry<Integer, List<ReferenceSite>> entry : pending.entrySet()) {
+            ValidationResult result = results.get(entry.getKey());
+            List<ValidationError> unresolved =
+                ReferenceChecker.check(entry.getValue(), index, result.getFilePath());
+            if (!unresolved.isEmpty()) {
+                List<ValidationError> errors = new ArrayList<>(result.getErrors());
+                errors.addAll(unresolved);
+                results.set(entry.getKey(), new ValidationResult(result.getFilePath(), errors,
+                    result.getWarnings(), result.getValidationTimeMs()));
+            }
+        }
 
         LOGGER.info("Validation complete: {} files processed", results.size());
         return results;

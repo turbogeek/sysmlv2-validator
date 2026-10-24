@@ -142,6 +142,16 @@ public final class ErrorCodes {
     public static final String SEMANTIC_UNRESOLVED_REFERENCE = "SEMANTIC_UNRESOLVED_REFERENCE";
 
     /**
+     * Unresolved import.
+     *
+     * <p>Cause: The namespace or element named by an import does not exist in the configured
+     * libraries or the validated files.
+     *
+     * <p>Resolution: Fix the import path, or configure the library that defines it.
+     */
+    public static final String IMPORT_RESOLUTION_ERROR = "IMPORT_RESOLUTION_ERROR";
+
+    /**
      * Invalid specialization relationship.
      *
      * <p>Cause: A specialization (e.g., :> or specializes) references
