@@ -403,6 +403,7 @@ metadataDefBody
 metadataDefBodyElement
     : namespaceBodyElement
     | anonymousRedefines
+    | simpleFeature
     ;
 
 // ============================================================================
@@ -855,6 +856,14 @@ name
     | DONE
     | START
     | nonReservedKeyword
+    | kermlOnlyKeyword
+    ;
+
+// KerML keywords that SysML v2 does not reserve (SysML v2 8.2.2.1.2). Cameo 26xR2 and the Dassault
+// libraries use them as names, e.g. 'in feature : Feature;' in DassaultSystemesFunctions.
+kermlOnlyKeyword
+    : NAMESPACE | DATATYPE | CLASS | STRUCT | ASSOC | BEHAVIOR | STEP | FUNCTION | PREDICATE
+    | INTERACTION | METACLASS | CLASSIFIER | TYPE | FEATURE | CONNECTOR | INV
     ;
 
 // Words that the lexer has keyword tokens for although no parser rule uses them and SysML v2 does not reserve them
@@ -872,7 +881,7 @@ nonReservedKeyword
     ;
 
 shortName
-    : UNRESTRICTED_NAME
+    : LT name GT
     ;
 
 qualifiedName
@@ -1025,7 +1034,7 @@ definitionBodyElement
     ;
 
 simpleFeature
-    : usageName? featureRelationships valueInit? SEMICOLON
+    : usageName? featureRelationships valueInit? (SEMICOLON | usageBody)
     | FEATURE REDEFINES qualifiedName featureRelationships? valueInit? usageBody?
     | FEATURE REDEFINES qualifiedName featureRelationships? valueInit? SEMICOLON
     | FEATURE usageName? featureRelationships valueInit? usageBody?
@@ -1164,6 +1173,7 @@ enumBodyElement
 enumMember
     : visibility? hashAnnotation* ENUM name? (COLON qualifiedName)? (EQUALS expression)? SEMICOLON?
     | visibility? hashAnnotation* ENUM name? enumMemberBody
+    | visibility? hashAnnotation* name enumMemberBody
     | visibility? hashAnnotation* name (COLON qualifiedName)? (EQUALS expression)? SEMICOLON?
     | hashAnnotation* EQUALS expression SEMICOLON?
     ;
@@ -1333,6 +1343,7 @@ thenStatement
     | THEN EVENT OCCURRENCE? usageName? featureRelationships? SEMICOLON
     | THEN EVENT expression SEMICOLON?
     | THEN WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
+    | THEN (ACTION usageName? featureRelationships?)? ASSIGN expression COLON_EQUALS expression SEMICOLON?
     | THEN expression SEMICOLON?
     ;
 
@@ -1405,7 +1416,8 @@ expression
     ;
 
 conditionalExpression
-    : nullCoalescingExpression (QUESTION expression COLON expression)?
+    : IF nullCoalescingExpression QUESTION expression ELSE expression
+    | nullCoalescingExpression (QUESTION expression COLON expression)?
     ;
 
 nullCoalescingExpression
@@ -1434,6 +1446,7 @@ equalityExpression
 
 classificationExpression
     : rangeExpression ((HASTYPE | ISTYPE | AT_SIGN | META | AS) qualifiedName)?
+    | (HASTYPE | ISTYPE | AT_SIGN) qualifiedName
     ;
 
 rangeExpression
@@ -1494,6 +1507,7 @@ baseExpression
 
 collectionLiteral
     : LPAREN expression (COMMA expression)+ RPAREN        // Tuple/sequence (1, 2, 3)
+    | LPAREN RPAREN                                       // Empty sequence (null)
     ;
 
 thisExpression
