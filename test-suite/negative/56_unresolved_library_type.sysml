@@ -1,7 +1,7 @@
 /**
  * NEGATIVE TEST: Type from a library that is not configured
  * EXPECTED ERROR: SEMANTIC_UNRESOLVED_REFERENCE - 'DiagramInterchange' not found (is a library missing?)
- * EXPECTED ERROR: IMPORT_RESOLUTION_ERROR - 'MissingLibrary' not found
+ * EXPECTED ERROR: IMPORT_PACKAGE_NOT_FOUND - 'MissingLibrary' not found
  * CATEGORY: Type/Resolution Errors
  * NOTE: needs the standard library configured; without libraries semantic checks are off.
  */

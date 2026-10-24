@@ -38,13 +38,21 @@ public final class ReferenceChecker {
                 .line(site.getLine())
                 .column(site.getColumn())
                 .message(message(site, r.getFailedSegment()))
-                .errorCode(site.getKind() == ReferenceSite.Kind.IMPORT
-                    ? ErrorCodes.IMPORT_RESOLUTION_ERROR
-                    : ErrorCodes.SEMANTIC_UNRESOLVED_REFERENCE)
+                .errorCode(errorCode(site, r.getFailedSegment()))
                 .severity(ValidationError.Severity.ERROR)
                 .build());
         }
         return errors;
+    }
+
+    private static String errorCode(ReferenceSite site, int failed) {
+        if (site.getKind() != ReferenceSite.Kind.IMPORT) {
+            return ErrorCodes.SEMANTIC_UNRESOLVED_REFERENCE;
+        }
+        boolean elementImport = !site.getText().endsWith("*");
+        return elementImport && failed == site.getSegments().size() - 1 && failed > 0
+            ? ErrorCodes.IMPORT_ELEMENT_NOT_FOUND
+            : ErrorCodes.IMPORT_PACKAGE_NOT_FOUND;
     }
 
     private static String message(ReferenceSite site, int failed) {
