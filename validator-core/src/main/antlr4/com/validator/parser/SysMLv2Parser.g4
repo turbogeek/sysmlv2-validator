@@ -1190,6 +1190,7 @@ entryAction
     | ENTRY ACTION? usageName? featureRelationships? usageBody
     | ENTRY assignStatement
     | ENTRY assignUsage
+    | ENTRY sendStatement
     | ENTRY expression? SEMICOLON
     ;
 
@@ -1206,6 +1207,7 @@ exitAction
     : EXIT actionUsage
     | EXIT ACTION? usageName? featureRelationships? usageBody
     | EXIT assignStatement
+    | EXIT sendStatement
     | EXIT expression? SEMICOLON
     ;
 
