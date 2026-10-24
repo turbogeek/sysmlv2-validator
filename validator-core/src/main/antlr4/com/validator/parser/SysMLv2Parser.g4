@@ -1123,7 +1123,7 @@ acceptTransition
     ;
 
 doActionClause
-    : DO (ACTION usageName? featureRelationships? | SEND expression TO expression | expression)
+    : DO (ACTION usageName? featureRelationships? | SEND expression (VIA expression)? (TO expression)? | expression)
     ;
 
 requirementBody
@@ -1208,7 +1208,7 @@ doAction
     : DO actionUsage
     | DO ACTION? usageName? featureRelationships? usageBody
     | DO ACTION? expression SEMICOLON
-    | DO SEND actionPayload? TO expression SEMICOLON
+    | DO sendStatement
     | DO assignStatement
     | DO assignUsage
     ;
@@ -1227,6 +1227,7 @@ assignStatement
 
 acceptClause
     : ACCEPT usageName? (COLON qualifiedName)? (VIA expression)? acceptTiming?
+    | ACCEPT qualifiedName (VIA expression)? acceptTiming?
     ;
 
 guardClause
@@ -1344,6 +1345,7 @@ thenStatement
     | THEN EVENT expression SEMICOLON?
     | THEN WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
     | THEN (ACTION usageName? featureRelationships?)? ASSIGN expression COLON_EQUALS expression SEMICOLON?
+    | THEN ifStatement
     | THEN expression SEMICOLON?
     ;
 
@@ -1372,15 +1374,15 @@ expressionStatement
 
 ifStatement
     : IF expression THEN statement (ELSE statement)?
-    | IF expression LBRACE statement* RBRACE elseIfClause* elseClause?
+    | IF expression LBRACE usageBodyElement* RBRACE elseIfClause* elseClause?
     ;
 
 elseIfClause
-    : ELSE IF expression LBRACE statement* RBRACE
+    : ELSE IF expression LBRACE usageBodyElement* RBRACE
     ;
 
 elseClause
-    : ELSE LBRACE statement* RBRACE
+    : ELSE LBRACE usageBodyElement* RBRACE
     ;
 
 whileStatement
