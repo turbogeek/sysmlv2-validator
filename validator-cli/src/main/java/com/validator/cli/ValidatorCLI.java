@@ -281,7 +281,7 @@ public class ValidatorCLI implements Callable<Integer> {
             for (ValidationError error : result.getErrors()) {
                 System.out.printf("[%s] %s:%d:%d%n",
                     error.getSeverity(),
-                    new File(error.getFilePath()).getName(),
+                    fileName(error),
                     error.getLine(),
                     error.getColumn());
                 System.out.printf("  %s: %s%n", error.getErrorCode(), error.getMessage());
@@ -298,7 +298,7 @@ public class ValidatorCLI implements Callable<Integer> {
             for (ValidationError warning : result.getWarnings()) {
                 System.out.printf("[%s] %s:%d:%d%n",
                     warning.getSeverity(),
-                    new File(warning.getFilePath()).getName(),
+                    fileName(warning),
                     warning.getLine(),
                     warning.getColumn());
                 System.out.printf("  %s: %s%n", warning.getErrorCode(), warning.getMessage());
@@ -310,6 +310,11 @@ public class ValidatorCLI implements Callable<Integer> {
             System.out.printf("Validation time: %dms%n", result.getValidationTimeMs());
         }
         System.out.println();
+    }
+
+    private static String fileName(ValidationError issue) {
+        String path = issue.getFilePath();
+        return path == null ? "<unknown>" : new File(path).getName();
     }
 
     private List<File> expandFileList(List<File> fileList, boolean recurse) {
