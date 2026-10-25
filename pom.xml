@@ -124,6 +124,15 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.6.0</version>
+                    <configuration>
+                        <!-- The version the performance history (docs/performance) records each run under.
+                             Properties given on the command line, such as -Dperf.record=true and
+                             -Dperf.note="...", reach the test JVM as well: surefire passes Maven's user
+                             properties on. -->
+                        <systemPropertyVariables>
+                            <validator.version>${project.version}</validator.version>
+                        </systemPropertyVariables>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.antlr</groupId>

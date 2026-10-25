@@ -1,6 +1,13 @@
 package com.validator.semantic;
 
 import com.validator.parser.SysMLv2ParserFacade;
+import com.validator.testutil.BuildInfo;
+import com.validator.testutil.PerformanceComparison;
+import com.validator.testutil.PerformanceHistory;
+import com.validator.testutil.PerformanceHistory.RecordMode;
+import com.validator.testutil.PerformanceHistory.Row;
+import com.validator.testutil.PerformanceHistory.Run;
+import com.validator.testutil.PerformanceReadme;
 import com.validator.testutil.PerformanceReference;
 import com.validator.testutil.TestPaths;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -8,9 +15,12 @@ import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.*;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,6 +31,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Semantic Analysis Integration Tests")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SemanticAnalysisIntegrationTest {
+
+    /** Warm builds of each budgeted model in testPerformance; their median is the model's time. */
+    private static final int WARM_RUNS = 5;
 
     private static Path testSuiteRoot;
     private static StandardLibraryManager standardLibrary;
@@ -178,25 +191,42 @@ public class SemanticAnalysisIntegrationTest {
         System.out.println("Performance test - Top 5 largest models:");
         List<Map<String, Object>> models = new ArrayList<>();
         // A model's first build in this JVM varies with JIT compilation and garbage collection, so each budgeted
-        // model is built three more times on the now warm JVM and the median is what the budget applies to. Known
-        // slow models keep their first time: their limits are ratios with a wide margin.
-        Map<String, Long> timedMs = new LinkedHashMap<>();
+        // model is built WARM_RUNS more times on the now warm JVM and the median is what the budget applies to and
+        // what the history records. Known slow models keep their first time: their limits are ratios with a wide
+        // margin. Every model is timed and reported before anything is asserted.
+        List<PerformanceHistory.Timing> timings = new ArrayList<>();
+        List<String> budgetFailures = new ArrayList<>();
         for (IntegrationTestResult result : largeModels) {
             boolean knownSlow = calibration.isKnownSlow(result.fileName);
-            List<Long> warm = new ArrayList<>();
+            List<Double> warm = new ArrayList<>();
             if (!knownSlow) {
-                for (int i = 0; i < 3; i++) {
-                    warm.add(testFile(result.file, result.category).buildTimeMs);
+                for (int i = 0; i < WARM_RUNS; i++) {
+                    warm.add(testFile(result.file, result.category).buildMs());
                 }
                 Collections.sort(warm);
             }
-            long ms = knownSlow ? result.buildTimeMs : warm.get(1);
-            timedMs.put(result.fileName, ms);
+            double ms = knownSlow ? result.buildMs() : warm.get(WARM_RUNS / 2);
             double limitMs = knownSlow ? calibration.knownSlowLimitMs(result.fileName, reference) : budgetMs;
             double ratio = ms / reference.medianMs();
-            System.out.println(String.format("  %s: %d symbols in %d ms (first build %d ms, warm %s; %.1f x reference%s)",
-                result.fileName, result.symbolCount, ms, result.buildTimeMs, knownSlow ? "-" : warm.toString(), ratio,
+            String warmText = warm.stream().map(w -> String.format(Locale.ROOT, "%.1f", w))
+                .collect(Collectors.joining(", ", "[", "]"));
+            System.out.println(String.format(Locale.ROOT,
+                "  %s: %d symbols in %.1f ms (first build %d ms, warm %s; %.2f x reference%s)",
+                result.fileName, result.symbolCount, ms, result.buildTimeMs, knownSlow ? "-" : warmText, ratio,
                 knownSlow ? ", known slow" : ""));
+            timings.add(new PerformanceHistory.Timing(result.fileName,
+                knownSlow ? PerformanceHistory.FIRST_BUILD : PerformanceHistory.WARM_MEDIAN_PREFIX + WARM_RUNS, 1,
+                result.symbolCount, ms));
+            if (knownSlow && ms > limitMs) {
+                budgetFailures.add(String.format("%s (known slow) took %.0f ms, more than %.0f x the reference %.1f ms"
+                        + " = %.0f ms: it got slower", result.fileName, ms,
+                    calibration.knownSlowRatioMax().get(result.fileName), reference.medianMs(), limitMs));
+            } else if (!knownSlow && ms >= budgetMs) {
+                budgetFailures.add(String.format("%s took %.0f ms, budget %.0f ms (%.0f ms nominal x slowdown %.2f x"
+                        + " spread %.2f; reference %.1f ms, nominal %.1f ms)", result.fileName, ms, budgetMs,
+                    calibration.budgetNominalMs(), slowdown, spread, reference.medianMs(),
+                    calibration.nominalReferenceMs()));
+            }
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("file", result.fileName);
             m.put("symbols", result.symbolCount);
@@ -209,6 +239,20 @@ public class SemanticAnalysisIntegrationTest {
             m.put("withinLimit", ms <= limitMs);
             models.add(m);
         }
+        // Each test suite's total: the sum of its files' first builds in this JVM, from tests 1 and 2
+        for (String suite : List.of("stockticker", "positive")) {
+            List<IntegrationTestResult> files = allResults.stream().filter(r -> r.category.equals(suite)).toList();
+            if (!files.isEmpty()) {
+                timings.add(new PerformanceHistory.Timing(PerformanceHistory.SUITE_PREFIX + suite,
+                    PerformanceHistory.FIRST_BUILDS_TOTAL, files.size(),
+                    files.stream().mapToInt(r -> r.symbolCount).sum(),
+                    files.stream().mapToDouble(IntegrationTestResult::buildMs).sum()));
+            }
+        }
+
+        HistoryOutcome history = largeModels.isEmpty() ? null
+            : compareWithHistory(timings, reference.medianMs(), slowdown, !budgetFailures.isEmpty());
+
         Map<String, Object> report = new LinkedHashMap<>();
         report.put("referenceBeforeMedianMs", referenceBefore.medianMs());
         report.put("referenceBeforeSpread", referenceBefore.spread());
@@ -221,23 +265,97 @@ public class SemanticAnalysisIntegrationTest {
         report.put("budgetMs", budgetMs);
         report.put("knownSlowRatioMax", calibration.knownSlowRatioMax());
         report.put("models", models);
+        if (history != null) {
+            report.put("historyRecorded", history.decision().append());
+            report.put("historyDecision", history.decision().reason());
+            report.put("historyUntrusted", history.untrusted().orElse(null));
+            report.put("historyRegressions", history.regressions().stream()
+                .map(l -> l.now().subject()).collect(Collectors.toList()));
+        }
         PerformanceReference.writeReport(Paths.get("target", "perf", "semantic-analysis-perf.json"), report);
 
-        for (IntegrationTestResult result : largeModels) {
-            if (calibration.isKnownSlow(result.fileName)) {
-                double limitMs = calibration.knownSlowLimitMs(result.fileName, reference);
-                assertTrue(timedMs.get(result.fileName) <= limitMs,
-                    String.format("%s (known slow) took %d ms, more than %.0f x the reference %.1f ms = %.0f ms: it got slower",
-                        result.fileName, timedMs.get(result.fileName), calibration.knownSlowRatioMax().get(result.fileName),
-                        reference.medianMs(), limitMs));
-            } else {
-                assertTrue(timedMs.get(result.fileName) < budgetMs,
-                    String.format("%s took %d ms, budget %.0f ms (%.0f ms nominal x slowdown %.2f x spread %.2f;"
-                            + " reference %.1f ms, nominal %.1f ms)", result.fileName, timedMs.get(result.fileName), budgetMs,
-                        calibration.budgetNominalMs(), slowdown, spread, reference.medianMs(),
-                        calibration.nominalReferenceMs()));
-            }
+        assertTrue(budgetFailures.isEmpty(), String.join("\n", budgetFailures));
+        if (history != null && history.failsOnRegressions()) {
+            fail(history.regressions().stream().map(l -> String.format(Locale.ROOT,
+                    "%s (%s): %s x the reference, %s in the last recorded run (%s at %s), %s", l.now().subject(),
+                    l.now().measure(), PerformanceComparison.ratio(l.now().ratio()),
+                    PerformanceComparison.ratio(l.baseline().orElseThrow().ratio()), history.lastRun().version(),
+                    history.lastRun().commit(), l.change()))
+                .collect(Collectors.joining("\n", "Clearly slower than the last recorded run ("
+                    + history.threshold().describe() + "):\n", "\nIf the slowdown is intended, record this run as the"
+                    + " new baseline: mvn verify -D" + RecordMode.PROPERTY + "=true (see "
+                    + PerformanceReadme.README_FILE + ")")));
         }
+    }
+
+    /** What the history check of one run found and decided. */
+    private record HistoryOutcome(RecordMode mode, Optional<String> untrusted, PerformanceHistory.Decision decision,
+                                  Run lastRun, PerformanceComparison.Threshold threshold,
+                                  List<PerformanceComparison.Line> regressions) {
+
+        /**
+         * Regressions fail the test unless they were just recorded as the new baseline or the run's ratios cannot be
+         * trusted (a busy machine, a coverage agent).
+         */
+        boolean failsOnRegressions() {
+            return !regressions.isEmpty() && mode != RecordMode.ALWAYS && untrusted.isEmpty();
+        }
+    }
+
+    /**
+     * Compares this run with the performance history in docs/performance: with the latest run of the previous
+     * version and with the last recorded run, which is the baseline a clear regression fails against (for the first
+     * run of a version the two are the same run). Writes the would-be rows to target/perf/history-entry.csv, and
+     * appends them to the history and regenerates its README when perf.record says so: always for true, never for
+     * false, and by default only for the first run of a project version that passed its checks and whose ratios can
+     * be trusted (PerformanceComparison.untrusted).
+     */
+    private HistoryOutcome compareWithHistory(List<PerformanceHistory.Timing> timings, double referenceMs,
+                                              double slowdown, boolean overBudget) {
+        Path root = TestPaths.repositoryRoot();
+        BuildInfo build = BuildInfo.capture(root);
+        // A Java agent goes into the note, since a row recorded with one has ratios that do not compare
+        String note = Stream.concat(Stream.ofNullable(System.getProperty("perf.note")),
+                build.javaAgents().stream().map(agent -> "java agent " + agent))
+            .filter(part -> !part.isBlank())
+            .collect(Collectors.joining("; "));
+        List<Row> rows = PerformanceHistory.newRun(build, Instant.now(), referenceMs, slowdown, timings, note);
+        Path entry = Paths.get("target", "perf", "history-entry.csv");
+        try {
+            Files.createDirectories(entry.getParent());
+            Files.writeString(entry, PerformanceHistory.header() + PerformanceHistory.formatRows(rows));
+        } catch (IOException e) {
+            throw new UncheckedIOException("Cannot write " + entry, e);
+        }
+
+        Path historyFile = root.resolve(PerformanceReadme.HISTORY_FILE);
+        PerformanceHistory history = PerformanceHistory.read(historyFile);
+        PerformanceComparison.Threshold threshold = PerformanceComparison.Threshold.load();
+        Optional<String> previousVersion = history.previousVersion(build.version());
+        Optional<Run> previousRun = previousVersion.flatMap(history::latestRun);
+        Optional<Run> lastRun = history.lastRun();
+        System.out.println("\n" + PerformanceComparison.table(rows, build.version(), previousVersion, previousRun,
+            lastRun, threshold));
+        List<PerformanceComparison.Line> regressions =
+            PerformanceComparison.regressions(PerformanceComparison.compare(rows, lastRun, threshold));
+
+        RecordMode mode = RecordMode.fromProperty(System.getProperty(RecordMode.PROPERTY));
+        Optional<String> untrusted = PerformanceComparison.untrusted(build, threshold);
+        PerformanceHistory.Decision decision =
+            PerformanceHistory.decide(mode, build, history, overBudget || !regressions.isEmpty(), untrusted);
+        if (decision.append()) {
+            PerformanceHistory.append(historyFile, rows);
+            PerformanceReadme.regenerate(historyFile, root.resolve(PerformanceReadme.README_FILE));
+        }
+        System.out.println((decision.append() ? "Recorded in " : "Not recorded in ") + historyFile + ": "
+            + decision.reason() + "; this run's rows are in " + entry.toAbsolutePath());
+        if (!regressions.isEmpty() && mode == RecordMode.ALWAYS) {
+            System.out.println("WARNING: " + regressions.size() + " clear regression(s) accepted as the new baseline");
+        } else if (!regressions.isEmpty() && untrusted.isPresent()) {
+            System.out.println("WARNING: " + regressions.size() + " clear regression(s), not failing because "
+                + untrusted.get() + "; run the test again without that");
+        }
+        return new HistoryOutcome(mode, untrusted, decision, lastRun.orElse(null), threshold, regressions);
     }
 
     @Test
@@ -274,7 +392,8 @@ public class SemanticAnalysisIntegrationTest {
      * Test a single SysML file.
      */
     private IntegrationTestResult testFile(File file, String category) {
-        long startTime = System.currentTimeMillis();
+        // nanoTime: a warm build takes a few milliseconds, too short for currentTimeMillis to time usefully
+        long startTime = System.nanoTime();
         IntegrationTestResult result = new IntegrationTestResult(file.getName(), category);
         result.file = file;
 
@@ -286,7 +405,7 @@ public class SemanticAnalysisIntegrationTest {
             if (parseTree == null) {
                 result.success = false;
                 result.errorMessage = "Parse tree is null";
-                result.buildTimeMs = System.currentTimeMillis() - startTime;
+                result.setBuildTime(System.nanoTime() - startTime);
                 return result;
             }
 
@@ -317,12 +436,12 @@ public class SemanticAnalysisIntegrationTest {
             }
 
             result.success = true;
-            result.buildTimeMs = System.currentTimeMillis() - startTime;
+            result.setBuildTime(System.nanoTime() - startTime);
 
         } catch (Exception e) {
             result.success = false;
             result.errorMessage = e.getMessage();
-            result.buildTimeMs = System.currentTimeMillis() - startTime;
+            result.setBuildTime(System.nanoTime() - startTime);
         }
 
         return result;
@@ -357,11 +476,21 @@ public class SemanticAnalysisIntegrationTest {
         int standardLibraryTypes;
         List<String> stdLibPackagesUsed = new ArrayList<>();
         long buildTimeMs;
+        long buildTimeNanos;
         File file;
 
         IntegrationTestResult(String fileName, String category) {
             this.fileName = fileName;
             this.category = category;
+        }
+
+        void setBuildTime(long nanos) {
+            buildTimeNanos = nanos;
+            buildTimeMs = Math.round(nanos / 1_000_000.0);
+        }
+
+        double buildMs() {
+            return buildTimeNanos / 1_000_000.0;
         }
     }
 }
