@@ -2,7 +2,7 @@
 // Exercises: assignment, while and loop action nodes ('action a assign ...', 'action a while ... until',
 // 'action a loop ... until'), loop, while, for, terminate and if-else-if-else nodes, a decision node with 'if ... then'
 // and 'else' successions, and the 'then' forms that the other files do not use: merge, decide, terminate, a while
-// action, a while node, perform, assign and if.
+// action, a while node, an event occurrence, perform, assign and if.
 package SysmlActions {
     private import ScalarValues::*;
 
@@ -34,7 +34,7 @@ package SysmlActions {
         then terminate;
         then action again while flag { }
         then while flag { }
-        then event engine.rpm;
+        then event occurrence arrival;
         then perform start;
         then assign engine.rpm := 1;
         then if flag { }
