@@ -1,0 +1,111 @@
+### V1.sysml
+  WARNING L5:19 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Vehicle
+  INHERITS V1::Car [V1::Vehicle::mass]
+### V1ok.sysml
+  (no issues)
+  FEATURE V1ok::Car::mass : redefines V1ok::Vehicle::mass
+  COMPUTED V1ok::Car::mass redefines [V1ok::Vehicle::mass]
+### V2.sysml
+  WARNING L6:19 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Car
+  WARNING L9:9 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Car
+  FEATURE V2::Car::mass : redefines V2::Vehicle::mass
+  FEATURE V2::okCar::mass : redefines V2::Car::mass
+  COMPUTED V2::Car::mass redefines [V2::Vehicle::mass]
+  INHERITS V2::myCar [V2::Car::mass]
+  INHERITS V2::yourCar [V2::Car::mass]
+  COMPUTED V2::okCar::mass redefines [V2::Car::mass]
+### V2x.sysml
+  WARNING L4:41 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Vehicle
+  WARNING L6:19 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Car, Vehicle
+  WARNING L5:5 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Car, Vehicle
+  INHERITS V2x::Car [V2x::Vehicle::mass]
+  INHERITS V2x::myCar [V2x::Car::mass, V2x::Vehicle::mass]
+### V3.sysml
+  WARNING L4:19 [validateNamespaceDistinguishablity] Duplicate of other owned member name
+  WARNING L5:19 [validateNamespaceDistinguishablity] Duplicate of other owned member name
+  WARNING L8:23 [validateNamespaceDistinguishablity] Duplicate of other owned member name
+  WARNING L9:19 [validateNamespaceDistinguishablity] Duplicate of other owned member name
+  FEATURE V3::Truck::payload : subsets V3::Truck::load
+### V4a.sysml
+  WARNING L5:5 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'rating' from Insured, Powered
+  WARNING L8:5 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'rating' from Insured, Powered
+  REF rating -> V4a::Powered::rating
+  REF rating -> V4a::Insured::rating
+  INHERITS V4a::Truck [V4a::Powered::rating, V4a::Insured::rating]
+  COMPUTED V4a::Truck::<anon>::<anon>::x redefines [DataFunctions::'>'::x]
+  COMPUTED V4a::Truck::<anon>::<anon>::x::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V4a::Truck::<anon>::<anon>::y redefines [DataFunctions::'>'::y]
+  COMPUTED V4a::Truck::<anon>::<anon>::result redefines [DataFunctions::'>'::result, Performances::Evaluation::result]
+  INHERITS V4a::Truck2 [V4a::Insured::rating, V4a::Powered::rating]
+  COMPUTED V4a::Truck2::<anon>::<anon>::x redefines [DataFunctions::'>'::x]
+  COMPUTED V4a::Truck2::<anon>::<anon>::x::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V4a::Truck2::<anon>::<anon>::y redefines [DataFunctions::'>'::y]
+  COMPUTED V4a::Truck2::<anon>::<anon>::result redefines [DataFunctions::'>'::result, Performances::Evaluation::result]
+### V4b.sysml
+  (no issues)
+  FEATURE RedefinitionDiamond::A1 : subsets RedefinitionDiamond::A
+  FEATURE RedefinitionDiamond::A1::p1 : redefines RedefinitionDiamond::A::p
+  FEATURE RedefinitionDiamond::A2 : subsets RedefinitionDiamond::A
+  FEATURE RedefinitionDiamond::B : subsets RedefinitionDiamond::A1, subsets RedefinitionDiamond::A2
+  COMPUTED RedefinitionDiamond::A1::p1 redefines [RedefinitionDiamond::A::p]
+  INHERITS RedefinitionDiamond::A2 [RedefinitionDiamond::A::p]
+  INHERITS RedefinitionDiamond::B [RedefinitionDiamond::A1::p1]
+### V5.sysml
+  (no issues)
+  INHERITS V5::myCar [V5::Vehicle::mass]
+### V6a.sysml
+  (no issues)
+  FEATURE V6a::Vehicle::mass : subsets V6a::Vehicle::mass
+### V6b.sysml
+  (no issues)
+  FEATURE V6b::Vehicle::totalMass : subsets ISQBase::mass
+  FEATURE V6b::Car::mass : redefines ISQBase::mass
+  REF kilogram -> SI::kilogram
+  INHERITS V6b::Car [V6b::Vehicle::totalMass]
+  COMPUTED V6b::Car::mass redefines [ISQBase::mass]
+  COMPUTED V6b::Car::mass::<anon>::x redefines [BaseFunctions::'['::x]
+  COMPUTED V6b::Car::mass::<anon>::y redefines [BaseFunctions::'['::y]
+  COMPUTED V6b::Car::mass::<anon>::y::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V6b::Car::mass::<anon>::result redefines [BaseFunctions::'['::result, Performances::Evaluation::result]
+### V6d.sysml
+  (no issues)
+  FEATURE V6d::probe : subsets V6d::mass
+  resolveLocal(V6d, 'mass') -> ISQBase::mass
+### V7a.sysml
+  (no issues)
+  COMPUTED V7a::AuditedTransfer::target redefines [V7a::Transfer::source]
+  COMPUTED V7a::AuditedTransfer::source redefines [V7a::Transfer::target]
+### V7b.sysml
+  (no issues)
+  FEATURE V7b::Refund::target : redefines V7b::Transfer::target
+  COMPUTED V7b::Refund::target redefines [V7b::Transfer::target, V7b::Transfer::source]
+### V8.sysml
+  ERROR   L4:46 [validateFeatureValueOverriding] Cannot override a binding feature value
+  WARNING L5:37 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Vehicle
+  FEATURE V8::car1::mass : redefines V8::Vehicle::mass
+  COMPUTED V8::car1::mass redefines [V8::Vehicle::mass]
+  INHERITS V8::car2 [V8::Vehicle::mass]
+### V9.sysml
+  WARNING L11:19 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'cutoff' from TestRecord
+  REF scores -> V9::TestRecord::scores
+  REF scores -> V9::TestRecord::scores
+  REF averageScore -> V9::TestRecord::averageScore
+  REF averageScore -> V9::TestRecord::averageScore
+  COMPUTED V9::TestRecord::averageScore::<anon>::x redefines [DataFunctions::'/'::x]
+  COMPUTED V9::TestRecord::averageScore::<anon>::x::<anon>::collection redefines [NumericalFunctions::sum::collection]
+  COMPUTED V9::TestRecord::averageScore::<anon>::x::<anon>::collection::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V9::TestRecord::averageScore::<anon>::x::<anon>::result redefines [NumericalFunctions::sum::result, Performances::Evaluation::result]
+  COMPUTED V9::TestRecord::averageScore::<anon>::y redefines [DataFunctions::'/'::y]
+  COMPUTED V9::TestRecord::averageScore::<anon>::y::<anon>::seq redefines [SequenceFunctions::size::seq]
+  COMPUTED V9::TestRecord::averageScore::<anon>::y::<anon>::seq::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V9::TestRecord::averageScore::<anon>::y::<anon>::result redefines [SequenceFunctions::size::result, Performances::Evaluation::result]
+  COMPUTED V9::TestRecord::averageScore::<anon>::result redefines [DataFunctions::'/'::result, Performances::Evaluation::result]
+  COMPUTED V9::TestRecord::cutoff::<anon>::x redefines [DataFunctions::'*'::x]
+  COMPUTED V9::TestRecord::cutoff::<anon>::y redefines [DataFunctions::'*'::y]
+  COMPUTED V9::TestRecord::cutoff::<anon>::y::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V9::TestRecord::cutoff::<anon>::result redefines [DataFunctions::'*'::result, Performances::Evaluation::result]
+  INHERITS V9::TestWithCutoff [V9::TestRecord::scores, V9::TestRecord::averageScore, V9::TestRecord::cutoff]
+  COMPUTED V9::TestWithCutoff::cutoff::<anon>::x redefines [DataFunctions::'*'::x]
+  COMPUTED V9::TestWithCutoff::cutoff::<anon>::y redefines [DataFunctions::'*'::y]
+  COMPUTED V9::TestWithCutoff::cutoff::<anon>::y::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V9::TestWithCutoff::cutoff::<anon>::result redefines [DataFunctions::'*'::result, Performances::Evaluation::result]
