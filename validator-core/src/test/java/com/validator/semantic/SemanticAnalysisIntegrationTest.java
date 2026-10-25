@@ -275,40 +275,32 @@ public class SemanticAnalysisIntegrationTest {
         PerformanceReference.writeReport(Paths.get("target", "perf", "semantic-analysis-perf.json"), report);
 
         assertTrue(budgetFailures.isEmpty(), String.join("\n", budgetFailures));
-        if (history != null && history.failsOnRegressions()) {
+        if (history != null && history.fails()) {
             fail(history.regressions().stream().map(l -> String.format(Locale.ROOT,
-                    "%s (%s): %s x the reference, %s in the last recorded run (%s at %s), %s", l.now().subject(),
-                    l.now().measure(), PerformanceComparison.ratio(l.now().ratio()),
-                    PerformanceComparison.ratio(l.baseline().orElseThrow().ratio()), history.lastRun().version(),
-                    history.lastRun().commit(), l.change()))
-                .collect(Collectors.joining("\n", "Clearly slower than the last recorded run ("
+                    "%s (%s): %s x the reference, %s in the last run recorded on this machine (%s at %s), %s",
+                    l.now().subject(), l.now().measure(), PerformanceComparison.ratio(l.now().ratio()),
+                    PerformanceComparison.ratio(l.baseline().orElseThrow().ratio()), history.baseline().version(),
+                    history.baseline().commit(), l.change()))
+                .collect(Collectors.joining("\n", "Clearly slower than the last run recorded on this machine ("
                     + history.threshold().describe() + "):\n", "\nIf the slowdown is intended, record this run as the"
                     + " new baseline: mvn verify -D" + RecordMode.PROPERTY + "=true (see "
                     + PerformanceReadme.README_FILE + ")")));
         }
     }
 
-    /** What the history check of one run found and decided. */
-    private record HistoryOutcome(RecordMode mode, Optional<String> untrusted, PerformanceHistory.Decision decision,
-                                  Run lastRun, PerformanceComparison.Threshold threshold,
-                                  List<PerformanceComparison.Line> regressions) {
-
-        /**
-         * Regressions fail the test unless they were just recorded as the new baseline or the run's ratios cannot be
-         * trusted (a busy machine, a coverage agent).
-         */
-        boolean failsOnRegressions() {
-            return !regressions.isEmpty() && mode != RecordMode.ALWAYS && untrusted.isEmpty();
-        }
+    /** What the history check of one run found and decided; fails says whether its regressions fail the test. */
+    private record HistoryOutcome(Optional<String> untrusted, PerformanceHistory.Decision decision, Run baseline,
+                                  PerformanceComparison.Threshold threshold,
+                                  List<PerformanceComparison.Line> regressions, boolean fails) {
     }
 
     /**
      * Compares this run with the performance history in docs/performance: with the latest run of the previous
-     * version and with the last recorded run, which is the baseline a clear regression fails against (for the first
-     * run of a version the two are the same run). Writes the would-be rows to target/perf/history-entry.csv, and
-     * appends them to the history and regenerates its README when perf.record says so: always for true, never for
-     * false, and by default only for the first run of a project version that passed its checks and whose ratios can
-     * be trusted (PerformanceComparison.untrusted).
+     * version, with the last recorded run and with the last run recorded on this machine, which is the baseline a
+     * clear regression fails against (usually all the same run). Writes the would-be rows to
+     * target/perf/history-entry.csv, and appends them to the history and regenerates its README when perf.record says
+     * so: always for true, never for false, and by default only for the first run of a project version that passed
+     * its checks and whose ratios can be trusted (PerformanceComparison.untrusted).
      */
     private HistoryOutcome compareWithHistory(List<PerformanceHistory.Timing> timings, double referenceMs,
                                               double slowdown, boolean overBudget) {
@@ -334,10 +326,11 @@ public class SemanticAnalysisIntegrationTest {
         Optional<String> previousVersion = history.previousVersion(build.version());
         Optional<Run> previousRun = previousVersion.flatMap(history::latestRun);
         Optional<Run> lastRun = history.lastRun();
+        Optional<Run> baseline = PerformanceComparison.baseline(history, rows);
         System.out.println("\n" + PerformanceComparison.table(rows, build.version(), previousVersion, previousRun,
-            lastRun, threshold));
+            lastRun, baseline, threshold));
         List<PerformanceComparison.Line> regressions =
-            PerformanceComparison.regressions(PerformanceComparison.compare(rows, lastRun, threshold));
+            PerformanceComparison.regressions(PerformanceComparison.compare(rows, baseline, threshold));
 
         RecordMode mode = RecordMode.fromProperty(System.getProperty(RecordMode.PROPERTY));
         Optional<String> untrusted = PerformanceComparison.untrusted(build, threshold);
@@ -349,13 +342,14 @@ public class SemanticAnalysisIntegrationTest {
         }
         System.out.println((decision.append() ? "Recorded in " : "Not recorded in ") + historyFile + ": "
             + decision.reason() + "; this run's rows are in " + entry.toAbsolutePath());
-        if (!regressions.isEmpty() && mode == RecordMode.ALWAYS) {
+        if (!regressions.isEmpty() && decision.append()) {
             System.out.println("WARNING: " + regressions.size() + " clear regression(s) accepted as the new baseline");
         } else if (!regressions.isEmpty() && untrusted.isPresent()) {
             System.out.println("WARNING: " + regressions.size() + " clear regression(s), not failing because "
                 + untrusted.get() + "; run the test again without that");
         }
-        return new HistoryOutcome(mode, untrusted, decision, lastRun.orElse(null), threshold, regressions);
+        return new HistoryOutcome(untrusted, decision, baseline.orElse(null), threshold, regressions,
+            PerformanceComparison.fails(regressions, decision, untrusted));
     }
 
     @Test

@@ -195,6 +195,9 @@ class PerformanceHistoryTest {
         assertEquals(1, latest.rows().size());
         assertEquals(Optional.empty(), history.latestRun("9.9"));
         assertEquals("0.3", history.lastRun().orElseThrow().version());
+        assertEquals("2026-02-15T00:00:00Z", history.lastRun(r -> r.row("b.sysml").isEmpty()
+            && r.version().equals("0.2")).orElseThrow().recordedUtc(), "the last run a filter accepts");
+        assertEquals(Optional.empty(), history.lastRun(r -> r.version().equals("9.9")));
     }
 
     @Test
@@ -264,7 +267,23 @@ class PerformanceHistoryTest {
         assertFalse(decision.append(), "inflated ratios would hide the next regression");
         assertEquals(busy.get() + "; version 0.4 is recorded by its first run without that", decision.reason());
         assertTrue(PerformanceHistory.decide(RecordMode.ALWAYS, build("0.4"), history, false, busy).append(),
-            "perf.record=true records whatever the conditions");
+            "perf.record=true records a busy run, whose load_avg says so");
+    }
+
+    @Test
+    @DisplayName("Should never record a run with a Java agent, even with perf.record=true")
+    void neverRecordsInstrumentedRun() {
+        BuildInfo covered = new BuildInfo("0.4", "abc1234", "25.0.2 Homebrew", "Mac OS X 26.5", "x86_64", 12, 3.25,
+            List.of("org.jacoco.agent-0.8.15-runtime.jar"));
+        Optional<String> untrusted = Optional.of("a Java agent instruments the code");
+
+        for (RecordMode mode : RecordMode.values()) {
+            Decision decision = PerformanceHistory.decide(mode, covered, threeVersions(), false, untrusted);
+            assertFalse(decision.append(), mode + ": its inflated ratios would hide the next regression");
+        }
+        Decision always = PerformanceHistory.decide(RecordMode.ALWAYS, covered, threeVersions(), false, untrusted);
+        assertEquals("a Java agent instruments the code (org.jacoco.agent-0.8.15-runtime.jar), so the ratios do not"
+            + " compare; run with -Djacoco.skip=true", always.reason());
     }
 
     @Test

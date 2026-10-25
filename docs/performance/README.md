@@ -29,10 +29,10 @@ ratio grows. Lower is faster.
 The ratio has two limits. It is only roughly comparable between different machines, operating systems or JVM
 architectures (for example an x86_64 JDK running under Rosetta on Apple silicon against a native one), because the
 validator and the reference workload need not speed up equally on different hardware: compare rows of the same `os`,
-`arch` and `cpus` first. And it grows when the machine is heavily oversubscribed: the reference's short bursts still
-get a processor, but a first build, which needs the JIT compiler and garbage collector threads, slows down more. On
-2026-10-25 the vehicle model's ratio was 884-1076 at load averages of 13-24 on 12 CPUs and 1377 at about 35. The
-`load_avg` column shows how busy the machine was.
+`arch` and `cpus` first (the regression check below only fails against such a row). And it grows when the machine is
+heavily oversubscribed: the reference's short bursts still get a processor, but a first build, which needs the JIT
+compiler and garbage collector threads, slows down more. On 2026-10-25 the vehicle model's ratio was 884-1076 at load
+averages of 13-24 on 12 CPUs and 1377 at about 35. The `load_avg` column shows how busy the machine was.
 
 ### A JVM of its own
 
@@ -46,7 +46,8 @@ test classes gives first-build times that do not compare with the history.
 That JVM also runs without JaCoCo's coverage agent, so the timing test adds no coverage. The agent's probes slow the
 validator's code but not the JDK code of the reference workload: with it, the ratios were 1.1-1.5 x those without
 it. A run with any `-javaagent` (for example `-Dtest=SemanticAnalysisIntegrationTest` without
-`-Djacoco.skip=true`) names the agent in its note and is treated like a run on a busy machine (below).
+`-Djacoco.skip=true`) names the agent in its note, does not fail on its ratios and is never recorded, not even with
+`-Dperf.record=true`.
 
 ### Columns of history.csv
 
@@ -73,7 +74,7 @@ prints them against the history. It appends them to `history.csv` (and regenerat
 - **automatically** for the first run of a project version that has no rows yet, passed its checks and has ratios
   that can be trusted (no busy machine, no Java agent; see below), so every version is recorded once without
   ordinary builds modifying the file;
-- **always** with `-Dperf.record=true`;
+- **always** with `-Dperf.record=true`, except a run with a Java agent;
 - **never** with `-Dperf.record=false` (for CI or measurements that should leave the tree alone).
 
 A run outside Maven (from an IDE without the surefire configuration) has no project version and is never recorded.
@@ -105,17 +106,24 @@ java validator-core/src/test/java/com/validator/testutil/PerformanceReadme.java
 
 Each run prints its ratios next to the latest run of the **previous version** (the version recorded before this one)
 and the **last recorded run**; for the first run of a new version the two are the same run. The test fails when a
-subject's ratio is clearly worse than in the last recorded run: more than **2.0 x** that ratio **and** more than
-**1.0** above it. The factor covers the run-to-run noise measured on the development machine; the minimum
-increase keeps the models that take a few milliseconds warm (ratios well below 1) from failing on a few milliseconds
-of scheduling or garbage collection. Both, and the noise they come from, are in
-`validator-core/src/test/resources/perf-reference.properties`. A subject timed another way than in the baseline
-(first build against warm median) or a suite with a different number of files is shown but not compared.
+subject's ratio is clearly worse than in the last run recorded **on this machine** (the same operating system, of any
+version, JVM architecture, number of processors and JDK feature release; usually the last recorded run, and when it
+is not, the table adds a column for it): more than **2.0 x** that ratio **and** more than **1.0** above it. The factor
+covers the run-to-run noise measured on the development machine; the minimum increase keeps the models that take a
+few milliseconds warm (ratios well below 1) from failing on a few milliseconds of scheduling or garbage collection.
+Both, and the noise they come from, are in `validator-core/src/test/resources/perf-reference.properties`. A subject
+timed another way than in the baseline (first build against warm median) or a suite with a different number of files
+is shown but not compared.
+
+On a machine with no recorded run nothing fails: the threshold comes from the noise of the development machine, and
+on other hardware the validator and the reference workload need not scale equally (a first build uses the JIT
+compiler and garbage collector threads, the reference a single thread), so the ratios can differ by more than the
+factor without any regression. Record a run there with `-Dperf.record=true` to give it a baseline.
 
 A run on a **busy** machine, with a load average above **2.0 per CPU** at its end, or with a **Java agent**, is
-compared and printed but does not fail, and is not recorded automatically: its ratios are inflated (see above), so
-it could neither show a regression reliably nor serve as a baseline. Run the test again on a quieter machine or
-without the agent.
+compared and printed but does not fail, and is not recorded automatically (with an agent, not at all): its ratios are
+inflated (see above), so it could neither show a regression reliably nor serve as a baseline. Run the test again on a
+quieter machine or without the agent.
 
 When a slowdown is intended, record the run with `-Dperf.record=true`: it becomes the baseline the next runs compare
 with.

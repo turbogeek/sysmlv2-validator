@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * The performance history of the validator: docs/performance/history.csv, one row per timed subject (a model, or the
@@ -300,6 +301,13 @@ public final class PerformanceHistory {
         return runs.isEmpty() ? Optional.empty() : Optional.of(runs.get(runs.size() - 1));
     }
 
+    /** The most recently recorded run that {@code filter} accepts. */
+    public Optional<Run> lastRun(Predicate<Run> filter) {
+        List<Run> runs = runs();
+        Collections.reverse(runs);
+        return runs.stream().filter(filter).findFirst();
+    }
+
     /** The number of recorded runs of each version, in the order the versions were first recorded. */
     public Map<String, Integer> runCounts() {
         Map<String, Integer> counts = new LinkedHashMap<>();
@@ -337,11 +345,12 @@ public final class PerformanceHistory {
     }
 
     /**
-     * Decides whether to append a run. A run of an unknown version (outside Maven) is never recorded. In AUTO mode a
-     * run that failed a check is not recorded either, so that a regression does not silently become the next run's
-     * baseline (recording it with perf.record=true is how a slowdown is accepted), and neither is a run whose ratios
-     * cannot be trusted (a busy machine, a coverage agent), since its inflated ratios would hide the next regression:
-     * the version is then recorded by its first trustworthy run.
+     * Decides whether to append a run. A run of an unknown version (outside Maven) is never recorded, nor is a run
+     * with a Java agent, whatever the mode: the agent slows the validator's code but not the reference workload, so
+     * its ratios do not compare with any other run's. In AUTO mode a run that failed a check is not recorded either,
+     * so that a regression does not silently become the next run's baseline (recording it with perf.record=true is
+     * how a slowdown is accepted), and neither is a run on a busy machine, since its inflated ratios would hide the
+     * next regression: the version is then recorded by its first trustworthy run.
      *
      * @param mode         the recording mode
      * @param build        the version and commit measured
@@ -356,6 +365,10 @@ public final class PerformanceHistory {
         }
         if (!build.versionKnown()) {
             return new Decision(false, "the project version is unknown (run the test through Maven)");
+        }
+        if (!build.javaAgents().isEmpty()) {
+            return new Decision(false, "a Java agent instruments the code (" + String.join(", ", build.javaAgents())
+                + "), so the ratios do not compare; run with -Djacoco.skip=true");
         }
         if (mode == RecordMode.ALWAYS) {
             return new Decision(true, RecordMode.PROPERTY + "=true"

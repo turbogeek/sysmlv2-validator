@@ -116,11 +116,14 @@ class PerformanceComparisonTest {
         List<Row> current = List.of(model(NOW, "0.2", "a.sysml", 13), model(NOW, "0.2", "b.sysml", 9));
 
         String table = PerformanceComparison.table(current, "0.2", Optional.of("0.1"), Optional.of(previousVersion),
-            Optional.of(lastRun), THRESHOLD);
+            Optional.of(lastRun), Optional.of(lastRun), THRESHOLD);
 
         assertTrue(table.contains("for version 0.2"), table);
         assertTrue(table.contains("previous version: 0.1 at abc1234, " + THEN), table);
         assertTrue(table.contains("last run:         0.2 at abc1234, 2026-01-15T00:00:00Z"), table);
+        assertTrue(table.contains("regression:       more than 2.0 x the baseline ratio and more than 1.0 above it,"
+            + " against the last run\n"), table);
+        assertFalse(table.contains("this machine"), "the last run is this machine's: " + table);
         String[] lines = table.split("\n");
         String a = List.of(lines).stream().filter(l -> l.trim().startsWith("a.sysml")).findFirst().orElseThrow();
         String b = List.of(lines).stream().filter(l -> l.trim().startsWith("b.sysml")).findFirst().orElseThrow();
@@ -147,10 +150,11 @@ class PerformanceComparisonTest {
     @DisplayName("Should say when nothing is recorded yet")
     void printsTableWithoutHistory() {
         String table = PerformanceComparison.table(List.of(model(NOW, "0.1", "a.sysml", 1)), "0.1", Optional.empty(),
-            Optional.empty(), Optional.empty(), THRESHOLD);
+            Optional.empty(), Optional.empty(), Optional.empty(), THRESHOLD);
 
         assertTrue(table.contains("previous version: none recorded"), table);
         assertTrue(table.contains("last run:         none recorded"), table);
+        assertTrue(table.contains("regression:       none can fail: no run is recorded\n"), table);
         assertFalse(table.contains("new"), "with nothing to compare, no subject is labelled new: " + table);
     }
 
@@ -162,11 +166,88 @@ class PerformanceComparisonTest {
         List<Row> current = List.of(model(NOW, "0.1", "a.sysml", 10), model(NOW, "0.1", "b.sysml", 5));
 
         String table = PerformanceComparison.table(current, "0.1", Optional.empty(), Optional.empty(),
-            Optional.of(lastRun), THRESHOLD);
+            Optional.of(lastRun), Optional.of(lastRun), THRESHOLD);
 
         String b = List.of(table.split("\n")).stream().filter(l -> l.trim().startsWith("b.sysml")).findFirst()
             .orElseThrow();
         assertTrue(b.matches(".*5\\.00 +- +- +new"), b);
+    }
+
+    /** A row like {@link PerformanceHistoryTest#model}, measured on another machine. */
+    private static Row on(String os, String arch, int cpus, String jdk, String utc, String subject, double ratio) {
+        return new Row(utc, "0.1", "abc1234", jdk, os, arch, cpus, 1.5, 22.8, 1.0, subject,
+            PerformanceHistory.FIRST_BUILD, 1, 100, ratio * 22.8, ratio, "");
+    }
+
+    @Test
+    @DisplayName("Should tell machines apart by OS name, architecture, processors and JDK feature release")
+    void identifiesMachines() {
+        PerformanceComparison.Machine mac = PerformanceComparison.Machine.of(model(NOW, "0.1", "a.sysml", 1));
+
+        assertEquals(new PerformanceComparison.Machine("Mac OS X", "x86_64", 12, "25"), mac);
+        assertEquals("Mac OS X x86_64, 12 CPUs, JDK 25", mac.describe());
+        assertEquals(mac, PerformanceComparison.Machine.of(on("Mac OS X 26.6", "x86_64", 12, "25.0.3 Homebrew", NOW,
+            "a.sysml", 1)), "an OS or JDK update is the same machine");
+        assertNotEquals(mac, PerformanceComparison.Machine.of(on("Mac OS X 26.5", "aarch64", 12, "25.0.2 Homebrew",
+            NOW, "a.sysml", 1)), "a native JDK is not the one under Rosetta");
+        assertNotEquals(mac, PerformanceComparison.Machine.of(on("Mac OS X 26.5", "x86_64", 4, "25.0.2 Homebrew",
+            NOW, "a.sysml", 1)));
+        assertNotEquals(mac, PerformanceComparison.Machine.of(on("Mac OS X 26.5", "x86_64", 12, "26 Oracle",
+            NOW, "a.sysml", 1)));
+        assertEquals(new PerformanceComparison.Machine("Windows 11", "amd64", 8, "25"),
+            PerformanceComparison.Machine.of(on("Windows 11 10.0", "amd64", 8, "25.0.1 Eclipse Adoptium", NOW,
+                "a.sysml", 1)));
+    }
+
+    @Test
+    @DisplayName("Should fail against the last run of this machine, not a later run of another machine")
+    void failsOnlyAgainstThisMachine() {
+        Row here = model(THEN, "0.1", "a.sysml", 10);
+        Row elsewhere = on("Linux 6.8.0", "amd64", 4, "25.0.1 Eclipse Adoptium", "2026-01-15T00:00:00Z", "a.sysml",
+            60);
+        PerformanceHistory history = new PerformanceHistory(List.of(here, elsewhere));
+        List<Row> current = List.of(model(NOW, "0.2", "a.sysml", 25));
+
+        Optional<Run> baseline = PerformanceComparison.baseline(history, current);
+
+        assertEquals(Optional.of(new Run(List.of(here))), baseline);
+        assertEquals(List.of(Status.REGRESSION), PerformanceComparison.compare(current, baseline, THRESHOLD).stream()
+            .map(Line::status).toList(), "2.5 x this machine's last run");
+        assertEquals(List.of(Status.FASTER), PerformanceComparison.compare(current, history.lastRun(), THRESHOLD)
+            .stream().map(Line::status).toList(), "the other machine's ratios do not apply here");
+        assertEquals(Optional.empty(), PerformanceComparison.baseline(new PerformanceHistory(List.of(elsewhere)),
+            current), "a machine without a recorded run has no baseline");
+        assertEquals(Optional.empty(), PerformanceComparison.baseline(history, List.of()));
+
+        String table = PerformanceComparison.table(current, "0.2", Optional.of("0.1"), baseline, history.lastRun(),
+            baseline, THRESHOLD);
+        assertTrue(table.contains("this machine:     0.1 at abc1234, " + THEN), table);
+        assertTrue(table.contains("against the last run on this machine (Mac OS X x86_64, 12 CPUs, JDK 25)"), table);
+        String a = List.of(table.split("\n")).stream().filter(l -> l.trim().startsWith("a.sysml")).findFirst()
+            .orElseThrow();
+        assertTrue(a.matches(".*25\\.0 +10\\.0 +\\+150% +REGRESSION +60\\.0 +-58% +faster +10\\.0 +\\+150%"
+            + " +REGRESSION"), a);
+
+        String noBaseline = PerformanceComparison.table(current, "0.2", Optional.empty(), Optional.empty(),
+            Optional.of(new Run(List.of(elsewhere))), Optional.empty(), THRESHOLD);
+        assertTrue(noBaseline.contains("regression:       none can fail: no run is recorded on this machine"
+            + " (Mac OS X x86_64, 12 CPUs, JDK 25)"), noBaseline);
+    }
+
+    @Test
+    @DisplayName("Should fail on regressions only when the run was not recorded as the baseline and can be trusted")
+    void decidesWhetherRegressionsFail() {
+        List<Line> regressions = List.of(new Line(model(NOW, "0.2", "a.sysml", 25),
+            Optional.of(model(THEN, "0.1", "a.sysml", 10)), Status.REGRESSION));
+        PerformanceHistory.Decision notRecorded = new PerformanceHistory.Decision(false, "already recorded");
+        PerformanceHistory.Decision recorded = new PerformanceHistory.Decision(true, "perf.record=true");
+        Optional<String> busy = Optional.of("the machine is busy");
+
+        assertTrue(PerformanceComparison.fails(regressions, notRecorded, Optional.empty()));
+        assertFalse(PerformanceComparison.fails(List.of(), notRecorded, Optional.empty()), "nothing to fail on");
+        assertFalse(PerformanceComparison.fails(regressions, recorded, Optional.empty()),
+            "recorded with perf.record=true: the slowdown is accepted as the new baseline");
+        assertFalse(PerformanceComparison.fails(regressions, notRecorded, busy), "inflated ratios do not fail");
     }
 
     @Test

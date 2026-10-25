@@ -71,6 +71,50 @@ public final class PerformanceComparison {
         }
     }
 
+    /**
+     * The machine a run was measured on, as far as its ratios compare with another run's: the operating system
+     * (without its version), the JVM's architecture, the processors and the JDK's feature release. The threshold was
+     * derived from the noise of one machine; on another, the validator and the reference workload need not speed up
+     * equally (a first build keeps the JIT compiler and garbage collector threads busy while the reference runs on
+     * one thread, and an x86_64 JDK under Rosetta translates both differently from a native one), so a regression
+     * only fails against a run of the same machine.
+     */
+    public record Machine(String os, String arch, int cpus, String jdk) {
+
+        /** The machine of a recorded row; BuildInfo records the OS as its name and version, the JDK as its version. */
+        public static Machine of(Row row) {
+            int version = row.os().lastIndexOf(' ');
+            String osName = version < 0 ? row.os() : row.os().substring(0, version);
+            String feature = row.jdk().replaceFirst("^(\\d+).*$", "$1");
+            return new Machine(osName, row.arch(), row.cpus(), feature);
+        }
+
+        public String describe() {
+            return String.format(Locale.ROOT, "%s %s, %d CPUs, JDK %s", os, arch, cpus, jdk);
+        }
+    }
+
+    /**
+     * The run a clear regression fails against: the last recorded run on the machine of {@code current} (see
+     * {@link Machine}), or empty when that machine has none, and then nothing can fail.
+     */
+    public static Optional<Run> baseline(PerformanceHistory history, List<Row> current) {
+        if (current.isEmpty()) {
+            return Optional.empty();
+        }
+        Machine here = Machine.of(current.get(0));
+        return history.lastRun(run -> Machine.of(run.first()).equals(here));
+    }
+
+    /**
+     * True when this run's regressions against its baseline fail the test: there are some, the run was not just
+     * recorded as the new baseline (perf.record=true accepts a slowdown), and its ratios can be trusted.
+     */
+    public static boolean fails(List<Line> regressions, PerformanceHistory.Decision decision,
+                                Optional<String> untrusted) {
+        return !regressions.isEmpty() && !decision.append() && untrusted.isEmpty();
+    }
+
     /** How a subject's ratio compares with its baseline. */
     public enum Status {
         /** The baseline did not time the subject. */
@@ -155,13 +199,23 @@ public final class PerformanceComparison {
     }
 
     /**
-     * A plain-text table of the current run against the latest run of the previous version and against the last
-     * recorded run, with a line describing each baseline.
+     * A plain-text table of the current run against the latest run of the previous version, against the last
+     * recorded run and, when that was measured on another machine, against {@code baseline}, the last run on this
+     * one (see {@link #baseline}), with a line describing each and saying which one a regression fails against.
      */
     public static String table(List<Row> current, String version, Optional<String> previousVersion,
-                               Optional<Run> previousVersionRun, Optional<Run> lastRun, Threshold threshold) {
-        List<Line> vsPrevious = compare(current, previousVersionRun, threshold);
-        List<Line> vsLast = compare(current, lastRun, threshold);
+                               Optional<Run> previousVersionRun, Optional<Run> lastRun, Optional<Run> baseline,
+                               Threshold threshold) {
+        boolean baselineIsLast = baseline.isPresent() && baseline.equals(lastRun);
+        // Column groups: title, the run compared with (if any) and the comparison of each subject
+        List<String> titles = new ArrayList<>(List.of("prev version", "last run"));
+        List<Optional<Run>> runs = new ArrayList<>(List.of(previousVersionRun, lastRun));
+        if (baseline.isPresent() && !baselineIsLast) {
+            titles.add("this machine");
+            runs.add(baseline);
+        }
+        List<List<Line>> lines = runs.stream().map(run -> compare(current, run, threshold)).toList();
+
         StringBuilder out = new StringBuilder();
         out.append("Performance history (ratio = timed ms / reference ms, lower is faster) for version ")
             .append(version).append('\n');
@@ -169,21 +223,31 @@ public final class PerformanceComparison {
             .orElse(previousVersion.map(v -> v + " (no run)").orElse("none recorded"))).append('\n');
         out.append("  last run:         ").append(lastRun.map(PerformanceComparison::describeRun)
             .orElse("none recorded")).append('\n');
-        out.append("  regression:       ").append(threshold.describe()).append(", against the last run\n");
+        if (baseline.isPresent() && !baselineIsLast) {
+            out.append("  this machine:     ").append(describeRun(baseline.get())).append('\n');
+        }
+        String here = current.isEmpty() ? "this machine" : Machine.of(current.get(0)).describe();
+        out.append("  regression:       ").append(baseline.isPresent()
+            ? threshold.describe() + (baselineIsLast ? ", against the last run" : ", against the last run on this"
+                + " machine (" + here + ")")
+            : lastRun.isPresent() ? "none can fail: no run is recorded on this machine (" + here + ")"
+            : "none can fail: no run is recorded").append('\n');
 
         List<String[]> cells = new ArrayList<>();
-        cells.add(new String[] {"subject", "measure", "ms", "ratio", "prev version", "change", "", "last run",
-            "change", ""});
+        List<String> header = new ArrayList<>(List.of("subject", "measure", "ms", "ratio"));
+        titles.forEach(title -> header.addAll(List.of(title, "change", "")));
+        cells.add(header.toArray(String[]::new));
         for (int i = 0; i < current.size(); i++) {
             Row now = current.get(i);
-            Line p = vsPrevious.get(i);
-            Line l = vsLast.get(i);
-            // Without a baseline run every subject would be "new": the status is left blank instead
-            cells.add(new String[] {now.subject(), now.measure(), String.format(Locale.ROOT, "%.1f", now.timedMs()),
-                ratio(now.ratio()), p.baseline().map(r -> ratio(r.ratio())).orElse("-"), p.change(),
-                previousVersionRun.isPresent() ? p.status().label() : "",
-                l.baseline().map(r -> ratio(r.ratio())).orElse("-"), l.change(),
-                lastRun.isPresent() ? l.status().label() : ""});
+            List<String> row = new ArrayList<>(List.of(now.subject(), now.measure(),
+                String.format(Locale.ROOT, "%.1f", now.timedMs()), ratio(now.ratio())));
+            for (int g = 0; g < runs.size(); g++) {
+                Line line = lines.get(g).get(i);
+                // Without a run to compare with every subject would be "new": the status is left blank instead
+                row.addAll(List.of(line.baseline().map(r -> ratio(r.ratio())).orElse("-"), line.change(),
+                    runs.get(g).isPresent() ? line.status().label() : ""));
+            }
+            cells.add(row.toArray(String[]::new));
         }
         int[] widths = new int[cells.get(0).length];
         for (String[] row : cells) {
@@ -194,7 +258,8 @@ public final class PerformanceComparison {
         for (String[] row : cells) {
             StringBuilder line = new StringBuilder("  ");
             for (int c = 0; c < row.length; c++) {
-                boolean leftAligned = c < 2 || c == 6 || c == 9;
+                // The subject, the measure and each group's status are text; the rest are numbers
+                boolean leftAligned = c < 2 || c >= 4 && (c - 4) % 3 == 2;
                 String format = "%" + (leftAligned ? "-" : "") + Math.max(1, widths[c]) + "s";
                 line.append(String.format(Locale.ROOT, format, row[c])).append(c < row.length - 1 ? "  " : "");
             }
