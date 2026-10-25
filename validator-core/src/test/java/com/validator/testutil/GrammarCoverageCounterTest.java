@@ -24,10 +24,13 @@ class GrammarCoverageCounterTest {
     @DisplayName("Outer alternatives are counted from the ATN")
     void testAlternativeCounts() {
         GrammarCoverage coverage = new GrammarCoverage();
+        Map<String, List<String>> source = ParserGrammarSource.read(ParserGrammarSource.DEFAULT_GRAMMAR);
         assertEquals(1, coverage.alternativeCount("compilationUnit"));
         assertEquals(2, coverage.alternativeCount("packageBody"), "'{ ... }' and ';'");
-        assertEquals(3, coverage.alternativeCount("partUsage"));
-        assertEquals(20, coverage.alternativeCount("thenStatement"));
+        // Rules with many alternatives, counted against the source so that grammar edits do not break this test
+        assertTrue(source.get("thenStatement").size() > 1);
+        assertEquals(source.get("thenStatement").size(), coverage.alternativeCount("thenStatement"));
+        assertEquals(source.get("partUsage").size(), coverage.alternativeCount("partUsage"));
         assertEquals(1, coverage.alternativeCount("namespaceBodyElement"),
             "One outer alternative whose inner block chooses the element");
         assertEquals(1, coverage.alternativeCount("visibility"), "Single-token alternatives become one token set");
@@ -70,6 +73,22 @@ class GrammarCoverageCounterTest {
         assertEquals(1, coverage.tokenHits(SysMLv2Lexer.BLOCK_COMMENT));
         assertEquals(1, coverage.tokenHits(SysMLv2Lexer.LINE_COMMENT));
         assertTrue(coverage.tokenHits(SysMLv2Lexer.WS) >= 2);
+    }
+
+    @Test
+    @DisplayName("Tokens count as the parser received them, so a keyword used as a name in KerML is a name")
+    void testCountsTokensAsParsed() {
+        GrammarCoverage coverage = new GrammarCoverage();
+        assertTrue(coverage.add("k.kerml", "package K { feature part; }").isEmpty(),
+            "'part' is not a KerML keyword, so it is a feature name");
+        assertEquals(0, coverage.tokenHits(SysMLv2Lexer.PART), "The lexer matched PART, but the parser saw a name");
+        assertEquals(2, coverage.tokenHits(SysMLv2Lexer.ID), "'K' and 'part'");
+        assertEquals(1, coverage.tokenHits(SysMLv2Lexer.FEATURE));
+        assertTrue(coverage.unusedTokens().contains("PART"));
+
+        GrammarCoverage sysml = new GrammarCoverage();
+        assertTrue(sysml.add("p.sysml", "package P { part p; }").isEmpty());
+        assertEquals(1, sysml.tokenHits(SysMLv2Lexer.PART));
     }
 
     @Test

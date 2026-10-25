@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.atn.RuleStartState;
 import org.antlr.v4.runtime.atn.Transition;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -48,9 +49,11 @@ import java.util.stream.Stream;
  * comes from the ATN, see {@link #outerAlternativeCount}. A rule whose alternatives are all single tokens counts as
  * one alternative: ANTLR reduces such a block to a token set, and which token of the set occurred is token coverage.
  *
- * Tokens: every token type that the lexer matched in an accepted file, including the ones it skips (WS,
- * BLOCK_COMMENT) or sends to a hidden channel (LINE_COMMENT). The lexer runs on the raw text, so in a .kerml file a
- * SysML-only keyword counts as that keyword although the parser facade turns it into a name.
+ * Tokens: every token type that the parser received in an accepted file, as the terminal nodes of its parse tree, and
+ * every token type that the lexer matched but never hands to the parser: the ones it skips (WS, BLOCK_COMMENT) or
+ * sends to a hidden channel (LINE_COMMENT). Taking the parser's tokens from the tree counts them as the parser saw
+ * them: in a .kerml file the parser facade turns a SysML-only keyword such as 'part' into a name, so it counts as ID
+ * and does not make the keyword look exercised.
  */
 public final class GrammarCoverage {
 
@@ -197,6 +200,13 @@ public final class GrammarCoverage {
             if (node instanceof ErrorNode) {
                 continue;
             }
+            if (node instanceof TerminalNode terminal) {
+                int type = terminal.getSymbol().getType();
+                if (type > 0 && type < tokenHits.length) {
+                    tokenHits[type]++;
+                }
+                continue;
+            }
             if (node instanceof ParserRuleContext ctx) {
                 int rule = ctx.getRuleIndex();
                 ruleHits[rule]++;
@@ -214,30 +224,43 @@ public final class GrammarCoverage {
         }
     }
 
+    /**
+     * Records the tokens that the parser does not receive: the lexer's matches less the tokens it emits on the default
+     * channel, which leaves the skipped and the hidden ones. {@link #recordTree} records the others.
+     */
     private void recordTokens(String source) {
+        long[] matched = new long[tokenHits.length];
         Lexer lexer = new SysMLv2Lexer(CharStreams.fromString(source));
         lexer.removeErrorListeners();
-        lexer.setInterpreter(new RecordingLexerSimulator(lexer, lexer.getInterpreter()));
-        Token token;
-        do {
-            token = lexer.nextToken();
-        } while (token.getType() != Token.EOF);
+        lexer.setInterpreter(new RecordingLexerSimulator(lexer, lexer.getInterpreter(), matched));
+        for (Token token = lexer.nextToken(); token.getType() != Token.EOF; token = lexer.nextToken()) {
+            int type = token.getType();
+            if (token.getChannel() == Token.DEFAULT_CHANNEL && type > 0 && type < matched.length) {
+                matched[type]--;
+            }
+        }
+        for (int t = 1; t < matched.length; t++) {
+            tokenHits[t] += matched[t];
+        }
     }
 
     /**
-     * Records the type of every token the lexer matches. The lexer does not emit the tokens it skips, so they are
-     * recorded where the simulator returns their type, before the lexer drops them.
+     * Counts the type of every token the lexer matches. The lexer does not emit the tokens it skips, so they are
+     * counted where the simulator returns their type, before the lexer drops them.
      */
-    private final class RecordingLexerSimulator extends LexerATNSimulator {
-        RecordingLexerSimulator(Lexer lexer, LexerATNSimulator original) {
+    private static final class RecordingLexerSimulator extends LexerATNSimulator {
+        private final long[] matched;
+
+        RecordingLexerSimulator(Lexer lexer, LexerATNSimulator original, long[] matched) {
             super(lexer, original.atn, original.decisionToDFA, new PredictionContextCache());
+            this.matched = matched;
         }
 
         @Override
         public int match(CharStream input, int mode) {
             int type = super.match(input, mode);
-            if (type > 0 && type < tokenHits.length) {
-                tokenHits[type]++;
+            if (type > 0 && type < matched.length) {
+                matched[type]++;
             }
             return type;
         }
@@ -268,7 +291,7 @@ public final class GrammarCoverage {
         return alternativeCounts[ruleIndex(rule)];
     }
 
-    /** How often the lexer matched the token type. */
+    /** How often the token type occurred: as a token the parser received, or one the lexer skipped or hid. */
     public long tokenHits(int tokenType) {
         return tokenHits[tokenType];
     }
@@ -305,7 +328,7 @@ public final class GrammarCoverage {
         return result;
     }
 
-    /** Token types that the lexer never matched in an accepted file, by symbolic name. */
+    /** Token types that no accepted file exercised (see {@link #tokenHits}), by symbolic name. */
     public List<String> unusedTokens() {
         List<String> result = new ArrayList<>();
         for (int t = 1; t < tokenHits.length; t++) {
