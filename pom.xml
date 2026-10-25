@@ -34,9 +34,14 @@
         <spotbugs.version>4.10.5.0</spotbugs.version>
         <checkstyle.version>3.6.0</checkstyle.version>
 
-        <!-- Code coverage thresholds (increased for production quality) -->
-        <jacoco.line.coverage.minimum>0.70</jacoco.line.coverage.minimum>
-        <jacoco.branch.coverage.minimum>0.45</jacoco.branch.coverage.minimum>
+        <!-- Code coverage thresholds, a ratchet: raise them when coverage rises, never lower them. 2026-10-25
+             validator-core measured 84.1% lines and 68.3-68.7% branches (it varies a little between runs); the
+             minimums sit about one point below. These figures need the OMG SysML-v2-Release checkout
+             (SYSML_RELEASE_PATH and SYSML_LIBRARY_PATH, or a SysML-v2-Release folder next to the repository):
+             without it validator-core covers about 76% of lines and 59% of branches and this check fails, as it
+             already did before these minimums were raised (62% and 43% against 0.70 and 0.45). -->
+        <jacoco.line.coverage.minimum>0.83</jacoco.line.coverage.minimum>
+        <jacoco.branch.coverage.minimum>0.67</jacoco.branch.coverage.minimum>
         <pitest.mutation.threshold>80</pitest.mutation.threshold>
     </properties>
 
