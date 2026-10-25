@@ -1,5 +1,8 @@
 package com.validator.suggestions;
 
+import com.validator.parser.SysMLv2Lexer;
+import org.antlr.v4.runtime.Vocabulary;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -172,6 +175,19 @@ public final class KeywordProvider implements SuggestionProvider {
         keywords.add("return");
         keywords.add("snapshot");
         keywords.add("timeslice");
+
+        // Every reserved word of the lexer, so that no keyword is missing from the list above
+        // ('actor' and 'occurrence' were): a misspelled keyword is then always offered back.
+        Vocabulary vocabulary = SysMLv2Lexer.VOCABULARY;
+        for (int type = 1; type <= vocabulary.getMaxTokenType(); type++) {
+            String literal = vocabulary.getLiteralName(type);
+            if (literal != null && literal.length() > 3) {
+                String word = literal.substring(1, literal.length() - 1);
+                if (word.chars().allMatch(Character::isLetter)) {
+                    keywords.add(word);
+                }
+            }
+        }
 
         KEYWORDS = Collections.unmodifiableSet(keywords);
     }

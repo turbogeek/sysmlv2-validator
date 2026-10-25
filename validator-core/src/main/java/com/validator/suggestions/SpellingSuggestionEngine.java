@@ -56,6 +56,16 @@ public final class SpellingSuggestionEngine {
     }
 
     /**
+     * Create an engine that suggests language keywords only, for a word that stands where a
+     * keyword is expected (the start of a declaration).
+     *
+     * @return a new keyword-only engine
+     */
+    public static SpellingSuggestionEngine keywordsOnly() {
+        return new SpellingSuggestionEngine(List.of(new KeywordProvider()));
+    }
+
+    /**
      * Get spelling suggestions for a potentially misspelled identifier.
      *
      * @param input the input string to find suggestions for

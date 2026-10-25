@@ -1,6 +1,7 @@
 package com.validator.parser;
 
 import com.validator.suggestions.SpellingSuggestionEngine;
+import com.validator.suggestions.SuggestionResult;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -8,9 +9,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.Vocabulary;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -170,12 +173,16 @@ public class SysMLv2ParserFacade {
         /** Longest quotation of the input kept whole in an error message. */
         private static final int MAX_QUOTED_INPUT = 60;
         private static final Pattern QUOTED_INPUT_START = Pattern.compile("(input |at: |at )'");
+        /** Tokens searched back from an error for the start of its declaration. */
+        private static final int MAX_DECLARATION_LOOKBACK = 64;
 
         private final List<SyntaxError> errors = new ArrayList<>();
         private final SpellingSuggestionEngine suggestionEngine;
+        private final SpellingSuggestionEngine keywordEngine;
 
         CollectingErrorListener() {
             this.suggestionEngine = new SpellingSuggestionEngine();
+            this.keywordEngine = SpellingSuggestionEngine.keywordsOnly();
         }
 
         @Override
@@ -194,6 +201,16 @@ public class SysMLv2ParserFacade {
             // Only suggest for identifier-like tokens (not operators, punctuation, etc.)
             if (isIdentifierLike(tokenText)) {
                 suggestions = suggestionEngine.suggestForError(tokenText);
+            }
+
+            // A misspelled keyword ('prat def X', 'atribute x : Real') lexes as a name and the error
+            // is reported at a later token, so offer the keywords for that name first
+            Token misspelled = recognizer instanceof Parser parser && offendingSymbol instanceof Token offending
+                ? misspelledKeyword(parser.getInputStream(), offending) : null;
+            if (misspelled != null) {
+                List<String> merged = new ArrayList<>(keywordSuggestions(keywordEngine, misspelled.getText()));
+                suggestions.stream().filter(s -> !merged.contains(s)).forEach(merged::add);
+                suggestions = merged;
             }
 
             errors.add(new SyntaxError(line, charPositionInLine, abbreviateQuotedInput(msg), symbol, suggestions));
@@ -221,6 +238,34 @@ public class SysMLv2ParserFacade {
                 return msg;
             }
             return msg.substring(0, open + 40) + "..." + msg.substring(close - 17);
+        }
+
+        /**
+         * The first token of the declaration the error is in (the declaration starts after the
+         * nearest ';', '{' or '}'), when it is a name followed by another name: two names in a row
+         * never start a declaration, so the first is most likely a misspelled keyword. The search
+         * goes back a bounded number of tokens, so that errors in a long run of tokens without a
+         * declaration boundary stay cheap.
+         */
+        private static Token misspelledKeyword(TokenStream tokens, Token offending) {
+            if (offending.getTokenIndex() < 0) {
+                return null;
+            }
+            Token first = offending;
+            int steps = 0;
+            for (Token t = previousOnChannel(tokens, offending.getTokenIndex()); !startsDeclaration(t);
+                    t = previousOnChannel(tokens, t.getTokenIndex())) {
+                if (++steps > MAX_DECLARATION_LOOKBACK) {
+                    return null;
+                }
+                first = t;
+            }
+            if (first.getType() != SysMLv2Lexer.ID) {
+                return null;
+            }
+            Token second = nextOnChannel(tokens, first.getTokenIndex());
+            return second != null && (second.getType() == SysMLv2Lexer.ID || second.getType() == SysMLv2Lexer.QUOTED_ID)
+                ? first : null;
         }
 
         /**
@@ -267,6 +312,45 @@ public class SysMLv2ParserFacade {
         public List<SyntaxError> getErrors() {
             return errors;
         }
+    }
+
+    /** True when a declaration can start after this token: ';', '{', '}' or the start of the file (null). */
+    static boolean startsDeclaration(Token before) {
+        return before == null || before.getType() == SysMLv2Lexer.SEMICOLON
+            || before.getType() == SysMLv2Lexer.LBRACE || before.getType() == SysMLv2Lexer.RBRACE;
+    }
+
+    /** The token before the given index on the default channel, or null at the start. */
+    static Token previousOnChannel(TokenStream tokens, int index) {
+        for (int i = index - 1; i >= 0; i--) {
+            Token t = tokens.get(i);
+            if (t.getChannel() == Token.DEFAULT_CHANNEL) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    /** The token after the given index on the default channel (or EOF), or null past the end. */
+    static Token nextOnChannel(TokenStream tokens, int index) {
+        for (int i = index + 1; i < tokens.size(); i++) {
+            Token t = tokens.get(i);
+            if (t.getChannel() == Token.DEFAULT_CHANNEL || t.getType() == Token.EOF) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    /** Keywords at most two edits from a word that stands where a keyword is expected. */
+    static List<String> keywordSuggestions(SpellingSuggestionEngine keywordEngine, String word) {
+        if (word.length() < 2) {
+            return List.of();
+        }
+        return keywordEngine.suggest(word).stream()
+            .filter(s -> s.getDistance() <= 2)
+            .map(SuggestionResult::getSuggestion)
+            .toList();
     }
 
     /**
@@ -322,6 +406,16 @@ public class SysMLv2ParserFacade {
             // Error escape; there is no tree.
             errorListener.getErrors().add(nestingTooDeep(tokens, parser.getCurrentToken()));
             tree = null;
+        }
+        if (tree != null) {
+            // Misspelled keywords the grammar accepted; one error per position
+            List<SyntaxError> errors = errorListener.getErrors();
+            for (SyntaxError misspelled : MisspelledKeywordCheck.check(tree, tokens, errorListener.keywordEngine)) {
+                if (errors.stream().noneMatch(e -> e.getLine() == misspelled.getLine()
+                        && e.getCharPositionInLine() == misspelled.getCharPositionInLine())) {
+                    errors.add(misspelled);
+                }
+            }
         }
         long parseTime = System.currentTimeMillis() - startTime;
 
@@ -409,7 +503,7 @@ public class SysMLv2ParserFacade {
         return new SyntaxError(at.getLine(), at.getCharPositionInLine(), message, at.toString());
     }
 
-    private static String abbreviate(String text) {
+    static String abbreviate(String text) {
         return text.length() > 40 ? text.substring(0, 40) + "..." : text;
     }
 
@@ -418,7 +512,7 @@ public class SysMLv2ParserFacade {
      * reserved words ('part', 'state', 'entry', 'frame', 'accept', ...) are ordinary names in a
      * .kerml file; the standard library's kernel files rely on that.
      */
-    private static final Set<String> KERML_KEYWORDS = Set.of(
+    static final Set<String> KERML_KEYWORDS = Set.of(
         "about", "abstract", "alias", "all", "and", "as", "assoc", "behavior", "binding", "bool", "by",
         "chains", "class", "classifier", "comment", "composite", "conjugate", "conjugates", "conjugation",
         "connector", "const", "crosses", "datatype", "default", "dependency", "derived", "differences",
