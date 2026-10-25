@@ -1,5 +1,7 @@
 package com.validator;
 
+import java.util.Set;
+
 /**
  * Centralized error codes for the SysML v2 Validator.
  *
@@ -11,6 +13,7 @@ package com.validator;
  *   <li>IMPORT_* - Import resolution errors</li>
  *   <li>SEMANTIC_* - Semantic analysis errors</li>
  *   <li>*_INHERITANCE_* - Multiple-inheritance warnings (diamonds and name conflicts)</li>
+ *   <li>Name-collision warnings - a name that makes a new element where an existing one was likely meant</li>
  *   <li>TYPE_* - Type checking errors</li>
  *   <li>IO_* - File I/O errors</li>
  * </ul>
@@ -171,6 +174,18 @@ public final class ErrorCodes {
      */
     public static final String SEMANTIC_CIRCULAR_DEPENDENCY = "SEMANTIC_CIRCULAR_DEPENDENCY";
 
+    /**
+     * A redefinition that overrides a bound or initial value (error).
+     *
+     * <p>Cause: {@code part def Vehicle { attribute mass : Real = 1000.0; }} and
+     * {@code part car : Vehicle { attribute :>> mass = 1500.0; }}: only a default value ({@code default 1000.0})
+     * may be overridden (KerML validateFeatureValueOverriding).
+     *
+     * <p>Resolution: make the general's value a default, or remove one of the values. Declaring a new
+     * {@code mass} instead is not a fix: it is a second feature (see {@link #INHERITED_NAME_REDECLARED}).
+     */
+    public static final String SEMANTIC_BOUND_VALUE_OVERRIDDEN = "SEMANTIC_BOUND_VALUE_OVERRIDDEN";
+
     // =========================================================================
     // INHERITANCE WARNINGS - Multiple inheritance left unresolved
     // =========================================================================
@@ -180,12 +195,13 @@ public final class ErrorCodes {
      *
      * <p>Cause: an element D has two or more general types (e.g. {@code part def D :> B, C} or
      * {@code part d : B, C}) that share a common ancestor A, and a feature f of A is redefined along two
-     * branches by different features ({@code B} has {@code :>> f = 4}, {@code C} has {@code :>> f = 6}).
+     * branches by different features ({@code B} has {@code :>> f default 4}, {@code C} has {@code :>> f default 6}).
      * D inherits both redefinitions. The message says whether they contradict (different value, unrelated
      * types, multiplicities without a common value) or merely repeat each other. Redefinitions that only
      * refine each other compatibly (a subtype, an added value or bound) are not reported.
      *
-     * <p>Resolution: redefine f in D to state which applies (e.g. {@code attribute :>> f = 4;}), or move the
+     * <p>Resolution: redefine every branch's f in D to state which applies
+     * (e.g. {@code attribute f :>> B::f, C::f = 4;}; {@code :>> f} alone names only the first general's f), or move the
      * redefinition into a common supertype of B and C so it is inherited once.
      */
     public static final String DIAMOND_INHERITANCE_CONFLICT = "DIAMOND_INHERITANCE_CONFLICT";
@@ -200,6 +216,99 @@ public final class ErrorCodes {
      * rename one of the features, or move the feature into a common supertype.
      */
     public static final String MULTIPLE_INHERITANCE_NAME_CONFLICT = "MULTIPLE_INHERITANCE_NAME_CONFLICT";
+
+    // =========================================================================
+    // NAME COLLISION WARNINGS - A name that makes a new element where an existing one was likely meant
+    // (see docs/NAME_COLLISION_ANALYSIS.md)
+    // =========================================================================
+
+    /**
+     * Two members with the same name in one namespace (warning).
+     *
+     * <p>Cause: {@code attribute mass : Real; attribute mass : Real;} in one definition. Each declaration is a
+     * different element, and a reference to the name may resolve to either.
+     *
+     * <p>Resolution: remove the duplicate or rename one of them.
+     */
+    public static final String DUPLICATE_MEMBER_NAME = "DUPLICATE_MEMBER_NAME";
+
+    /**
+     * A new feature with the name of an inherited feature (warning).
+     *
+     * <p>Cause: {@code part def Car :> Vehicle { attribute mass : Real; }} or
+     * {@code part myCar : Vehicle { attribute mass = 1500.0; }} declares a second feature named {@code mass}
+     * instead of redefining the inherited one, so constraints and values written for {@code Vehicle::mass}
+     * never see it (KerML 7.3.2.1).
+     *
+     * <p>Resolution: redefine the inherited feature ({@code attribute :>> mass = 1500.0;}), or rename the new one.
+     */
+    public static final String INHERITED_NAME_REDECLARED = "INHERITED_NAME_REDECLARED";
+
+    /**
+     * A new feature named like an ancestor's feature that is inherited under another name (warning).
+     *
+     * <p>Cause: {@code A1 :> A { p1 :>> p; }}, then {@code B :> A1, A2 { part p; }}: B inherits A's p as p1, so
+     * B's p is a new, unrelated feature.
+     *
+     * <p>Resolution: refer to the inherited feature by its current name ({@code part :>> p1;}).
+     */
+    public static final String RENAMED_INHERITED_NAME_REUSED = "RENAMED_INHERITED_NAME_REUSED";
+
+    /**
+     * A name one edit away from an inherited feature's name (warning).
+     *
+     * <p>Cause: {@code attribute masss = 1500.0;} beside an inherited {@code mass} creates a new feature, and
+     * {@code :>> masss} names no inherited feature.
+     *
+     * <p>Resolution: redefine the intended feature ({@code attribute :>> mass = 1500.0;}).
+     */
+    public static final String NAME_SIMILAR_TO_INHERITED = "NAME_SIMILAR_TO_INHERITED";
+
+    /**
+     * A redefinition by simple name that resolves to something not inherited (warning).
+     *
+     * <p>Cause: {@code attribute :>> mass = 1500 [kg];} where no general has a feature named {@code mass}, but
+     * {@code ISQ::*} is imported: the redefinition target falls through to {@code ISQ::mass}.
+     *
+     * <p>Resolution: redefine an inherited feature, or qualify the target if the redefinition is intended.
+     */
+    public static final String REDEFINITION_NOT_INHERITED = "REDEFINITION_NOT_INHERITED";
+
+    /**
+     * A typing or subsetting that names the feature being declared (warning).
+     *
+     * <p>Cause: {@code attribute mass :> mass;}: the owner's own members are found first, so {@code mass}
+     * subsets itself instead of, e.g., {@code ISQ::mass}.
+     *
+     * <p>Resolution: qualify the intended feature ({@code attribute mass :> ISQ::mass;}).
+     */
+    public static final String FEATURE_REFERS_TO_ITSELF = "FEATURE_REFERS_TO_ITSELF";
+
+    /**
+     * Parameters declared in a different order than in the general (warning).
+     *
+     * <p>Cause: directed parameters redefine the general's parameters by position, so
+     * {@code in target; in source;} under {@code Transfer { in source; in target; }} swaps them silently.
+     *
+     * <p>Resolution: declare the parameters in the general's order.
+     */
+    public static final String PARAMETER_POSITION_MISMATCH = "PARAMETER_POSITION_MISMATCH";
+
+    /**
+     * A parameter that redefines one parameter by name and another by position (warning).
+     *
+     * <p>Cause: {@code in target :>> target;} as the first parameter of a specialization of
+     * {@code Transfer { in source; in target; }} redefines target explicitly and source by position, making
+     * them the same feature.
+     *
+     * <p>Resolution: declare the parameters in the general's order.
+     */
+    public static final String PARAMETER_REDEFINES_TWO = "PARAMETER_REDEFINES_TWO";
+
+    /** The name-collision warning codes. */
+    private static final Set<String> NAME_COLLISION_CODES = Set.of(
+        DUPLICATE_MEMBER_NAME, INHERITED_NAME_REDECLARED, RENAMED_INHERITED_NAME_REUSED, NAME_SIMILAR_TO_INHERITED,
+        REDEFINITION_NOT_INHERITED, FEATURE_REFERS_TO_ITSELF, PARAMETER_POSITION_MISMATCH, PARAMETER_REDEFINES_TWO);
 
     // =========================================================================
     // TYPE ERRORS - Type checking issues
@@ -574,6 +683,9 @@ public final class ErrorCodes {
         }
         if (DIAMOND_INHERITANCE_CONFLICT.equals(errorCode) || MULTIPLE_INHERITANCE_NAME_CONFLICT.equals(errorCode)) {
             return "Inheritance Warning";
+        }
+        if (NAME_COLLISION_CODES.contains(errorCode)) {
+            return "Name Collision Warning";
         }
         if (errorCode.startsWith("TYPE_")) {
             return "Type Error";

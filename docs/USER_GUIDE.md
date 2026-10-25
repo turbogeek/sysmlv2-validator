@@ -17,8 +17,8 @@ branches. D then inherits both redefinitions.
 
 ```sysml
 part def Vehicle { attribute range : Real; }
-part def ElectricVehicle :> Vehicle { attribute :>> range = 400.0; }
-part def CombustionVehicle :> Vehicle { attribute :>> range = 700.0; }
+part def ElectricVehicle :> Vehicle { attribute :>> range default 400.0; }
+part def CombustionVehicle :> Vehicle { attribute :>> range default 700.0; }
 part def HybridVehicle :> ElectricVehicle, CombustionVehicle;   // warning: range is 400.0 and 700.0
 ```
 
@@ -39,19 +39,30 @@ Redefinitions that only refine each other compatibly are not reported: one branc
 subtype, adds a value or a multiplicity the other leaves open, or redefines different nested features.
 Values given by expressions (`= mRef.dimensions` and `= 3`) are not compared, since they may agree.
 
-To resolve the conflict, redefine the feature in D to state which value applies, or move the redefinition
-into a common supertype so it is inherited once:
+To resolve the conflict, redefine **every** branch's feature in D, by qualified name, to state which value
+applies, or move the redefinition into a common supertype so it is inherited once:
 
 ```sysml
 part def HybridVehicle :> ElectricVehicle, CombustionVehicle {
-    attribute :>> range = 1000.0;
+    attribute range :>> ElectricVehicle::range, CombustionVehicle::range = 1000.0;
 }
 ```
 
-Redefining `f` by name (`attribute :>> range ...`, `attribute range :>> range ...`), redefining either
-branch's redefinition (`:>> ElectricVehicle::range`), or redefining the ancestor's feature
-(`:>> Vehicle::range`) all count as resolving it. Redefining a feature of the same name in an unrelated
-type (`:>> Other::range`) does not.
+Redefining the common ancestor's feature (`attribute value :>> Vehicle::range = 1000.0;`) resolves it too,
+because a feature that redefines what D redefines is no longer inherited (KerML `removeRedefinedFeatures`).
+
+These do **not** resolve it, and are still reported:
+
+- `attribute :>> range = 1000.0;` (or `redefines range`, `range :>> range`): a redefinition by simple name
+  names *one* feature, that of the first general in declaration order. `CombustionVehicle::range` stays
+  inherited, so D has two features named `range`. The SysML v2 reference implementation reports
+  "Duplicate of inherited member name 'range' from CombustionVehicle" for this (see OMG issue KERML11-72).
+- Redefining one branch's redefinition (`:>> CombustionVehicle::range`, or renamed:
+  `attribute value :>> ElectricVehicle::range`): the other branch's value still constrains `Vehicle::range`.
+- Redefining a feature of the same name in an unrelated type (`:>> Other::range`).
+
+If the branches give their values with `=` (a bound value) rather than `default`, D cannot override them at
+all: that is an error, `SEMANTIC_BOUND_VALUE_OVERRIDDEN` (see below). Make the branch values defaults first.
 
 ### MULTIPLE_INHERITANCE_NAME_CONFLICT
 
@@ -85,3 +96,45 @@ is not enough: the other one remains beside D's new `serviceInterval`.
 
 See `test-suite/positive/62_diamond_unresolved_warnings.sysml` and its refactored version
 `test-suite/positive/61_diamond_resolved.sysml`.
+
+## Name-collision warnings
+
+Declaring a feature is so easy that it is easy to create a new one where an existing one was meant:
+`attribute mass = 1500.0;` in a usage of `Vehicle` declares a *second* `mass` instead of giving the
+inherited one a value. These checks report such names. The analysis behind them, with the specification
+rules and what the SysML v2 reference implementation does, is in
+[NAME_COLLISION_ANALYSIS.md](NAME_COLLISION_ANALYSIS.md); `examples/name-collision/` has each case next to
+its fix.
+
+| Code | Example | Fix |
+|---|---|---|
+| `INHERITED_NAME_REDECLARED` | `part def Car :> Vehicle { attribute mass : Real; }` | `attribute :>> mass : Real;` |
+| `DUPLICATE_MEMBER_NAME` | `attribute mass; attribute mass;` in one definition | remove or rename one |
+| `RENAMED_INHERITED_NAME_REUSED` | `A1 :> A { p1 :>> p; }`, then `B :> A1, A2 { part p; }` | `part :>> p1;` |
+| `NAME_SIMILAR_TO_INHERITED` | `attribute masss = 1500.0;` or `:>> masss` beside an inherited `mass` | `attribute :>> mass = 1500.0;` |
+| `REDEFINITION_NOT_INHERITED` | `attribute :>> mass = 1500 [kg];` where no general has `mass` and `ISQ::*` is imported: it redefines `ISQ::mass` | redefine an inherited feature, or qualify the target |
+| `FEATURE_REFERS_TO_ITSELF` | `attribute mass :> mass;` (the owner's own members are found first) | `attribute mass :> ISQ::mass;` |
+| `PARAMETER_POSITION_MISMATCH` | `in target; in source;` under `Transfer { in source; in target; }` | declare parameters in the general's order |
+| `PARAMETER_REDEFINES_TWO` | `in target :>> target;` as parameter 1 of a `Transfer` specialization | declare parameters in the general's order |
+
+All are warnings except one error:
+
+- `SEMANTIC_BOUND_VALUE_OVERRIDDEN`: a redefinition gives a value to a feature whose value is bound (`=`)
+  or initial (`:=`), possibly through a chain of redefinitions. Only a `default` value may be overridden
+  (KerML `validateFeatureValueOverriding`; the reference implementation reports "Cannot override a binding
+  feature value"). Declaring a new feature with the same name instead is not a fix: that is the
+  `INHERITED_NAME_REDECLARED` pitfall.
+
+Not reported as name collisions:
+
+- Redefinitions, by simple or qualified name, and an owned feature that redefines what the inherited one
+  redefines (it replaces it).
+- References that look like declarations: `event e;`, `satisfy r by p;`, `metadata M about x;`,
+  `perform a;`, `then join j;`, `dependency a to b;`, the cross feature of an `end`.
+- Parameters, `subject`, `objective`, actors, stakeholders and `end` features under the re-declaration
+  check: they redefine by position (the two parameter checks cover them), and features in metadata bodies,
+  which redefine by name.
+- For typos: names shorter than four characters, names that differ only in digits (`port1`, `port2`), and a
+  new feature that subsets the similar one on purpose (`fraction1 :> fractions`).
+- `REDEFINITION_NOT_INHERITED` only when the target is a library feature and everything the owner inherits
+  is in the validated files; redefining a package-level feature of your own model is a deliberate pattern.

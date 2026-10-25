@@ -3,7 +3,7 @@ package DefaultValueTests;
 private import ScalarValues::*;
 
 part def Component {
-    // Default value with =
+    // Bound value with = (a redefinition cannot override it)
     attribute count : Integer = 10;
     
     // Default value with default keyword
@@ -15,7 +15,7 @@ part def Component {
 
 part def System {
     part component : Component {
-        // Override default
-        attribute :>> count = 20;
+        // Override the default
+        attribute :>> name = "Subcomponent";
     }
 }

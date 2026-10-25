@@ -9,6 +9,7 @@ import com.validator.parser.SysMLv2ParserFacade.ParseResult;
 import com.validator.semantic.SemanticValidator;
 import com.validator.semantic.StandardLibraryManager;
 import com.validator.semantic.index.InheritanceChecker;
+import com.validator.semantic.index.NameCollisionChecker;
 import com.validator.semantic.index.ModelIndex;
 import com.validator.semantic.index.ModelIndexBuilder;
 import com.validator.semantic.index.ReferenceChecker;
@@ -150,10 +151,14 @@ public class SysMLv2ValidatorImpl implements Validator {
             errors.addAll(semanticErrors);
 
             // Names that must resolve: imports, typings, definition supertypes, metadata;
-            // multiple inheritance that leaves conflicting features
+            // multiple inheritance that leaves conflicting features; names that make a new element where an
+            // existing one was likely meant
             if (index != null && built != null) {
                 errors.addAll(ReferenceChecker.check(built.getSites(), index, file.getAbsolutePath()));
-                warnings.addAll(InheritanceChecker.check(built.getElements(), index, file.getAbsolutePath()));
+                InheritanceChecker inheritance = new InheritanceChecker(index);
+                warnings.addAll(inheritance.check(built.getElements(), file.getAbsolutePath()));
+                NameCollisionChecker collisions = new NameCollisionChecker(index, inheritance);
+                addSplit(collisions.check(built.getElements(), file.getAbsolutePath()), errors, warnings);
             }
 
             // Add semantic warnings
@@ -296,16 +301,19 @@ public class SysMLv2ValidatorImpl implements Validator {
         }
 
         InheritanceChecker inheritance = new InheritanceChecker(index);
+        NameCollisionChecker collisions = new NameCollisionChecker(index, inheritance);
         for (Map.Entry<Integer, ModelIndexBuilder.Result> entry : pending.entrySet()) {
             ValidationResult result = results.get(entry.getKey());
             List<ValidationError> unresolved =
                 ReferenceChecker.check(entry.getValue().getSites(), index, result.getFilePath());
             List<ValidationWarning> conflicts = inheritance.check(entry.getValue().getElements(), result.getFilePath());
-            if (!unresolved.isEmpty() || !conflicts.isEmpty()) {
+            List<ValidationError> names = collisions.check(entry.getValue().getElements(), result.getFilePath());
+            if (!unresolved.isEmpty() || !conflicts.isEmpty() || !names.isEmpty()) {
                 List<ValidationError> errors = new ArrayList<>(result.getErrors());
                 errors.addAll(unresolved);
                 List<ValidationWarning> warnings = new ArrayList<>(result.getWarnings());
                 warnings.addAll(conflicts);
+                addSplit(names, errors, warnings);
                 results.set(entry.getKey(), new ValidationResult(result.getFilePath(), errors,
                     warnings, result.getValidationTimeMs()));
             }
@@ -336,5 +344,17 @@ public class SysMLv2ValidatorImpl implements Validator {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    /** Add checker results to the errors or the warnings by their severity. */
+    private static void addSplit(List<ValidationError> found, List<ValidationError> errors,
+            List<ValidationWarning> warnings) {
+        for (ValidationError e : found) {
+            if (e instanceof ValidationWarning w) {
+                warnings.add(w);
+            } else {
+                errors.add(e);
+            }
+        }
     }
 }
