@@ -151,6 +151,22 @@ class PerformanceComparisonTest {
 
         assertTrue(table.contains("previous version: none recorded"), table);
         assertTrue(table.contains("last run:         none recorded"), table);
+        assertFalse(table.contains("new"), "with nothing to compare, no subject is labelled new: " + table);
+    }
+
+    @Test
+    @DisplayName("Should label a subject new only when a baseline run lacks it")
+    void labelsNewSubjects() {
+        Run lastRun = new Run(List.of(model(THEN, "0.1", "a.sysml", 10)));
+
+        List<Row> current = List.of(model(NOW, "0.1", "a.sysml", 10), model(NOW, "0.1", "b.sysml", 5));
+
+        String table = PerformanceComparison.table(current, "0.1", Optional.empty(), Optional.empty(),
+            Optional.of(lastRun), THRESHOLD);
+
+        String b = List.of(table.split("\n")).stream().filter(l -> l.trim().startsWith("b.sysml")).findFirst()
+            .orElseThrow();
+        assertTrue(b.matches(".*5\\.00 +- +- +new"), b);
     }
 
     @Test

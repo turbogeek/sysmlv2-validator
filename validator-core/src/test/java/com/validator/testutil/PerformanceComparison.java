@@ -178,10 +178,12 @@ public final class PerformanceComparison {
             Row now = current.get(i);
             Line p = vsPrevious.get(i);
             Line l = vsLast.get(i);
+            // Without a baseline run every subject would be "new": the status is left blank instead
             cells.add(new String[] {now.subject(), now.measure(), String.format(Locale.ROOT, "%.1f", now.timedMs()),
                 ratio(now.ratio()), p.baseline().map(r -> ratio(r.ratio())).orElse("-"), p.change(),
-                p.status().label(), l.baseline().map(r -> ratio(r.ratio())).orElse("-"), l.change(),
-                l.status().label()});
+                previousVersionRun.isPresent() ? p.status().label() : "",
+                l.baseline().map(r -> ratio(r.ratio())).orElse("-"), l.change(),
+                lastRun.isPresent() ? l.status().label() : ""});
         }
         int[] widths = new int[cells.get(0).length];
         for (String[] row : cells) {
