@@ -2,6 +2,7 @@ parser grammar SysMLv2Parser;
 
 options {
     tokenVocab = SysMLv2Lexer;
+    contextSuperClass = org.antlr.v4.runtime.RuleContextWithAltNum;
 }
 
 // ============================================================================
