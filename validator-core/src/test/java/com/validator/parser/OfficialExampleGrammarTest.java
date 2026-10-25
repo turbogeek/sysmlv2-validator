@@ -1,0 +1,732 @@
+package com.validator.parser;
+
+import com.validator.testutil.ParseTrees;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Grammar gaps found by parsing the official SysML v2 release (sysml/src and kerml/src/examples). Each test is a
+ * minimal form of a construct that the official BNF (SysML-textual-bnf.kebnf, KerML-textual-bnf.kebnf) allows and the
+ * validator rejected; the production is named in the test. Where a fix could also accept something the BNF does not,
+ * a second test checks that the invalid form is still rejected.
+ */
+@DisplayName("Grammar gaps found by the official SysML v2 examples")
+class OfficialExampleGrammarTest {
+
+    private SysMLv2ParserFacade parserFacade;
+
+    @BeforeEach
+    void setUp() {
+        parserFacade = new SysMLv2ParserFacade();
+    }
+
+    private SysMLv2ParserFacade.ParseResult parse(String text) {
+        return parserFacade.parseString(text, "official-gap.sysml");
+    }
+
+    private SysMLv2ParserFacade.ParseResult parseKerml(String text) {
+        return parserFacade.parseString(text, "official-gap.kerml");
+    }
+
+    /**
+     * No syntax errors, and no construct cut short: a valid file can also parse "by accident" when a rule ends early
+     * and the rest of the construct is read as a separate expression statement ('subject v : V' plus a '{ ... }'
+     * expression), so the tree is checked for such stray statements too.
+     */
+    private static void assertParses(SysMLv2ParserFacade.ParseResult result) {
+        assertFalse(result.hasErrors(), "Should parse without errors: " + result.getSyntaxErrors());
+        List<String> stray = ParseTrees.strayStatements(result.getParseTree());
+        assertTrue(stray.isEmpty(), "A construct was cut short; its remainder was read as statements: " + stray);
+    }
+
+    /** The number of nodes of the given rule in the tree. */
+    private static int count(ParseTree tree, Class<? extends ParserRuleContext> rule) {
+        int n = rule.isInstance(tree) ? 1 : 0;
+        for (int i = 0; i < tree.getChildCount(); i++) {
+            n += count(tree.getChild(i), rule);
+        }
+        return n;
+    }
+
+    /** The last node of the given rule in the tree (in source order), or null. */
+    private static <T extends ParserRuleContext> T last(ParseTree tree, Class<T> rule) {
+        for (int i = tree.getChildCount() - 1; i >= 0; i--) {
+            T found = last(tree.getChild(i), rule);
+            if (found != null) {
+                return found;
+            }
+        }
+        return rule.isInstance(tree) ? rule.cast(tree) : null;
+    }
+
+    /** The first node of the given rule in the tree, or null. */
+    private static <T extends ParserRuleContext> T first(ParseTree tree, Class<T> rule) {
+        if (rule.isInstance(tree)) {
+            return rule.cast(tree);
+        }
+        for (int i = 0; i < tree.getChildCount(); i++) {
+            T found = first(tree.getChild(i), rule);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
+    }
+
+    /** True if the tree has a node of the given rule, i.e. the construct was read by that rule. */
+    private static boolean contains(ParseTree tree, Class<? extends ParserRuleContext> rule) {
+        if (rule.isInstance(tree)) {
+            return true;
+        }
+        for (int i = 0; i < tree.getChildCount(); i++) {
+            if (contains(tree.getChild(i), rule)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Parses with SLL prediction only, failing on the first conflict, as the facade's fast first stage does. */
+    private static boolean parsesWithSllAlone(String text) {
+        SysMLv2Lexer lexer = new SysMLv2Lexer(CharStreams.fromString(text));
+        lexer.removeErrorListeners();
+        SysMLv2Parser parser = new SysMLv2Parser(new CommonTokenStream(lexer));
+        parser.removeErrorListeners();
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+        parser.setErrorHandler(new BailErrorStrategy());
+        try {
+            parser.compilationUnit();
+            return true;
+        } catch (ParseCancellationException e) {
+            return false;
+        }
+    }
+
+    // ---------------------------------------------------------------- notes (KerML 8.2.2.2 MULTILINE_NOTE)
+
+    @Test
+    @DisplayName("A multiline note '//* ... */' can end mid-line")
+    void testMultilineNoteEndsMidLine() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                private import ScalarValues::Real;
+                attribute cityScenario : Real[*] = ( //* ... */ );
+            }
+            """);
+        assertParses(result);
+        assertTrue(result.getLineComments().isEmpty(), "A multiline note is not a '//' line comment");
+    }
+
+    @Test
+    @DisplayName("A multiline note spanning lines hides its text; a '//' line comment is still reported")
+    void testMultilineNoteSpansLines() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                //*
+                // The above is semantically equivalent to:
+                ref action 'provide power' (in fuelCmd = fuelCmdPort::fuelCmd) :> performedActions;
+                */
+                part p; // a line comment
+            }
+            """);
+        assertParses(result);
+        assertEquals(1, result.getLineComments().size(), "Only the '//' comment after 'part p;' is a line comment");
+        assertEquals(6, result.getLineComments().get(0).getLine());
+    }
+
+    // ---------------------------------------------------------------- user-defined keywords (SysML 8.2.2.27)
+
+    @Test
+    @DisplayName("ExtendedDefinition and ExtendedUsage: '#scenario def X { #cause 'c' { ... } }'")
+    void testUserDefinedKeywords() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                metadata def scenario;
+                metadata def cause;
+                metadata def system;
+                #scenario def DeviceFailure {
+                    #cause 'battery old' {
+                        :>> probability = 0.01;
+                    }
+                }
+                #system service_registry {
+                    #cause :>> serviceDiscovery;
+                }
+                #system orchestrationDesign;
+            }
+            """);
+        assertParses(result);
+        assertTrue(contains(result.getParseTree(), SysMLv2Parser.ExtendedDefinitionContext.class));
+    }
+
+    @Test
+    @DisplayName("'def' is reserved: 'actor def', 'snapshot def' and a bare 'def' are rejected")
+    void testDefWithoutUserKeywordRejected() {
+        assertTrue(parse("package P { actor def User { } }").hasErrors(), "There is no 'actor def'");
+        assertTrue(parse("package P { snapshot def S :> Vehicle { } }").hasErrors(), "There is no 'snapshot def'");
+        assertTrue(parse("package P { def X { } }").hasErrors(), "'def' needs a definition keyword or '#keyword'");
+        assertTrue(parse("package P { part p : def; }").hasErrors(), "'def' cannot be a name");
+    }
+
+    // ---------------------------------------------------------------- connectors (SysML 8.2.2.13.2, 8.2.2.14.2)
+
+    @Test
+    @DisplayName("'connect' with an n-ary ConnectorPart or a body, 'allocate' with named ends and a body")
+    void testConnectorParts() {
+        assertParses(parse("""
+            package P {
+                occurrence a; item b; part c; action d;
+                connect ( cause1 ::> a, cause2 ::> b, effect1 ::> c, effect2 ::> d );
+                connect (a, b, c, d);
+                connect b to d {
+                    doc /* a binary connection with a body */
+                }
+                allocation torqueGenAlloc allocate logical ::> a to physical ::> c {
+                    allocate a.x to c.y;
+                }
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("An n-ary ConnectorPart needs at least two ends")
+    void testNaryConnectorWithOneEndRejected() {
+        assertTrue(parse("package P { part a; connect (a); }").hasErrors());
+    }
+
+    // ---------------------------------------------------------------- metadata (SysML 8.2.2.27)
+
+    @Test
+    @DisplayName("Metadata usage 'about' several elements, with or without a body")
+    void testMetadataUsageAbout() {
+        assertParses(parse("""
+            package P {
+                metadata def SafetyFeature;
+                metadata def Issue { attribute text : ScalarValues::String; }
+                part vehicle { part seatBelt; part bumper; }
+                metadata SafetyFeature about
+                    vehicle::seatBelt,
+                    vehicle::bumper;
+                metadata issue : Issue about vehicle {
+                    text = "A body after the annotated elements";
+                }
+                @SafetyFeature about vehicle::bumper;
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("'@' metadata with a declared name or an empty one: '@m : M;', '@ : M;'")
+    void testMetadataAnnotationDeclaration() {
+        assertParses(parse("""
+            package P {
+                metadata def Security;
+                part y {
+                    @ : Security;
+                    @tag : Security;
+                }
+            }
+            """));
+    }
+
+    // ---------------------------------------------------------------- requirements (SysML 8.2.2.21)
+
+    @Test
+    @DisplayName("'assume' / 'require' with a constraint reference, multiplicity or user-defined keywords")
+    void testRequirementConstraintUsages() {
+        assertParses(parse("""
+            package P {
+                metadata def goal;
+                constraint c1;
+                constraint c2;
+                concern c3;
+                requirement def R2 {
+                    assume c1 [0..*];
+                    require c2 [0..*];
+                    frame c3[0..*];
+                }
+                requirement deliverPayload {
+                    assume #goal constraint payloadMassLimit;
+                    require #goal vehicleMassRequirement;
+                }
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("Viewpoints and concerns have requirement bodies: 'require constraint { ... }'")
+    void testViewpointAndConcernBodies() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                concern def UserConcern {
+                    stakeholder user : Person;
+                    require constraint {
+                        doc /* Device must be readable from 1 meter distance */
+                    }
+                }
+                viewpoint 'system structure perspective' {
+                    frame 'system breakdown';
+                    require constraint {
+                        doc /* shows the part decomposition */
+                    }
+                }
+                concern c {
+                    subject s;
+                    assume constraint { true }
+                }
+            }
+            """);
+        assertParses(result);
+    }
+
+    // ---------------------------------------------------------------- views (SysML 8.2.2.26)
+
+    @Test
+    @DisplayName("ViewRenderingUsage reference with multiplicity: 'render r [0..*];'")
+    void testRenderWithMultiplicity() {
+        assertParses(parse("""
+            package P {
+                view def V;
+                rendering r;
+                view v : V {
+                    render r [0..*];
+                }
+            }
+            """));
+    }
+
+    // ---------------------------------------------------------------- states and transitions (SysML 8.2.2.18)
+
+    @Test
+    @DisplayName("Target transitions with 'at' / 'when' / 'after' triggers, guards, effects and a body")
+    void testTargetTransitions() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                attribute def OverTemp;
+                state def S {
+                    in controller;
+                    in vehicle;
+                    first start then normal;
+                    state normal;
+                    accept at vehicle.maintenanceTime
+                        then maintenance;
+                    accept when vehicle.temp > vehicle.maxTemperature
+                        do send new OverTemp() to controller
+                        then degraded;
+                    state maintenance;
+                    accept after 48 [h]
+                        then normal;
+                    state degraded;
+                    accept VehicleOnSignal
+                        if vehicle.brakePedalDepressed
+                        do send new OverTemp() to controller
+                        then normal;
+                }
+            }
+            """);
+        assertParses(result);
+        assertTrue(contains(result.getParseTree(), SysMLv2Parser.AcceptTransitionContext.class));
+    }
+
+    @Test
+    @DisplayName("A transition's target may be followed by a body, and its trigger may be a feature chain")
+    void testTransitionBodyAndChainTrigger() {
+        assertParses(parse("""
+            package P {
+                state def Main {
+                    state off;
+                    state starting;
+                    part Remote { action start; }
+                    transition 'off-starting'
+                        first off
+                        accept 'Vehicle Start Signal'
+                        if vehicle.brakePedalDepressed
+                        do send new StartSignal() to vehicle.controller
+                        then starting {
+                        doc /* The transition definition is implicit. */
+                    }
+                    transition startServe
+                        first off
+                        accept Remote.start
+                        do action log : Log { in msg = "Serving"; }
+                        then starting;
+                }
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("A target transition in a state body may be triggered by a qualified name or a feature chain")
+    void testTargetTransitionWithQualifiedTrigger() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                package Signals { attribute def Start; }
+                part remote { attribute pressed; }
+                state def S {
+                    entry; then off;
+                    state off;
+                    accept Signals::Start then on;
+                    state on;
+                    accept remote.pressed then off;
+                }
+            }
+            """);
+        assertParses(result);
+        assertEquals(2, count(result.getParseTree(), SysMLv2Parser.AcceptTransitionContext.class));
+    }
+
+    @Test
+    @DisplayName("Guarded succession: 'succession S first A1 if x == 0 then A2;'")
+    void testGuardedSuccession() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            action def DecisionTest {
+                attribute x = 1;
+                action A1;
+                action A2;
+                public succession S first A1
+                    if x == 0 then A2;
+            }
+            """);
+        assertParses(result);
+        // The grammar used to accept this by accident as 'succession S', 'first A1' and an 'if ... then' statement
+        SysMLv2Parser.SuccessionUsageContext succession = first(result.getParseTree(),
+            SysMLv2Parser.SuccessionUsageContext.class);
+        assertNotNull(succession);
+        assertTrue(contains(succession, SysMLv2Parser.GuardClauseContext.class), "The guard belongs to the succession");
+        assertFalse(contains(result.getParseTree(), SysMLv2Parser.IfStatementContext.class));
+    }
+
+    // ---------------------------------------------------------------- use cases (SysML 8.2.2.24)
+
+    @Test
+    @DisplayName("Include of a referenced use case with multiplicity and a body")
+    void testIncludeReference() {
+        assertParses(parse("""
+            package P {
+                use case 'add fuel' { subject vehicle; }
+                use case 'drive vehicle' {
+                    subject vehicle;
+                    include 'add fuel'[0..*] {
+                        subject vehicle;
+                        actor fueler = driver;
+                    }
+                    then include 'add fuel' {
+                        subject;
+                    }
+                }
+            }
+            """));
+    }
+
+    // ---------------------------------------------------------------- imports (SysML 8.2.2.5.1)
+
+    @Test
+    @DisplayName("Filtered imports and imports with a relationship body")
+    void testFilteredImportAndImportBody() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                metadata def Safety { attribute isMandatory : ScalarValues::Boolean; }
+                part vehicle { part bumper { @Safety { isMandatory = true; } } }
+                package 'Safety Features' {
+                    public import vehicle::**[@Safety];
+                }
+                package 'Mandatory Safety Features' {
+                    public import vehicle::**[@Safety and (as Safety).isMandatory];
+                }
+                private import ScalarValues::Integer {
+                    doc
+                    /*
+                     * The unqualified Integer is signed.
+                     */
+                }
+            }
+            """);
+        assertParses(result);
+    }
+
+    // ---------------------------------------------------------------- flows and successions (SysML 8.2.2.13.4)
+
+    @Test
+    @DisplayName("Flows between feature chains, with a body, and a succession flow")
+    void testFlowsWithBody() {
+        assertParses(parse("""
+            package P {
+                action 'generate torque' { out engineTorque; }
+                action 'amplify torque' { in engineTorque; }
+                flow 'generate torque'.engineTorque
+                    to 'amplify torque'.engineTorque {
+                    doc /* A flow streams items between actions. */
+                }
+                succession flow 'generate torque'.engineTorque to 'amplify torque'.engineTorque;
+                ref flow 'generate torque'.engineTorque to 'amplify torque'.engineTorque;
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("A flow needs its ';' or body (DefinitionBody)")
+    void testFlowWithoutBodyRejected() {
+        assertTrue(parse("""
+            package P {
+                part p {
+                    flow a.x to b.y
+                    part q;
+                }
+            }
+            """).hasErrors(), "A flow without ';' or a body must stay an error now that the body is required");
+    }
+
+    // ---------------------------------------------------------------- expressions (KerML 8.2.5.8)
+
+    @Test
+    @DisplayName("Extent expression 'all T' as a value and in parentheses; unary '+'")
+    void testExtentExpressionAndUnaryPlus() {
+        assertParses(parse("""
+            package P {
+                part def Engine;
+                part engineChoice : Engine[*];
+                analysis engineTradeStudy {
+                    subject : Engine[1..*] = all engineChoice;
+                }
+                attribute z = (all Engine)#(1);
+                attribute p = +1;
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("Collect 'x.{ ... }', function-reference arrow '->reduce \"+\"' and global '$::' names")
+    void testCollectReduceAndGlobalScope() {
+        assertParses(parse("""
+            package P {
+                attribute x = (1, 2, 3);
+                attribute c1 = x.{in xx; xx + 1};
+                attribute s = x->reduce '+' ?? 0;
+                part def E :> $::Parts::Part;
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("The non-BNF 'expression transition expression' form is rejected")
+    void testExpressionTransitionRejected() {
+        assertTrue(parse("package P { state def S { state a; state b; a transition b; } }").hasErrors());
+    }
+
+    // ---------------------------------------------------------------- feature declarations (SysML 8.2.2.6)
+
+    @Test
+    @DisplayName("Typing with 'defined by', crossing with 'crosses' and '=>'")
+    void testDefinedByAndCrosses() {
+        assertParses(parse("""
+            package P {
+                part def Engine;
+                part engine defined by Engine;
+                connection def C {
+                    end a : Engine crosses b.x;
+                    end b : Engine => a.y;
+                }
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("Usages with a RefPrefix only: 'derived x : A;', 'constant c = 1;', and 'protected in w : A;'")
+    void testPrefixedReferenceUsages() {
+        assertParses(parse("""
+            package P {
+                part def A {
+                    derived x : A;
+                    constant c = 1;
+                    abstract y : A;
+                    in derived d : A;
+                    protected in w : A;
+                }
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("Constraint usages with a typing and ';' parse without SLL ambiguity")
+    void testConstraintUsageForms() {
+        String text = """
+            package P {
+                constraint def C;
+                constraint c : C;
+                part q {
+                    assert constraint massConstraint : C;
+                    assert not c;
+                }
+            }
+            """;
+        assertParses(parse(text));
+        assertTrue(parsesWithSllAlone(text), "SLL prediction alone should suffice for constraint usages");
+    }
+
+    @Test
+    @DisplayName("Documentation with a short name: 'doc <d1> /* ... */'")
+    void testDocumentationShortName() {
+        assertParses(parse("""
+            package P {
+                part def A {
+                    doc <d1> /* Documentation comment on A */
+                    comment about d1 locale "en_US" /* Comment about the documentation */
+                }
+            }
+            """));
+    }
+
+    // ---------------------------------------------------------------- KerML (.kerml) feature syntax
+
+    @Test
+    @DisplayName("KerML: 'typed by', 'featured by', prefixed features and feature chains in unions")
+    void testKermlFeatureSyntax() {
+        assertParses(parseKerml("""
+            package Features {
+                class A;
+                class C;
+                class MassedThing {
+                    feature mass : ScalarValues::Real;
+                    composite subcomponents: MassedThing[0..*];
+                }
+                behavior B {
+                    in x1;
+                    out var y1;
+                }
+                feature x typed by A;
+                feature y1 : A :> x featured by C;
+                feature b : A;
+                feature h1 unions x, b.mass;
+            }
+            """));
+    }
+
+    // ---------------------------------------------------------------- forms official files parsed only by accident
+    // Each was cut short by an alternative that can end early, with the rest read as stray expression statements, so
+    // the file had no syntax errors although the construct was misread.
+
+    @Test
+    @DisplayName("Subject, binding, control node and 'first ... then' with a body (UsageBody / ActionBody)")
+    void testBodiesAfterShortForms() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                part def Vehicle;
+                requirement def R {
+                    subject vehicle : Vehicle {
+                        doc /* the subject has a body */
+                    }
+                    attribute m;
+                }
+                action def A {
+                    in x; out y;
+                    action a1 { out y; }
+                    action a2 { in x; }
+                    bind x = a2.x {
+                        doc /* a binding with a body */
+                    }
+                    first start then continue {
+                        doc /* a succession with a body */
+                    }
+                    merge continue {
+                        doc /* a merge node with a body */
+                    }
+                    then a1;
+                }
+            }
+            """);
+        assertParses(result);
+        assertNotNull(first(result.getParseTree(), SysMLv2Parser.SubjectDeclarationContext.class).usageBody());
+        assertNotNull(first(result.getParseTree(), SysMLv2Parser.BindingUsageContext.class).usageBody());
+        assertNotNull(first(result.getParseTree(), SysMLv2Parser.MergeNodeContext.class).usageBody());
+    }
+
+    @Test
+    @DisplayName("'verify' of a feature chain with a body, and an event referencing a feature chain")
+    void testVerifyAndEventReferences() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                requirement def MassReq { attribute massActual; }
+                part spec { requirement massReq : MassReq; }
+                verification def V {
+                    objective {
+                        verify spec.massReq {
+                            redefines massActual = 1;
+                        }
+                    }
+                }
+                occurrence def Behavior { event occurrence publish; }
+                part producer {
+                    part behavior : Behavior;
+                    event behavior.publish[1] :>> publishEvent;
+                    event occurrence publishEvent;
+                }
+            }
+            """);
+        assertParses(result);
+        SysMLv2Parser.VerifyRequirementContext verify = first(result.getParseTree(),
+            SysMLv2Parser.VerifyRequirementContext.class);
+        assertEquals("spec.massReq", verify.expression().getText());
+        assertNotNull(verify.requirementBody());
+    }
+
+    @Test
+    @DisplayName("A constraint body after 'assume' / 'require' does not swallow a following '@' annotation")
+    void testRequirementConstraintBodyBeforeAnnotation() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                metadata def StatusInfo { attribute status; }
+                attribute def MassValue;
+                constraint c2;
+                requirement r {
+                    attribute cargoMass : MassValue;
+                    assume constraint { cargoMass <= 500 }
+                    @StatusInfo { status = 1; }
+                    require constraint { cargoMass >= 0 }
+                    @StatusInfo { status = 2; }
+                    require c2 [0..*];
+                }
+            }
+            """);
+        assertParses(result);
+        // Before, the body was an expression that continued with the classification operator: '{ ... } @ StatusInfo'
+        assertEquals(2, count(result.getParseTree(), SysMLv2Parser.MetadataAnnotationContext.class));
+        // Without 'constraint' or a user-defined keyword, 'require c2' references a constraint, as 'assume c1' does
+        SysMLv2Parser.RequireConstraintContext reference = last(result.getParseTree(),
+            SysMLv2Parser.RequireConstraintContext.class);
+        assertNotNull(reference);
+        assertNotNull(reference.featureChain(), "'require c2 [0..*];' is a reference, not a declaration of 'c2'");
+        assertNull(reference.usageName());
+    }
+
+    // ---------------------------------------------------------------- SLL prediction (parse speed)
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = {
+        "part def A { flow p1.torque to p2.torque; }",
+        "part def A { succession flow x.p to a1.aa.receiver; }",
+        "package P { @Risk about a::b { totalRisk = medium; } }",
+        "package P { use case u { include 'add fuel'[0..*] { subject v; } } }",
+        "package P { calc def F { return : Real = c->reduce '+' ?? zero; } }",
+        "package P { metadata def M specializes A, B; metadata : M; }"
+    })
+    @DisplayName("Valid forms that used to force a full LL re-parse now parse with SLL prediction alone")
+    void testFormsParseWithSllAlone(String text) {
+        assertParses(parse(text));
+        assertTrue(parsesWithSllAlone(text),
+            "SLL prediction should suffice; a conflict here makes the facade re-parse the whole file with LL");
+    }
+}

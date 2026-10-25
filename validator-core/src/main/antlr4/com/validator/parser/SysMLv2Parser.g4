@@ -28,6 +28,7 @@ namespaceBodyElement
       | aliasDeclaration
       | importDeclaration
       | implicitFeatureDeclaration
+      | prefixedFeatureDeclaration
       | member
       | metadataAnnotation
       | filterStatement
@@ -68,13 +69,37 @@ implicitFeatureDeclaration
     : declarationName featureRelationships? valueInit? (SEMICOLON | usageBody)
     ;
 
+// A feature declared with modifier keywords but no kind keyword: SysML DefaultReferenceUsage = RefPrefix Usage
+// ('derived x : A;', 'constant c = 1;') and KerML BasicFeaturePrefix FeatureDeclaration ('composite parts : P[*];',
+// 'out var y;'). At least one modifier is required: a direction alone is an in/out/inout parameter.
+prefixedFeatureDeclaration
+    : directionPrefix? featureModifier+ declarationName? featureRelationships? valueInit? (SEMICOLON | usageBody)
+    ;
+
+featureModifier
+    : DERIVED
+    | ABSTRACT
+    | VARIATION
+    | CONSTANT
+    | COMPOSITE
+    | VAR
+    ;
+
 aliasName
     : name (shortName)?
     | shortName
     ;
 
+// SysML v2 8.2.2.5.1: Import = visibility 'import' 'all'? ImportDeclaration RelationshipBody, where a filtered import
+// adds FilterPackageMembers '[' OwnedExpression ']' ('import vehicle::**[@Safety];') and RelationshipBody may own
+// annotations ('import ScalarValues::Integer { doc /* ... */ }')
 importDeclaration
-    : visibility? IMPORT (ALL | importFilter)? qualifiedNameWithWildcard SEMICOLON
+    : visibility? IMPORT (ALL | importFilter)? qualifiedNameWithWildcard filterClause* relationshipBody
+    ;
+
+relationshipBody
+    : SEMICOLON
+    | LBRACE (documentation | comment | metadataAnnotation)* RBRACE
     ;
 
 importFilter
@@ -97,10 +122,17 @@ hashAnnotation
     : HASH qualifiedName
     ;
 
+// The alternative with a body comes first: SLL prediction resolves a conflict to the lowest alternative, and the
+// shorter ones can end before the '{' ('@Risk about x { ... }' was otherwise read as '@Risk about x' plus a block).
+// MetadataUsageDeclaration = ( Identification ( ':' | 'typed' 'by' ) )? type: '@Risk', '@r : Risk', '@ : Risk'.
 metadataAnnotation
-    : AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? (LPAREN annotationArguments RPAREN)?
-    | AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? metadataBody
-    | AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? SEMICOLON?
+    : AT_SIGN metadataDeclaredName? qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? metadataBody
+    | AT_SIGN metadataDeclaredName? qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? (LPAREN annotationArguments RPAREN)?
+    | AT_SIGN metadataDeclaredName? qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? SEMICOLON?
+    ;
+
+metadataDeclaredName
+    : usageName? (COLON | TYPED_BY)
     ;
 
 annotationArguments
@@ -187,6 +219,7 @@ member
       | flowDefinition
       | metadataDefinition
       | individualDefinition
+      | extendedDefinition
         // KerML Definitions
       | datatypeDefinition
       | classDefinition
@@ -303,10 +336,10 @@ viewpointBody
     | SEMICOLON
     ;
 
+// Viewpoint definitions and usages have a RequirementBody (SysML v2 8.2.2.26.3): 'require constraint { ... }',
+// 'frame c;', 'subject;'. Concern usages are members, so requirementBodyElement covers them too.
 viewpointBodyElement
-    : namespaceBodyElement
-    | framedConcern
-    | concernUsage
+    : requirementBodyElement
     ;
 
 constraintDefinition
@@ -378,8 +411,9 @@ verificationDefinition
     : VERIFICATION_DEF declarationName? typeRelationships? definitionBody
     ;
 
+// Concerns are requirements: ConcernDefinition and ConcernUsage have a RequirementBody (SysML v2 8.2.2.21.3)
 concernDefinition
-    : CONCERN_DEF declarationName? typeRelationships? definitionBody
+    : CONCERN_DEF declarationName? typeRelationships? requirementBody
     ;
 
 renderingDefinition
@@ -395,13 +429,18 @@ flowDefinition
     ;
 
 metadataDefinition
-    : METADATA_DEF declarationName? shortName? typeRelationships? metadataDefBody?
-    | METADATA_DEF declarationName? shortName? typeRelationships? SEMICOLON
+    : METADATA_DEF declarationName? shortName? typeRelationships? (SEMICOLON | metadataDefBody)?
     ;
 
 individualDefinition
     : INDIVIDUAL_DEF declarationName? typeRelationships? definitionBody
     | INDIVIDUAL_DEF declarationName? typeRelationships? SEMICOLON
+    ;
+
+// A definition declared with user-defined keywords only (SysML v2 8.2.2.27 ExtendedDefinition):
+// BasicDefinitionPrefix? DefinitionExtensionKeyword+ 'def' Definition, e.g. '#scenario def DeviceFailure { ... }'
+extendedDefinition
+    : hashAnnotation+ DEF declarationName? typeRelationships? definitionBody
     ;
 
 metadataDefBody
@@ -529,13 +568,12 @@ viewUsage
     : VIEW usageName? featureRelationships? viewBody?
     ;
 
+// One alternative per form, with the ';' and the body as choices of the same subrule: as separate alternatives that
+// differ only after the declaration, SLL prediction chose the bodiless one for 'constraint c : C;' and fell back to LL.
 constraintUsage
-    : CONSTRAINT usageName? featureRelationships? constraintBody?
-    | CONSTRAINT usageName? featureRelationships? SEMICOLON
-    | ASSERT CONSTRAINT usageName? featureRelationships? constraintBody?
-    | ASSERT CONSTRAINT usageName? featureRelationships? SEMICOLON
-    | ASSERT NOT? qualifiedName constraintBody?
-    | ASSERT NOT? qualifiedName SEMICOLON
+    : CONSTRAINT usageName? featureRelationships? (SEMICOLON | constraintBody)?
+    | ASSERT CONSTRAINT usageName? featureRelationships? (SEMICOLON | constraintBody)?
+    | ASSERT NOT? qualifiedName (SEMICOLON | constraintBody)?
     ;
 
 constraintBody
@@ -586,7 +624,9 @@ itemUsage
 
 refUsage
     : directionPrefix? REF hashAnnotation* refKind? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
-    | hashAnnotation+ usageName featureRelationships? valueInit? SEMICOLON
+      // A usage declared with user-defined keywords only (SysML v2 8.2.2.27 ExtendedUsage):
+      // UsageExtensionKeyword+ Usage, e.g. '#system registry { ... }' or '#servicedd :>> discovery;'
+    | hashAnnotation+ usageName? featureRelationships? valueInit? usageBody
     ;
 
 refKind
@@ -617,19 +657,21 @@ refKind
 connectionUsage // Reference: SysMLv2.md, Section 7.13.2 / Line 2416
     : CONNECTION usageName? featureRelationships? connectionEndpoints? usageBody?
     | CONNECTION usageName? featureRelationships? connectionEndpoints? SEMICOLON
-    | CONNECT connectionEndpoints SEMICOLON?
+    | CONNECT connectorPart usageBody? // 'connect' ConnectorPart UsageBody: 'connect a to b { ... }', 'connect (a, b, c);'
     ;
 
+// SysML v2 8.2.2.13.4: 'flow' FlowDeclaration DefinitionBody. The body (';' or '{ ... }') is required: an optional one
+// let a bare 'flow' end the usage, so 'flow a.x to b.y;' was ambiguous under SLL prediction and forced a full LL re-parse.
 flowConnectionUsage
-    : FLOW usageName? featureRelationships? flowEndpoints? usageBody?
-    | FLOW usageName? featureRelationships? flowEndpoints? SEMICOLON?
-    | FLOW expression TO expression SEMICOLON
+    : FLOW usageName? featureRelationships? flowEndpoints? usageBody
+    | FLOW expression TO expression usageBody // FlowEndMember 'to' FlowEndMember DefinitionBody: 'flow a.x to b.y { ... }'
     ;
 
 successionUsage // Reference: SysMLv2.md, Section 7.17.4 / Line 3317
-    : FIRST expression (THEN expression)? SEMICOLON?
+    : FIRST expression (THEN expression)? (SEMICOLON | usageBody)? // SuccessionAsUsage UsageBody: 'first a then b {}'
     | THEN expression SEMICOLON?
-    | SUCCESSION FLOW? ALL? usageName? featureRelationships? successionFlowOf? successionEndpoints? (SEMICOLON | usageBody)?
+    | SUCCESSION FLOW? ALL? usageName? featureRelationships? successionFlowOf? successionEndpoints? usageBody
+    | SUCCESSION FLOW expression TO expression usageBody // SuccessionFlowUsage: 'succession flow a.x to b.y;'
     ;
 
 successionFlowOf
@@ -640,7 +682,6 @@ transitionUsage
     : TRANSITION usageName? transitionRelationships? transitionBody
     | TRANSITION usageName? FIRST expression transitionBody
     | TRANSITION featureChain transitionBody // source as a qualified name or chain, e.g. transition A::B then C;
-    | expression TRANSITION expression SEMICOLON? // Reference: SysMLv2.md, Section 7.18.3 / Line 4213
     ;
 
 satisfyRequirement
@@ -648,18 +689,11 @@ satisfyRequirement
       | ASSERT? NOT? SATISFY expression (BY expression)? featureRelationships? requirementBody?
       ;
 
+// SysML v2 8.2.2.14.2: ( 'allocation' UsageDeclaration ( 'allocate' ConnectorPart )? | 'allocate' ConnectorPart ) UsageBody,
+// e.g. 'allocate logical ::> torqueGenerator to physical ::> powerTrain { ... }'
 allocateUsage
-    : ALLOCATION usageName? featureRelationships? usageBody?
-    | ALLOCATION usageName? featureRelationships? ALLOCATE LPAREN namedAllocationList RPAREN SEMICOLON?
-    | ALLOCATE expression TO expression (SEMICOLON | usageBody)
-    ;
-
-namedAllocationList
-    : namedAllocation (COMMA namedAllocation)*
-    ;
-
-namedAllocation
-    : name REFERENCE_SUBSETTING expression
+    : ALLOCATION usageName? featureRelationships? (ALLOCATE connectorPart)? usageBody?
+    | ALLOCATE connectorPart usageBody
     ;
 
 performUsage
@@ -673,7 +707,11 @@ exhibitUsage
     ;
 
 includeUsage
-    : INCLUDE expression SEMICOLON?
+      // IncludeUseCaseUsage reference form (SysML v2 8.2.2.24): OwnedReferenceSubsetting FeatureSpecializationPart?
+      // ValuePart? CaseBody, e.g. "include 'add fuel'[0..*] { subject vehicle; }". It comes first so that SLL
+      // prediction, which resolves a conflict to the lowest alternative, does not end at the shorter expression form.
+    : INCLUDE featureChain featureRelationships? valueInit? usageBody
+    | INCLUDE expression SEMICOLON?
     | INCLUDE USE_CASE usageName? featureRelationships? usageBody?
     | INCLUDE USE_CASE usageName? featureRelationships? SEMICOLON
     ;
@@ -717,8 +755,7 @@ stakeholderUsage
     ;
 
 concernUsage
-    : CONCERN usageName? featureRelationships? concernBody?
-    | CONCERN usageName? featureRelationships? SEMICOLON
+    : CONCERN usageName? featureRelationships? (SEMICOLON | concernBody)?
     ;
 
 concernBody
@@ -726,9 +763,7 @@ concernBody
     ;
 
 concernBodyElement
-    : namespaceBodyElement
-    | subjectDeclaration
-    | stakeholderUsage
+    : requirementBodyElement
     ;
 
 occurrenceUsage
@@ -738,6 +773,9 @@ occurrenceUsage
     | SNAPSHOT usageName? featureRelationships? valueInit? SEMICOLON
     | TIMESLICE usageName? featureRelationships? valueInit? usageBody?
     | TIMESLICE usageName? featureRelationships? valueInit? SEMICOLON
+      // EventOccurrenceUsage referencing a feature chain (SysML v2 8.2.2.9.2): 'event producer.publish[1] :>> source;'.
+      // Before the bare 'event' alternatives, which SLL prediction otherwise chose, leaving the chain as a statement.
+    | EVENT name (DOT name)+ featureRelationships? usageBody
     | EVENT OCCURRENCE? usageName? featureRelationships? usageBody?
     | EVENT OCCURRENCE? usageName? featureRelationships? SEMICOLON
     | EVENT expression SEMICOLON?
@@ -783,24 +821,26 @@ elseBranch
     : ELSE expression SEMICOLON?
     ;
 
+// Control nodes end with an ActionBody (SysML v2 8.2.2.17.3): 'merge continue { doc /* ... */ }'
 mergeNode
-    : MERGE usageName? SEMICOLON?
+    : MERGE usageName? (SEMICOLON | usageBody)?
     ;
 
 forkNode
-    : FORK usageName? SEMICOLON?
+    : FORK usageName? (SEMICOLON | usageBody)?
     ;
 
 joinNode
-    : JOIN usageName? SEMICOLON?
+    : JOIN usageName? (SEMICOLON | usageBody)?
     ;
 
 // ============================================================================
 // BINDING AND MESSAGING
 // ============================================================================
 
+// BindingConnectorAsUsage ends with a UsageBody (SysML v2 8.2.2.13.2): 'bind a.x = b.y { doc /* ... */ }'
 bindingUsage
-    : BIND expression (EQUALS expression)? SEMICOLON?
+    : BIND expression (EQUALS expression)? (SEMICOLON | usageBody)?
     ;
 
 acceptUsage
@@ -832,9 +872,10 @@ dependencyDeclaration
     : DEPENDENCY usageName? (FROM expression (COMMA expression)*)? TO expression (COMMA expression)* usageBody
     ;
 
+// SysML v2 8.2.2.27: 'metadata' MetadataUsageDeclaration ( 'about' Annotation ( ',' Annotation )* )? MetadataBody,
+// e.g. 'metadata SafetyFeature about vehicle::seatBelt, vehicle::bumper;'
 metadataUsage
-    : METADATA usageName? featureRelationships? metadataBody?
-    | METADATA usageName? featureRelationships? SEMICOLON
+    : METADATA usageName? featureRelationships? (ABOUT qualifiedName (COMMA qualifiedName)*)? (SEMICOLON | metadataBody)?
     ;
 
 metadataBody
@@ -936,8 +977,9 @@ shortName
     : LT name GT
     ;
 
+// KerML 8.2.3.3: QualifiedName = ( '$' '::' )? ( NAME '::' )* NAME, where '$::' starts at the global namespace
 qualifiedName
-    : name (DOUBLE_COLON name)*
+    : (DOLLAR DOUBLE_COLON)? name (DOUBLE_COLON name)*
     ;
 
 featureChain
@@ -971,6 +1013,8 @@ featureRelationships
 
 featureRelationship
     : typeRelationship
+    | crossesClause
+    | FEATURED_BY qualifiedName (COMMA qualifiedName)* // KerML TypeFeaturingPart: 'feature f : A featured by C;'
     | INVERSE OF (featureChain | qualifiedName)
     | multiplicityClause
     | valueInit
@@ -996,28 +1040,34 @@ referencesClause
     : (REFERENCE_SUBSETTING | REFERENCES) (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
+// Crosses (SysML v2 8.2.2.6.5, KerML 8.2.4.3.1): CROSSES = '=>' | 'crosses', e.g. 'end cart : Cart crosses product.inCart;'
+crossesClause
+    : (CROSSES_OP | CROSSES) (featureChain | qualifiedName)
+    ;
+
 conjugatesClause
     : (TILDE | CONJUGATES) qualifiedName // Reference: SysMLv2.md, Section 7.12.3 / Line 2158
     ;
 
+// SysML DEFINED_BY = ':' | 'defined' 'by'; KerML TYPED_BY = ':' | 'typed' 'by' (both lexed as compound keywords)
 typingClause
-    : COLON TILDE? qualifiedName (COMMA TILDE? qualifiedName)*
+    : (COLON | DEFINED_BY | TYPED_BY) TILDE? qualifiedName (COMMA TILDE? qualifiedName)*
     ;
 
 unionsClause
-    : UNIONS qualifiedName (COMMA qualifiedName)*
+    : UNIONS (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 intersectsClause
-    : INTERSECTS qualifiedName (COMMA qualifiedName)*
+    : INTERSECTS (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 differencesClause
-    : DIFFERENCES qualifiedName (COMMA qualifiedName)*
+    : DIFFERENCES (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 disjointClause
-    : DISJOINT FROM? qualifiedName (COMMA qualifiedName)*
+    : DISJOINT FROM? (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 multiplicityClause
@@ -1048,6 +1098,12 @@ connectionEnd
     : multiplicityClause? (name (REFERENCE_SUBSETTING | REFERENCES))? expression
     ;
 
+// ConnectorPart (SysML v2 8.2.2.13.2): BinaryConnectorPart 'a to b' or NaryConnectorPart '(a, b, c)' (two or more ends)
+connectorPart
+    : connectionEnd TO connectionEnd
+    | LPAREN connectionEnd COMMA connectionEnd (COMMA connectionEnd)* RPAREN
+    ;
+
 expressionList
     : expression (COMMA expression)*
     ;
@@ -1058,7 +1114,7 @@ flowEndpoints
     ;
 
 successionEndpoints
-    : FIRST connectionEnd THEN connectionEnd
+    : FIRST connectionEnd guardClause? THEN connectionEnd // with a guard: GuardedSuccession 'first A1 if x == 0 then A2'
     | FROM connectionEnd TO connectionEnd
     | connectionEnd THEN connectionEnd
     ;
@@ -1098,9 +1154,10 @@ returnFeature
     : RETURN (REF | FEATURE | PART | ATTRIBUTE | PORT | ITEM | ACTION | STATE | REQUIREMENT | CALC | CONSTRAINT | EVENT | OCCURRENCE)? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
     ;
 
+// Parameters may have a visibility like any other member: 'protected in c : C;'
 inParameter
-    : IN usageName? featureRelationships? parameterValueInit? usageBody
-    | IN usageName? featureRelationships? parameterValueInit? SEMICOLON
+    : visibility? IN usageName? featureRelationships? parameterValueInit? usageBody
+    | visibility? IN usageName? featureRelationships? parameterValueInit? SEMICOLON
     ;
 
 parameterValueInit
@@ -1110,13 +1167,13 @@ parameterValueInit
     ;
 
 outParameter
-    : OUT usageName? featureRelationships? valueInit? usageBody
-    | OUT usageName? featureRelationships? valueInit? SEMICOLON
+    : visibility? OUT usageName? featureRelationships? valueInit? usageBody
+    | visibility? OUT usageName? featureRelationships? valueInit? SEMICOLON
     ;
 
 inoutParameter
-    : INOUT usageName? featureRelationships? valueInit? usageBody
-    | INOUT usageName? featureRelationships? valueInit? SEMICOLON
+    : visibility? INOUT usageName? featureRelationships? valueInit? usageBody
+    | visibility? INOUT usageName? featureRelationships? valueInit? SEMICOLON
     ;
 
 usageBody
@@ -1178,8 +1235,13 @@ stateBodyElement // Reference: SysMLv2.md, Section 7.18.2 / Line 4035
     | inoutParameter
     ;
 
+// TargetTransitionUsage (SysML v2 8.2.2.18.3) after a state: 'accept' trigger, optional 'if' guard and 'do' effect,
+// 'then' target and ActionBody, e.g. 'accept when temp > max do send new OverTemp() to controller then degraded;'
 acceptTransition
-    : ACCEPT usageName? (COLON qualifiedName)? (VIA expression)? doActionClause? THEN expression SEMICOLON?
+    : ACCEPT usageName? (COLON qualifiedName)? acceptTiming? (VIA expression)? guardClause? doActionClause?
+      THEN expression usageBody?
+      // payload typed by a qualified name or feature chain, as in acceptClause: 'accept Signals::Start then on;'
+    | ACCEPT featureChain (VIA expression)? guardClause? doActionClause? THEN expression usageBody?
     ;
 
 doActionClause
@@ -1247,8 +1309,9 @@ enumMemberBodyElement
     | namespaceBodyElement
     ;
 
+// ... 'then' TransitionSuccessionMember ActionBody (SysML v2 8.2.2.18.3): the target may be followed by a body
 transitionBody
-    : acceptClause? guardClause? effectClause? THEN expression SEMICOLON?
+    : acceptClause? guardClause? effectClause? THEN expression usageBody?
     ;
 
 // ============================================================================
@@ -1287,7 +1350,7 @@ assignStatement
 
 acceptClause
     : ACCEPT usageName? (COLON qualifiedName)? (VIA expression)? acceptTiming?
-    | ACCEPT qualifiedName (VIA expression)? acceptTiming?
+    | ACCEPT featureChain (VIA expression)? acceptTiming? // payload typed by a feature chain: 'accept Remote.start'
     ;
 
 guardClause
@@ -1304,10 +1367,10 @@ effectClause
 // REQUIREMENT ELEMENTS
 // ============================================================================
 
+// One alternative, with the body before the bare end: as separate alternatives, 'subject v : V { ... }' was read as
+// 'subject v : V' followed by a '{ ... }' expression statement (SLL prediction resolves a conflict to the lowest one)
 subjectDeclaration
-    : SUBJECT SEMICOLON
-    | SUBJECT usageName? featureRelationships? valueInit? SEMICOLON?
-    | SUBJECT usageName? featureRelationships? valueInit? usageBody
+    : SUBJECT usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)?
     ;
 
 framedConcern
@@ -1315,12 +1378,19 @@ framedConcern
     | FRAME expression SEMICOLON
     ;
 
+// RequirementConstraintUsage (SysML v2 8.2.2.21.1) after 'assume' / 'require': a reference to an existing constraint
+// with optional multiplicity and body ('assume c1 [0..*];'), or a declaration introduced by 'constraint' and/or
+// user-defined keywords ('assume #goal constraint payloadMassLimit;', 'require #goal vehicleMassRequirement;').
+// The body comes before the expression: '{ ... }' is also a body expression, and as an expression it continued into a
+// following annotation ('assume constraint { m <= 500 } @StatusInfo { ... }' was read as '{ ... } @ StatusInfo').
 assumeConstraint
-    : ASSUME CONSTRAINT usageName? featureRelationships? (expression | usageBody)? SEMICOLON?
+    : ASSUME (hashAnnotation* CONSTRAINT | hashAnnotation+) usageName? featureRelationships? (usageBody | expression)? SEMICOLON?
+    | ASSUME featureChain featureRelationships? requirementBody
     ;
 
 requireConstraint
-    : REQUIRE CONSTRAINT? usageName? featureRelationships? expression? (requirementBody | SEMICOLON?)
+    : REQUIRE (hashAnnotation* CONSTRAINT | hashAnnotation+) usageName? featureRelationships? (requirementBody | expression)? SEMICOLON?
+    | REQUIRE featureChain featureRelationships? requirementBody // reference, as for 'assume': 'require c2 [0..*];'
     | REQUIRE expression (requirementBody | SEMICOLON?)
     ;
 
@@ -1329,9 +1399,11 @@ objectiveRequirement
     | OBJECTIVE usageName? featureRelationships? (requirementBody | SEMICOLON?)
     ;
 
+// The reference form comes first: the declaration form can end right after 'verify', so for 'verify spec.req { ... }'
+// SLL prediction chose it and read 'spec.req' and the body as two expression statements
 verifyRequirement
-    : VERIFY REQUIREMENT? usageName? featureRelationships? (requirementBody | SEMICOLON?)
-    | VERIFY expression (requirementBody | SEMICOLON?)
+    : VERIFY expression (requirementBody | SEMICOLON?)
+    | VERIFY REQUIREMENT? usageName? featureRelationships? (requirementBody | SEMICOLON?)
     ;
 
 // ============================================================================
@@ -1346,6 +1418,7 @@ renderStatement
     : RENDER (AS qualifiedName | ID)? (SEMICOLON | usageBody)
     | RENDER RENDERING usageName? featureRelationships? (SEMICOLON | usageBody)
     | RENDER expression (SEMICOLON | usageBody)
+    | RENDER featureChain featureRelationships usageBody // ViewRenderingUsage reference with multiplicity: 'render r [0..*];'
     ;
 
 filterStatement
@@ -1360,8 +1433,12 @@ filterClause
 // VALUES AND INITIALIZATION
 // ============================================================================
 
+// KerML ExtentExpression 'all' Type (8.2.5.8.1) is accepted as a value ('= all engineChoice') and in parentheses
+// ('(all T)'), not as a general operand: at the start of a statement 'all' would also continue the sufficiency keyword
+// of a declaration ('feature all x : T { ... }'), and SLL prediction then scanned the whole body to choose.
 valueInit // Reference: SysMLv2.md, Section 7.13.4 / Line 2214
     : EQUALS expression
+    | EQUALS ALL qualifiedName
     | COLON_EQUALS expression
     | DEFAULT (EQUALS | COLON_EQUALS)? expression
     ;
@@ -1538,7 +1615,8 @@ exponentiationExpression
     ;
 
 unaryExpression
-    : MINUS unaryExpression
+    : PLUS unaryExpression                                // KerML UnaryOperator '+'
+    | MINUS unaryExpression
     | BANG unaryExpression
     | NOT unaryExpression
     | TILDE unaryExpression
@@ -1552,9 +1630,11 @@ primaryExpression
 sequenceSuffix
     : DOT name                                            // Member access
     | DOT METADATA                                        // Metadata access: Type.metadata (KerML MetadataAccessExpression)
-    | ARROW name (LPAREN argumentList? RPAREN)? bodyExpression? // Arrow operation
-    | ARROW name qualifiedName                            // Arrow operation with a function reference
+    | ARROW name qualifiedName                            // Arrow operation with a function reference: ->reduce '+'
+    | ARROW name (LPAREN argumentList? RPAREN)? bodyExpression? // Arrow operation (the function reference form comes
+                                                          // first: SLL prediction ends conflicts at the lowest alternative)
     | DOT QUESTION (LPAREN argumentList? RPAREN)? bodyExpression? // Filter operation
+    | DOT bodyExpression                                  // Collect operation: x.{in e; e + 1}
     | HASH LPAREN expression RPAREN                       // Positional Index
     | LBRACK expression RBRACK                            // Index
     | LPAREN argumentList? RPAREN                         // Invocation
@@ -1573,6 +1653,7 @@ baseExpression
     | AS qualifiedName
     | collectionLiteral                                   // Collection literal
     | LPAREN expression RPAREN                            // Parenthesized
+    | LPAREN ALL qualifiedName RPAREN                     // Parenthesized extent expression: (all T)
     ;
 
 collectionLiteral
@@ -1637,8 +1718,10 @@ comment
     : COMMENT_KW usageName? (ABOUT qualifiedName (COMMA qualifiedName)*)? (LOCALE STRING)? documentationBody? SEMICOLON?
     ;
 
+// 'doc' Identification: only a short name ('doc <d1> /* ... */'); the comment body is skipped by the lexer, so a
+// plain name after 'doc' could not be told apart from the next element's name
 documentation
-    : DOC (LOCALE STRING)? documentationBody? SEMICOLON?
+    : DOC shortName? (LOCALE STRING)? documentationBody? SEMICOLON?
     | REP usageName? (LANGUAGE STRING)? documentationBody? SEMICOLON?
     | LOCALE STRING documentationBody? SEMICOLON?
     ;

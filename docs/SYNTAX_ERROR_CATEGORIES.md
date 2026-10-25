@@ -1,8 +1,9 @@
 # Positive-suite syntax errors, categorized
 
 > **Status (2026-10-25): resolved.** G1 and G2 are fixed in `SysMLv2Parser.g4`, and the T1-T11 test-file lines
-> are corrected. `test-suite/positive` now validates with 0 errors (51 files). The follow-ups in section 3
-> (validator leniency, plus `defined by` and filtered imports) remain open.
+> are corrected. `test-suite/positive` now validates with 0 errors (51 files). Of the follow-ups in section 3,
+> `defined by` and filtered imports are fixed (with the other gaps found by the official SysML v2 examples: all 252
+> files of `sysml/src` now parse, see `OfficialExamplesTest`); the validator-leniency items remain open.
 
 The 41 reported syntax errors in 15 files come from **28 root errors** and **13 cascades**.
 
@@ -183,9 +184,11 @@ If the goal is validator correctness rather than error count, do G1 and G2 first
 - `loop <expr> {` is accepted. Item 1 removes this.
 - `importDeclaration` has `visibility?` (g4:77), but the BNF requires a visibility on every import (`:149-150`).
 
-**Follow-up: valid SysML the validator rejects (not among the 41 errors):**
+**Follow-up: valid SysML the validator rejects (not among the 41 errors):** both fixed.
 - `: X defined by Y`: the `DEFINED_BY` token (Lexer.g4:52) is never used by the parser, and `typingClause` (g4:1002) only takes `:`.
+  Fixed: `typingClause` takes `:`, `defined by` and KerML's `typed by`.
 - Filtered import `import P::*[@Meta];`: `importDeclaration` (g4:76-78) has no `[expr]` part.
+  Fixed: `importDeclaration` takes filter members and a relationship body.
 
 ## 4. Uncertain items
 - **G2 was not tested in a scratch build; G1 was.** There is a safe precedent: `ifStatement` already uses `usageBodyElement*`. Run the full suite after the change. Only test 46 uses `loop <expr> {`, so dropping `expression?` affects nothing else in `test-suite/`.

@@ -14,11 +14,13 @@ part def Vehicle {
     attribute vin : String;
 }
 
-snapshot def VehicleSnapshot :> Vehicle {
+// SysML v2 has 'snapshot' and 'timeslice' usages (portions) but no 'snapshot def' or 'timeslice def';
+// the portions below are typed by part definitions.
+part def VehicleSnapshot :> Vehicle {
     attribute captureTime : Real;
 }
 
-timeslice def VehicleTimeslice :> Vehicle {
+part def VehicleTimeslice :> Vehicle {
     attribute startTime : Real;
     attribute endTime : Real;
 }

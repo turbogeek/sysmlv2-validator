@@ -1,20 +1,21 @@
 package ActorStakeholderTests;
 
-// Test actor and stakeholder definitions
+// Test actor and stakeholder usages. SysML v2 has no 'actor def' or 'stakeholder def': actors and
+// stakeholders are part usages, typed here by part definitions.
 
-actor def User {
+part def User {
     doc /* End user of the system */
 }
 
-actor def Administrator {
+part def Administrator {
     doc /* System administrator */
 }
 
-actor def ExternalSystem {
+part def ExternalSystem {
     doc /* External interfacing system */
 }
 
-stakeholder def Customer {
+part def Customer {
     doc /* Paying customer */
 
     concern 'Cost' {
@@ -26,7 +27,7 @@ stakeholder def Customer {
     }
 }
 
-stakeholder def Regulator {
+part def Regulator {
     doc /* Regulatory authority */
 
     concern 'Compliance' {
