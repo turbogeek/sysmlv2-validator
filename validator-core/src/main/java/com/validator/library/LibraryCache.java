@@ -49,9 +49,10 @@ public class LibraryCache {
 
     /**
      * Bump when the layout of {@link LibraryCacheData} or its meaning changes. 4: index records carry
-     * redefinitions, parameter and private flags, positions and typing/multiplicity/value text.
+     * redefinitions, parameter and private flags, positions and typing/multiplicity/value text. 5: parameter
+     * directions and repeated declarations of one name.
      */
-    public static final int FORMAT_VERSION = 4;
+    public static final int FORMAT_VERSION = 5;
 
     private static volatile String cacheKey;
 

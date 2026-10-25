@@ -246,6 +246,58 @@ class ModelIndexBuilderTest {
         assertEquals("P::B", index.recordsOf("P::B").get(0).qualifiedName);
     }
 
+    @Test
+    @DisplayName("Directed parameters are recorded in order on their owner, unnamed ones included")
+    void parameterPositions() {
+        Map<String, IndexedElement> e = build("""
+            package P {
+                action def A { in item; out picture; inout :>> y; attribute notAParameter; }
+            }
+            """);
+        assertEquals(List.of("", "picture", ""), e.get("P::A").parameterNames);
+        assertEquals("out", e.get("P::A::picture").direction);
+        assertEquals(1, e.get("P::A::picture").parameterIndex);
+        IndexedElement inout = ownedBy(e, "P::A").stream().filter(x -> "y".equals(x.effectiveName())).findFirst()
+            .orElseThrow();
+        assertEquals("inout", inout.direction);
+        assertEquals(2, inout.parameterIndex);
+        assertNull(e.get("P::A::notAParameter").direction);
+        assertEquals(-1, e.get("P::A::notAParameter").parameterIndex);
+    }
+
+    @Test
+    @DisplayName("A second declaration of a name in one namespace is recorded on the first")
+    void redeclarationsAreRecorded() {
+        Map<String, IndexedElement> e = build("""
+            package P {
+                part def T {
+                    attribute def load;
+                    attribute load;
+                }
+            }
+            """);
+        IndexedElement load = e.get("P::T::load");
+        assertEquals("AttributeDefinition", load.kind);
+        assertEquals(1, load.redeclarations.size());
+        assertEquals(4, load.redeclarations.get(0).line);
+        assertEquals("AttributeUsage", load.redeclarations.get(0).kind);
+    }
+
+    @Test
+    @DisplayName("'event e' is a reference; an end's cross feature is owned by the end")
+    void eventReferencesAndCrossFeatures() {
+        Map<String, IndexedElement> e = build("""
+            package P {
+                part def Producer { event sent; event occurrence made; }
+                connection def S { end inCart [0..1] item cart; }
+            }
+            """);
+        assertTrue(e.get("P::Producer::sent").reference, "'event sent' refers to an existing feature");
+        assertFalse(e.get("P::Producer::made").reference, "'event occurrence made' declares one");
+        assertTrue(e.containsKey("P::S::inCart::cart"), e.keySet().toString());
+        assertFalse(e.containsKey("P::S::cart"), "not a member of the connection definition");
+    }
+
     // ------------------------------------------------------------------------------------------
 
     private static Map<String, IndexedElement> build(String source) {

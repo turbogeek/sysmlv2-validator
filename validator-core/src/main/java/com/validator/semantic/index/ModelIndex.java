@@ -158,6 +158,14 @@ public final class ModelIndex {
         return lookupMember(namespace, name, false, 0);
     }
 
+    /**
+     * True when this layer, not only a parent layer, has the element: it belongs to the validated files
+     * rather than to a library.
+     */
+    public synchronized boolean isLocal(String qualifiedName) {
+        return byName.containsKey(qualifiedName);
+    }
+
     /** The records of an element (several when a namespace is declared more than once). */
     public synchronized List<IndexedElement> recordsOf(String qualifiedName) {
         return records(qualifiedName);

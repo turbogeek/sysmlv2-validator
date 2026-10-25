@@ -111,6 +111,7 @@ public final class ModelIndexBuilder {
         }
         // An unnamed redefinition ('attribute :>> mass = 5;') is a feature named after what it redefines
         boolean anonymous = declared == null && (hasBody(ctx) || isUnnamedRedefinition(ctx));
+        int parameterIndex = recordParameter(ctx, scope, declared);
         if (declared == null && !anonymous) {
             for (int i = 0; i < ctx.getChildCount(); i++) {
                 visit(ctx.getChild(i), scope, headerOwnerKind);
@@ -119,7 +120,11 @@ public final class ModelIndexBuilder {
         }
 
         IndexedElement continued = continuedDeclaration(ctx, scope, declared);
+        IndexedElement crossOf = continued == null ? crossFeatureOwner(ctx, scope, declared) : null;
         unterminated = null;
+        if (crossOf != null) {
+            scope = crossOf.qualifiedName;
+        }
         if (continued != null) {
             // The redefinition continues the previous declaration's header: collect it there
             collectHeaderAndBody(ctx, continued, scope);
@@ -139,6 +144,10 @@ public final class ModelIndexBuilder {
         element.line = at.getLine();
         element.column = at.getCharPositionInLine();
         element.parameter = isParameter(ctx);
+        element.direction = directionOf(ctx);
+        element.parameterIndex = parameterIndex;
+        element.reference = ctx instanceof SysMLv2Parser.OccurrenceUsageContext occurrence
+            && occurrence.EVENT() != null && occurrence.OCCURRENCE() == null;
         element.isPrivate = isPrivate(ctx);
         if (ctx instanceof SysMLv2Parser.AliasDeclarationContext alias && alias.qualifiedName() != null) {
             element.aliasTarget = segments(alias.qualifiedName());
@@ -147,6 +156,9 @@ public final class ModelIndexBuilder {
         if (existing == null) {
             elements.put(element.qualifiedName, element);
         } else {
+            // A second member with the same name in the same namespace: kept as one record, noted for the
+            // name-collision check
+            existing.redeclarations.add(new IndexedElement.Declaration(element.line, element.column, element.kind));
             element = existing;
         }
         collectHeaderAndBody(ctx, element, scope);
@@ -156,6 +168,42 @@ public final class ModelIndexBuilder {
             unterminated = element;
             unterminatedStop = stop;
         }
+    }
+
+    /**
+     * The end feature whose cross feature this declaration is. The grammar can end {@code end inCart1 [0..1]
+     * item cart : ShoppingCart[1];} after the end's name, so {@code item cart ...} parses as a separate member;
+     * in KerML it is owned by the end feature, not by the end's owner.
+     */
+    private IndexedElement crossFeatureOwner(ParserRuleContext ctx, String scope, String[] declared) {
+        Token start = ctx.getStart();
+        if (unterminated == null || declared == null || !"EndUsage".equals(unterminated.kind)
+                || !scope.equals(unterminated.parentName) || start == null || start.getInputStream() == null
+                || start.getStartIndex() <= unterminatedStop.getStopIndex()) {
+            return null;
+        }
+        String between = start.getInputStream()
+            .getText(Interval.of(unterminatedStop.getStopIndex() + 1, start.getStartIndex() - 1));
+        return between.isBlank() ? unterminated : null;
+    }
+
+    /**
+     * Note a directed parameter, named or not, on its owner: parameters redefine by position.
+     *
+     * @return the parameter's position, or -1 if the declaration is not a directed parameter
+     */
+    private int recordParameter(ParserRuleContext ctx, String scope, String[] declared) {
+        String name = ctx.getClass().getSimpleName();
+        if (!name.endsWith("UsageContext") && !name.endsWith("ParameterContext") || directionOf(ctx) == null) {
+            return -1;
+        }
+        IndexedElement owner = elements.get(scope);
+        if (owner == null) {
+            return -1;
+        }
+        owner.parameterNames.add(declared == null ? "" : declared[0] != null ? declared[0]
+            : declared[1] != null ? declared[1] : "");
+        return owner.parameterNames.size() - 1;
     }
 
     /**
@@ -355,6 +403,32 @@ public final class ModelIndexBuilder {
             }
         }
         return false;
+    }
+
+    /** The direction of a directed parameter ("in", "out" or "inout"), or null. */
+    private static String directionOf(ParserRuleContext ctx) {
+        if (ctx instanceof SysMLv2Parser.InParameterContext) {
+            return "in";
+        }
+        if (ctx instanceof SysMLv2Parser.OutParameterContext) {
+            return "out";
+        }
+        if (ctx instanceof SysMLv2Parser.InoutParameterContext) {
+            return "inout";
+        }
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            if (ctx.getChild(i) instanceof SysMLv2Parser.DirectionPrefixContext d) {
+                return d.getText();
+            }
+        }
+        if (ctx.getParent() instanceof SysMLv2Parser.MemberContext member && member.prefixes() != null) {
+            for (SysMLv2Parser.FeaturePrefixContext prefix : member.prefixes().featurePrefix()) {
+                if (prefix.directionPrefix() != null) {
+                    return prefix.directionPrefix().getText();
+                }
+            }
+        }
+        return null;
     }
 
     /** The token that names a declaration (its name or short name), else the declaration's first token. */

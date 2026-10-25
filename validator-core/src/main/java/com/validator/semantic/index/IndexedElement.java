@@ -9,9 +9,10 @@ import java.util.Set;
  * called (declared name and short name), which namespaces it imports and which types it specializes,
  * types, subsets or redefines (its supertypes, whose members it inherits).
  *
- * <p>For the inheritance check ({@link InheritanceChecker}) it also records which supertypes are
- * redefinitions, whether the element is a parameter or private, where it is declared, and short source
- * text of its typing, multiplicity and value.</p>
+ * <p>For the inheritance and name-collision checks ({@link InheritanceChecker}, {@link NameCollisionChecker})
+ * it also records which supertypes are redefinitions, whether the element is a parameter (and its
+ * direction) or private, where it is declared (and declared again), and short source text of its typing,
+ * multiplicity and value.</p>
  *
  * <p>Plain fields so the record is cached as-is with each library file. Methods are not named like
  * bean getters so they are not serialized.</p>
@@ -57,6 +58,25 @@ public class IndexedElement {
      * the index does not model.
      */
     public boolean parameter;
+    /** For a directed parameter: "in", "out" or "inout"; null otherwise. */
+    public String direction;
+    /**
+     * The directed parameters of this element in declaration order, by name ("" for an unnamed one).
+     * Parameters redefine the general's parameters by position.
+     */
+    public List<String> parameterNames = new ArrayList<>();
+    /** For a directed parameter: its position among its owner's directed parameters (0-based); else -1. */
+    public int parameterIndex = -1;
+    /**
+     * True for a usage that refers to an existing feature rather than declaring one, e.g. {@code event e;}
+     * (an owned reference subsetting).
+     */
+    public boolean reference;
+    /**
+     * Later declarations of the same qualified name in the same file (two members with one name in one
+     * namespace). The index keeps one record per name; these say where the others are.
+     */
+    public List<Declaration> redeclarations = new ArrayList<>();
     /** True for a member declared 'private': specializations do not inherit it. */
     public boolean isPrivate;
     /** The typing as written, e.g. "Real" or "A, B", or null. */
@@ -112,6 +132,24 @@ public class IndexedElement {
             this.target = target;
             this.mode = mode;
             this.isPublic = isPublic;
+        }
+    }
+
+    /** Where a declaration is and what rule declared it. */
+    public static class Declaration {
+        /** Line (1-based). */
+        public int line;
+        /** Column (0-based). */
+        public int column;
+        /** Parse-rule kind, as {@link IndexedElement#kind}. */
+        public String kind;
+
+        public Declaration() {}
+
+        public Declaration(int line, int column, String kind) {
+            this.line = line;
+            this.column = column;
+            this.kind = kind;
         }
     }
 }
