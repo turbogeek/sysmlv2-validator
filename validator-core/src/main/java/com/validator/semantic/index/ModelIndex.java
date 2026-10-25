@@ -71,6 +71,7 @@ public final class ModelIndex {
     private final Map<String, List<IndexedElement>> byName = new HashMap<>();
     private final Map<String, Map<String, Set<String>>> members = new HashMap<>();
     private final Map<String, List<String>> bySimpleName = new HashMap<>();
+    private final Map<String, List<IndexedElement>> children = new HashMap<>();
 
     private final Map<String, Resolution> memberMemo = new HashMap<>();
     private final Map<IndexedElement.ImportRecord, Resolution> importMemo = new IdentityHashMap<>();
@@ -106,6 +107,7 @@ public final class ModelIndex {
             if (e.parentName == null) {
                 continue;
             }
+            children.computeIfAbsent(e.parentName, k -> new ArrayList<>()).add(e);
             Map<String, Set<String>> owned = members.computeIfAbsent(e.parentName, k -> new HashMap<>());
             if (e.name != null) {
                 owned.computeIfAbsent(e.name, k -> new LinkedHashSet<>()).add(e.qualifiedName);
@@ -146,6 +148,34 @@ public final class ModelIndex {
             }
         }
         return resolveQualified(segments, scope, 0);
+    }
+
+    /**
+     * Resolve a name as a member of a namespace: owned, publicly imported or inherited, but not found in
+     * enclosing namespaces. Used to find the feature that a redefinition names through the generals.
+     */
+    public synchronized Resolution resolveMember(String namespace, String name) {
+        return lookupMember(namespace, name, false, 0);
+    }
+
+    /** The records of an element (several when a namespace is declared more than once). */
+    public synchronized List<IndexedElement> recordsOf(String qualifiedName) {
+        return records(qualifiedName);
+    }
+
+    /** The elements a namespace owns, named or anonymous, in this layer and its parents. */
+    public synchronized List<IndexedElement> ownedElements(String namespace) {
+        List<IndexedElement> result = null;
+        for (ModelIndex layer = this; layer != null; layer = layer.parent) {
+            List<IndexedElement> c = layer.children.get(namespace);
+            if (c != null) {
+                if (result == null) {
+                    result = new ArrayList<>();
+                }
+                result.addAll(c);
+            }
+        }
+        return result == null ? List.of() : result;
     }
 
     // ------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.validator.parser.SysMLv2Lexer;
 import com.validator.parser.SysMLv2Parser;
 import com.validator.semantic.SymbolTableBuilder;
+import com.validator.semantic.index.IndexedElement;
 import com.validator.semantic.index.ModelIndexBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +29,9 @@ import java.util.HexFormat;
  * <p>Validity rules:</p>
  * <ol>
  *   <li>The entry's cache key must equal {@link #getCacheKey()}. The key covers the cache format, the
- *       generated lexer and parser (so any grammar change) and the symbol-extraction classes, so a
- *       validator upgrade never reuses symbols produced by older code.</li>
+ *       generated lexer and parser (so any grammar change), the symbol-extraction classes and the layout
+ *       of the cached index records, so a validator upgrade never reuses symbols produced by older code
+ *       (an entry without fields that newer code relies on is parsed again).</li>
  *   <li>Same size and modification time as recorded: reused without reading the source.</li>
  *   <li>Same size but a different modification time (copy, unzip, checkout): the source is hashed; if the
  *       SHA-256 matches, the entry is reused and its recorded time refreshed.</li>
@@ -45,8 +47,11 @@ public class LibraryCache {
     private static final String CACHE_DIR_NAME = ".sysml-validator/cache";
     private static final String CACHE_DIR_PROPERTY = "sysml.validator.cache.dir";
 
-    /** Bump when the layout of {@link LibraryCacheData} or its meaning changes. */
-    public static final int FORMAT_VERSION = 3;
+    /**
+     * Bump when the layout of {@link LibraryCacheData} or its meaning changes. 4: index records carry
+     * redefinitions, parameter and private flags, positions and typing/multiplicity/value text.
+     */
+    public static final int FORMAT_VERSION = 4;
 
     private static volatile String cacheKey;
 
@@ -102,6 +107,7 @@ public class LibraryCache {
             updateWithClassBytes(md, SymbolTableBuilder.class);
             updateWithClassBytes(md, LibraryLoader.class);
             updateWithClassBytes(md, ModelIndexBuilder.class);
+            updateWithClassBytes(md, IndexedElement.class);
             key = HexFormat.of().formatHex(md.digest()).substring(0, 16);
             cacheKey = key;
         }

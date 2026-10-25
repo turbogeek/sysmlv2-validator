@@ -3,7 +3,9 @@ package com.validator.semantic.index;
 import com.validator.parser.SysMLv2Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,9 +16,10 @@ import java.util.Map;
  * Builds the name-resolution index of one file from its parse tree.
  *
  * <p>An element is any rule that declares a name (a declaration or usage name, a package, an alias,
- * an enumeration literal) or that has a body without a name (an anonymous element). Names written
- * in an element's header (its typing, specializations, redefinitions) are resolved from the owning
- * namespace; names in its body are resolved from the element itself.</p>
+ * an enumeration literal) or that has a body without a name (an anonymous element). A feature without
+ * a name that redefines another ({@code attribute :>> mass = 5;}) is an anonymous element too. Names
+ * written in an element's header (its typing, specializations, redefinitions) are resolved from the
+ * owning namespace; names in its body are resolved from the element itself.</p>
  *
  * <p>With {@code collectSites} the builder also records the names that the validator must resolve:
  * import targets, typings, specializations of definitions and metadata annotations.</p>
@@ -38,13 +41,19 @@ public final class ModelIndexBuilder {
     }
 
     private final String fileKey;
+    /** In a .kerml file KerML keywords are reserved, so they are never names. */
+    private final boolean kerml;
     private final boolean collectSites;
     private final Map<String, IndexedElement> elements = new LinkedHashMap<>();
     private final List<ReferenceSite> sites = new ArrayList<>();
     private int anonymousCount;
+    /** The last declaration, when it ended without ';' or '}' (its header may continue in the next rule). */
+    private IndexedElement unterminated;
+    private Token unterminatedStop;
 
     private ModelIndexBuilder(String fileKey, boolean collectSites) {
         this.fileKey = fileKey;
+        this.kerml = fileKey != null && fileKey.endsWith(".kerml");
         this.collectSites = collectSites;
     }
 
@@ -97,11 +106,23 @@ public final class ModelIndexBuilder {
         }
 
         String[] declared = declaredNames(ctx);
-        boolean anonymous = declared == null && hasBody(ctx);
+        if (declared != null && misreadAsName(ctx)) {
+            declared = declared[1] == null ? null : new String[] {null, declared[1]};
+        }
+        // An unnamed redefinition ('attribute :>> mass = 5;') is a feature named after what it redefines
+        boolean anonymous = declared == null && (hasBody(ctx) || isUnnamedRedefinition(ctx));
         if (declared == null && !anonymous) {
             for (int i = 0; i < ctx.getChildCount(); i++) {
                 visit(ctx.getChild(i), scope, headerOwnerKind);
             }
+            return;
+        }
+
+        IndexedElement continued = continuedDeclaration(ctx, scope, declared);
+        unterminated = null;
+        if (continued != null) {
+            // The redefinition continues the previous declaration's header: collect it there
+            collectHeaderAndBody(ctx, continued, scope);
             return;
         }
 
@@ -114,6 +135,11 @@ public final class ModelIndexBuilder {
         element.parentName = scope;
         element.qualifiedName = scope.isEmpty() ? segment : scope + "::" + segment;
         element.kind = kindOf(ctx);
+        Token at = nameToken(ctx);
+        element.line = at.getLine();
+        element.column = at.getCharPositionInLine();
+        element.parameter = isParameter(ctx);
+        element.isPrivate = isPrivate(ctx);
         if (ctx instanceof SysMLv2Parser.AliasDeclarationContext alias && alias.qualifiedName() != null) {
             element.aliasTarget = segments(alias.qualifiedName());
         }
@@ -123,12 +149,47 @@ public final class ModelIndexBuilder {
         } else {
             element = existing;
         }
+        collectHeaderAndBody(ctx, element, scope);
+        Token stop = ctx.getStop();
+        if (stop != null && stop.getType() != SysMLv2Parser.SEMICOLON && stop.getType() != SysMLv2Parser.RBRACE
+                && element.declaresFeature()) {
+            unterminated = element;
+            unterminatedStop = stop;
+        }
+    }
 
+    /**
+     * The declaration that an unnamed redefinition continues. The grammar can end a declaration that has no
+     * ';' or body early ({@code ref constraint self : ConstraintCheck :>> BooleanEvaluation::self;} parses as
+     * {@code self : ConstraintCheck} followed by {@code :>> BooleanEvaluation::self;}); the two are one
+     * declaration when only whitespace separates them.
+     */
+    private IndexedElement continuedDeclaration(ParserRuleContext ctx, String scope, String[] declared) {
+        Token start = ctx.getStart();
+        if (unterminated == null || declared != null || !scope.equals(unterminated.parentName) || start == null
+                || start.getType() != SysMLv2Parser.REDEFINES_OP && start.getType() != SysMLv2Parser.REDEFINES) {
+            return null;
+        }
+        if (start.getInputStream() == null || start.getStartIndex() <= unterminatedStop.getStopIndex()) {
+            return null;
+        }
+        String between = start.getInputStream()
+            .getText(Interval.of(unterminatedStop.getStopIndex() + 1, start.getStartIndex() - 1));
+        return between.isBlank() ? unterminated : null;
+    }
+
+    private void collectHeaderAndBody(ParserRuleContext ctx, IndexedElement element, String scope) {
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree child = ctx.getChild(i);
             if (isBody(child)) {
                 visit(child, element.qualifiedName, null);
             } else {
+                if (child instanceof SysMLv2Parser.QualifiedNameContext q && i > 0
+                        && isRedefinesToken(ctx.getChild(i - 1))) {
+                    // 'attribute redefines mass = 5;' and 'feature redefines f;' name the feature directly
+                    element.supertypes.add(segments(q));
+                    element.redefines.add(segments(q));
+                }
                 collectSupertypes(child, element);
                 visit(child, scope, element.kind);
             }
@@ -181,6 +242,137 @@ public final class ModelIndexBuilder {
         return false;
     }
 
+    /**
+     * A declared name that the grammar's choice of alternative gives to a keyword or to the first name of
+     * a statement:
+     * <ul>
+     *   <li>in KerML, {@code feature redefines self : T;}, {@code inv { ... }} and {@code step :> s;} are
+     *       unnamed features introduced by a keyword, but parse as a feature named after the keyword;</li>
+     *   <li>{@code succession a then b;} parses as a succession named {@code a} with nothing else,
+     *       followed by a separate {@code then b;}.</li>
+     * </ul>
+     */
+    private boolean misreadAsName(ParserRuleContext ctx) {
+        if (kerml && ctx instanceof SysMLv2Parser.ImplicitFeatureDeclarationContext f
+                && f.declarationName() != null && f.declarationName().name() != null) {
+            SysMLv2Parser.NameContext n = f.declarationName().name();
+            return n.kermlOnlyKeyword() != null && n.getStart() == f.getStart();
+        }
+        if (ctx instanceof SysMLv2Parser.SuccessionUsageContext succession && succession.usageName() != null) {
+            return succession.featureRelationships() == null && succession.successionEndpoints() == null
+                && succession.successionFlowOf() == null && succession.usageBody() == null
+                && succession.SEMICOLON() == null;
+        }
+        return false;
+    }
+
+    /** A member declared 'private', which specializations do not inherit. */
+    private static boolean isPrivate(ParserRuleContext ctx) {
+        ParserRuleContext owner = ctx.getParent() instanceof SysMLv2Parser.MemberContext m ? m : ctx;
+        if (owner.getParent() instanceof SysMLv2Parser.NamespaceBodyElementContext nbe && nbe.visibility() != null) {
+            return nbe.visibility().PRIVATE() != null;
+        }
+        if (ctx instanceof SysMLv2Parser.EnumMemberContext e && e.visibility() != null) {
+            return e.visibility().PRIVATE() != null;
+        }
+        return false;
+    }
+
+    /** A feature declared without a name whose header redefines a feature, e.g. {@code :>> mass = 5;}. */
+    private static boolean isUnnamedRedefinition(ParserRuleContext ctx) {
+        boolean feature = ctx.getParent() instanceof SysMLv2Parser.MemberContext
+            || ctx instanceof SysMLv2Parser.ImplicitFeatureDeclarationContext
+            || ctx instanceof SysMLv2Parser.AnonymousRedefinesContext
+            || ctx instanceof SysMLv2Parser.SimpleFeatureContext
+            || ctx instanceof SysMLv2Parser.InParameterContext
+            || ctx instanceof SysMLv2Parser.OutParameterContext
+            || ctx instanceof SysMLv2Parser.InoutParameterContext
+            || ctx instanceof SysMLv2Parser.ReturnFeatureContext;
+        if (!feature) {
+            return false;
+        }
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree child = ctx.getChild(i);
+            if (isRedefinesToken(child) || child instanceof SysMLv2Parser.RedefinedListContext) {
+                return true;
+            }
+            if (child instanceof SysMLv2Parser.FeatureRelationshipsContext rels) {
+                for (SysMLv2Parser.FeatureRelationshipContext rel : rels.featureRelationship()) {
+                    if (rel.typeRelationship() != null && rel.typeRelationship().redefinesClause() != null) {
+                        return true;
+                    }
+                }
+            }
+            if (child instanceof SysMLv2Parser.TypeRelationshipsContext rels) {
+                for (SysMLv2Parser.TypeRelationshipContext rel : rels.typeRelationship()) {
+                    if (rel.redefinesClause() != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean isRedefinesToken(ParseTree node) {
+        if (node instanceof TerminalNode t) {
+            int type = t.getSymbol().getType();
+            return type == SysMLv2Parser.REDEFINES || type == SysMLv2Parser.REDEFINES_OP;
+        }
+        return false;
+    }
+
+    /**
+     * Parameters and connector ends: features that redefine the general type's parameters (or ends) by
+     * position rather than by name.
+     */
+    private static boolean isParameter(ParserRuleContext ctx) {
+        if (ctx instanceof SysMLv2Parser.InParameterContext
+                || ctx instanceof SysMLv2Parser.OutParameterContext
+                || ctx instanceof SysMLv2Parser.InoutParameterContext
+                || ctx instanceof SysMLv2Parser.ReturnFeatureContext
+                || ctx instanceof SysMLv2Parser.SubjectDeclarationContext
+                || ctx instanceof SysMLv2Parser.ObjectiveRequirementContext
+                || ctx instanceof SysMLv2Parser.ActorUsageContext
+                || ctx instanceof SysMLv2Parser.StakeholderUsageContext
+                || ctx instanceof SysMLv2Parser.EndUsageContext) {
+            return true;
+        }
+        if (ctx instanceof SysMLv2Parser.SimpleParameterContext p) {
+            return p.SUBJECT() != null || p.OBJECTIVE() != null;
+        }
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            if (ctx.getChild(i) instanceof SysMLv2Parser.DirectionPrefixContext) {
+                return true;
+            }
+        }
+        if (ctx.getParent() instanceof SysMLv2Parser.MemberContext member && member.prefixes() != null) {
+            for (SysMLv2Parser.FeaturePrefixContext prefix : member.prefixes().featurePrefix()) {
+                if (prefix.directionPrefix() != null
+                        || prefix.usagePrefix() != null && prefix.usagePrefix().END() != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /** The token that names a declaration (its name or short name), else the declaration's first token. */
+    private static Token nameToken(ParserRuleContext ctx) {
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree child = ctx.getChild(i);
+            if (child instanceof SysMLv2Parser.DeclarationNameContext
+                    || child instanceof SysMLv2Parser.UsageNameContext
+                    || child instanceof SysMLv2Parser.AliasNameContext
+                    || child instanceof SysMLv2Parser.NameContext
+                    || child instanceof SysMLv2Parser.QualifiedNameContext
+                        && !(i > 0 && isRedefinesToken(ctx.getChild(i - 1)))) {
+                return ((ParserRuleContext) child).getStart();
+            }
+        }
+        return ctx.getStart();
+    }
+
     private static boolean isBody(ParseTree child) {
         if (!(child instanceof ParserRuleContext c)) {
             return false;
@@ -197,7 +389,10 @@ public final class ModelIndexBuilder {
         return n.endsWith("Context") ? n.substring(0, n.length() - "Context".length()) : n;
     }
 
-    /** Typings, specializations, subsettings, redefinitions and references in an element's header. */
+    /**
+     * Typings, specializations, subsettings, redefinitions and references in an element's header, and the
+     * text of its typing, multiplicity and value.
+     */
     private void collectSupertypes(ParseTree node, IndexedElement element) {
         if (!(node instanceof ParserRuleContext ctx) || isBody(ctx) || declaredNames(ctx) != null) {
             return;
@@ -205,27 +400,62 @@ public final class ModelIndexBuilder {
         if (ctx instanceof SysMLv2Parser.ExpressionContext) {
             return;
         }
-        boolean clause = ctx instanceof SysMLv2Parser.TypingClauseContext
+        if (ctx instanceof SysMLv2Parser.ValueInitContext || ctx instanceof SysMLv2Parser.TupleOrValueInitContext
+                || ctx instanceof SysMLv2Parser.ParameterValueInitContext) {
+            if (element.valueText == null) {
+                element.valueText = valueText(ctx);
+            }
+            return;
+        }
+        if (ctx instanceof SysMLv2Parser.MultiplicityClauseContext
+                && !(ctx.getParent() instanceof SysMLv2Parser.ConnectionEndContext)) {
+            if (element.multiplicityText == null) {
+                element.multiplicityText = ctx.getText();
+            }
+            return;
+        }
+        if (ctx instanceof SysMLv2Parser.TypingClauseContext typing) {
+            StringBuilder text = new StringBuilder(element.typeText == null ? "" : element.typeText + ", ");
+            for (int i = 0; i < typing.getChildCount(); i++) {
+                ParseTree child = typing.getChild(i);
+                if (child instanceof TerminalNode t && t.getSymbol().getType() == SysMLv2Parser.TILDE) {
+                    text.append('~');
+                } else if (child instanceof SysMLv2Parser.QualifiedNameContext q) {
+                    text.append(q.getText());
+                } else if (child instanceof TerminalNode t && t.getSymbol().getType() == SysMLv2Parser.COMMA) {
+                    text.append(", ");
+                }
+            }
+            element.typeText = text.toString();
+        }
+        boolean redefinition = ctx instanceof SysMLv2Parser.RedefinesClauseContext
+            || ctx instanceof SysMLv2Parser.RedefinedListContext;
+        boolean clause = redefinition
+            || ctx instanceof SysMLv2Parser.TypingClauseContext
             || ctx instanceof SysMLv2Parser.SpecializesClauseContext
-            || ctx instanceof SysMLv2Parser.RedefinesClauseContext
             || ctx instanceof SysMLv2Parser.SubsetsClauseContext
             || ctx instanceof SysMLv2Parser.ReferencesClauseContext
-            || ctx instanceof SysMLv2Parser.ConjugatesClauseContext
-            || ctx instanceof SysMLv2Parser.RedefinedListContext;
+            || ctx instanceof SysMLv2Parser.ConjugatesClauseContext;
         if (clause) {
             for (int i = 0; i < ctx.getChildCount(); i++) {
                 ParseTree child = ctx.getChild(i);
+                List<String> segs = null;
                 if (child instanceof SysMLv2Parser.QualifiedNameContext q) {
-                    element.supertypes.add(segments(q));
+                    segs = segments(q);
                 } else if (child instanceof SysMLv2Parser.FeatureChainContext f) {
                     if (f.DOT().isEmpty()) {
-                        List<String> segs = new ArrayList<>();
+                        segs = new ArrayList<>();
                         for (SysMLv2Parser.NameContext n : f.name()) {
                             segs.add(normalize(n.getText()));
                         }
-                        element.supertypes.add(segs);
                     } else {
                         element.opaqueSupertypes = true;
+                    }
+                }
+                if (segs != null) {
+                    element.supertypes.add(segs);
+                    if (redefinition) {
+                        element.redefines.add(segs);
                     }
                 }
             }
@@ -234,6 +464,30 @@ public final class ModelIndexBuilder {
         for (int i = 0; i < ctx.getChildCount(); i++) {
             collectSupertypes(ctx.getChild(i), element);
         }
+    }
+
+    private static final int MAX_VALUE_TEXT = 60;
+
+    /**
+     * The value as written, whitespace collapsed. A long value is shortened and tagged with a hash of the
+     * whole value (ignoring whitespace), so two shortened values are equal only if the values are.
+     */
+    private static String valueText(ParserRuleContext ctx) {
+        Token start = ctx.getStart();
+        Token stop = ctx.getStop();
+        String text;
+        if (start == null || stop == null || start.getInputStream() == null
+                || stop.getStopIndex() < start.getStartIndex()) {
+            text = ctx.getText();
+        } else {
+            text = start.getInputStream().getText(Interval.of(start.getStartIndex(), stop.getStopIndex()));
+        }
+        text = text.replaceAll("\\s+", " ").trim();
+        if (text.length() <= MAX_VALUE_TEXT) {
+            return text;
+        }
+        String hash = Integer.toHexString(text.replace(" ", "").hashCode());
+        return text.substring(0, MAX_VALUE_TEXT - 10) + "... #" + hash;
     }
 
     private void recordImport(SysMLv2Parser.ImportDeclarationContext imp, String scope) {
