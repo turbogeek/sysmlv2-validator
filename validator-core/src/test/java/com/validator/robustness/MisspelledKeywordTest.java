@@ -63,6 +63,17 @@ class MisspelledKeywordTest {
     }
 
     @Test
+    @DisplayName("A misspelled 'enum' in an enumeration body is an error, not a second value")
+    void misspelledEnumIsAnError() {
+        // Before: 'eunm Pending;' parsed as the two values 'eunm' and 'Pending'
+        List<SyntaxError> errors = errors("enum def Status {\n    eunm Pending;\n    enum Active;\n}\n", "typo.sysml");
+        assertEquals(1, errors.size(), errors.toString());
+        assertEquals(2, errors.get(0).getLine());
+        assertTrue(errors.get(0).getSuggestions().contains("enum"), errors.get(0).getSuggestions().toString());
+        assertTrue(errors("enum def Color {\n    red;\n    green;\n    enum blue;\n}\n", "x.sysml").isEmpty());
+    }
+
+    @Test
     @DisplayName("A result expression at the end of a body is not mistaken for a misspelled keyword")
     void resultExpressionsStayValid() {
         assertTrue(errors("calc def Twice {\n    in x : Real;\n    x\n}\n", "x.sysml").isEmpty());

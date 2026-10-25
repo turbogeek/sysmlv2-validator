@@ -21,9 +21,11 @@ import java.util.Set;
  * body, the grammar takes that name for an expression statement, whose ';' it makes optional, and
  * the rest of the declaration for a second element: {@code atribute mass : Real;} parsed without
  * error as the expression {@code atribute} followed by the feature {@code mass : Real;}, and
- * {@code actin serve { ... }} as {@code actin} followed by the feature {@code serve}. A body never
- * has a bare name followed by another element in SysML v2: an expression without ';' can only be
- * the result expression at the end of a calculation, constraint or function body.</p>
+ * {@code actin serve { ... }} as {@code actin} followed by the feature {@code serve}. In an
+ * enumeration body the grammar makes the ';' of a value optional, so {@code eunm Pending;} parsed
+ * as the two values {@code eunm} and {@code Pending}. A body never has a bare name followed by
+ * another element in SysML v2: an expression without ';' can only be the result expression at the
+ * end of a calculation, constraint or function body.</p>
  *
  * <p>The check also runs on a tree that error recovery built. It reports what ANTLR reports for a missing
  * token, "missing ';' at" the token after the name, with the keywords the name may misspell.</p>
@@ -93,12 +95,14 @@ final class MisspelledKeywordCheck {
     }
 
     /**
-     * The name, when the element is an expression statement made of one name without ';' that
-     * stands where a declaration starts (after ';', '{' or '}'); otherwise null.
+     * The name, when the element is an expression statement or an enumeration value made of one
+     * name without ';' that stands where a declaration starts (after ';', '{' or '}'); otherwise
+     * null.
      */
     private static Token bareName(ParserRuleContext element, TokenStream tokens) {
         ParserRuleContext node = element;
-        while (!(node instanceof SysMLv2Parser.ExpressionStatementContext)) {
+        while (!(node instanceof SysMLv2Parser.ExpressionStatementContext
+                || node instanceof SysMLv2Parser.EnumMemberContext)) {
             if (node.getChildCount() != 1 || !(node.getChild(0) instanceof ParserRuleContext child)) {
                 return null;
             }
