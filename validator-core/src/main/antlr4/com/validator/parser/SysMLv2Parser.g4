@@ -73,8 +73,16 @@ aliasName
     | shortName
     ;
 
+// SysML v2 8.2.2.5.1: Import = visibility 'import' 'all'? ImportDeclaration RelationshipBody, where a filtered import
+// adds FilterPackageMembers '[' OwnedExpression ']' ('import vehicle::**[@Safety];') and RelationshipBody may own
+// annotations ('import ScalarValues::Integer { doc /* ... */ }')
 importDeclaration
-    : visibility? IMPORT (ALL | importFilter)? qualifiedNameWithWildcard SEMICOLON
+    : visibility? IMPORT (ALL | importFilter)? qualifiedNameWithWildcard filterClause* relationshipBody
+    ;
+
+relationshipBody
+    : SEMICOLON
+    | LBRACE (documentation | comment | metadataAnnotation)* RBRACE
     ;
 
 importFilter
@@ -187,6 +195,7 @@ member
       | flowDefinition
       | metadataDefinition
       | individualDefinition
+      | extendedDefinition
         // KerML Definitions
       | datatypeDefinition
       | classDefinition
@@ -303,10 +312,10 @@ viewpointBody
     | SEMICOLON
     ;
 
+// Viewpoint definitions and usages have a RequirementBody (SysML v2 8.2.2.26.3): 'require constraint { ... }',
+// 'frame c;', 'subject;'. Concern usages are members, so requirementBodyElement covers them too.
 viewpointBodyElement
-    : namespaceBodyElement
-    | framedConcern
-    | concernUsage
+    : requirementBodyElement
     ;
 
 constraintDefinition
@@ -378,8 +387,9 @@ verificationDefinition
     : VERIFICATION_DEF declarationName? typeRelationships? definitionBody
     ;
 
+// Concerns are requirements: ConcernDefinition and ConcernUsage have a RequirementBody (SysML v2 8.2.2.21.3)
 concernDefinition
-    : CONCERN_DEF declarationName? typeRelationships? definitionBody
+    : CONCERN_DEF declarationName? typeRelationships? requirementBody
     ;
 
 renderingDefinition
@@ -402,6 +412,12 @@ metadataDefinition
 individualDefinition
     : INDIVIDUAL_DEF declarationName? typeRelationships? definitionBody
     | INDIVIDUAL_DEF declarationName? typeRelationships? SEMICOLON
+    ;
+
+// A definition declared with user-defined keywords only (SysML v2 8.2.2.27 ExtendedDefinition):
+// BasicDefinitionPrefix? DefinitionExtensionKeyword+ 'def' Definition, e.g. '#scenario def DeviceFailure { ... }'
+extendedDefinition
+    : hashAnnotation+ DEF declarationName? typeRelationships? definitionBody
     ;
 
 metadataDefBody
@@ -586,7 +602,9 @@ itemUsage
 
 refUsage
     : directionPrefix? REF hashAnnotation* refKind? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
-    | hashAnnotation+ usageName featureRelationships? valueInit? SEMICOLON
+      // A usage declared with user-defined keywords only (SysML v2 8.2.2.27 ExtendedUsage):
+      // UsageExtensionKeyword+ Usage, e.g. '#system registry { ... }' or '#servicedd :>> discovery;'
+    | hashAnnotation+ usageName? featureRelationships? valueInit? usageBody
     ;
 
 refKind
@@ -617,13 +635,13 @@ refKind
 connectionUsage // Reference: SysMLv2.md, Section 7.13.2 / Line 2416
     : CONNECTION usageName? featureRelationships? connectionEndpoints? usageBody?
     | CONNECTION usageName? featureRelationships? connectionEndpoints? SEMICOLON
-    | CONNECT connectionEndpoints SEMICOLON?
+    | CONNECT connectorPart usageBody? // 'connect' ConnectorPart UsageBody: 'connect a to b { ... }', 'connect (a, b, c);'
     ;
 
 flowConnectionUsage
     : FLOW usageName? featureRelationships? flowEndpoints? usageBody?
     | FLOW usageName? featureRelationships? flowEndpoints? SEMICOLON?
-    | FLOW expression TO expression SEMICOLON
+    | FLOW expression TO expression usageBody // FlowEndMember 'to' FlowEndMember DefinitionBody: 'flow a.x to b.y { ... }'
     ;
 
 successionUsage // Reference: SysMLv2.md, Section 7.17.4 / Line 3317
@@ -648,18 +666,11 @@ satisfyRequirement
       | ASSERT? NOT? SATISFY expression (BY expression)? featureRelationships? requirementBody?
       ;
 
+// SysML v2 8.2.2.14.2: ( 'allocation' UsageDeclaration ( 'allocate' ConnectorPart )? | 'allocate' ConnectorPart ) UsageBody,
+// e.g. 'allocate logical ::> torqueGenerator to physical ::> powerTrain { ... }'
 allocateUsage
-    : ALLOCATION usageName? featureRelationships? usageBody?
-    | ALLOCATION usageName? featureRelationships? ALLOCATE LPAREN namedAllocationList RPAREN SEMICOLON?
-    | ALLOCATE expression TO expression (SEMICOLON | usageBody)
-    ;
-
-namedAllocationList
-    : namedAllocation (COMMA namedAllocation)*
-    ;
-
-namedAllocation
-    : name REFERENCE_SUBSETTING expression
+    : ALLOCATION usageName? featureRelationships? (ALLOCATE connectorPart)? usageBody?
+    | ALLOCATE connectorPart usageBody
     ;
 
 performUsage
@@ -674,6 +685,9 @@ exhibitUsage
 
 includeUsage
     : INCLUDE expression SEMICOLON?
+      // IncludeUseCaseUsage reference form (SysML v2 8.2.2.24): OwnedReferenceSubsetting FeatureSpecializationPart?
+      // ValuePart? CaseBody, e.g. "include 'add fuel'[0..*] { subject vehicle; }"
+    | INCLUDE featureChain featureRelationships? valueInit? usageBody
     | INCLUDE USE_CASE usageName? featureRelationships? usageBody?
     | INCLUDE USE_CASE usageName? featureRelationships? SEMICOLON
     ;
@@ -726,9 +740,7 @@ concernBody
     ;
 
 concernBodyElement
-    : namespaceBodyElement
-    | subjectDeclaration
-    | stakeholderUsage
+    : requirementBodyElement
     ;
 
 occurrenceUsage
@@ -832,9 +844,11 @@ dependencyDeclaration
     : DEPENDENCY usageName? (FROM expression (COMMA expression)*)? TO expression (COMMA expression)* usageBody
     ;
 
+// SysML v2 8.2.2.27: 'metadata' MetadataUsageDeclaration ( 'about' Annotation ( ',' Annotation )* )? MetadataBody,
+// e.g. 'metadata SafetyFeature about vehicle::seatBelt, vehicle::bumper;'
 metadataUsage
-    : METADATA usageName? featureRelationships? metadataBody?
-    | METADATA usageName? featureRelationships? SEMICOLON
+    : METADATA usageName? featureRelationships? (ABOUT qualifiedName (COMMA qualifiedName)*)? metadataBody?
+    | METADATA usageName? featureRelationships? (ABOUT qualifiedName (COMMA qualifiedName)*)? SEMICOLON
     ;
 
 metadataBody
@@ -1048,6 +1062,12 @@ connectionEnd
     : multiplicityClause? (name (REFERENCE_SUBSETTING | REFERENCES))? expression
     ;
 
+// ConnectorPart (SysML v2 8.2.2.13.2): BinaryConnectorPart 'a to b' or NaryConnectorPart '(a, b, c)' (two or more ends)
+connectorPart
+    : connectionEnd TO connectionEnd
+    | LPAREN connectionEnd COMMA connectionEnd (COMMA connectionEnd)* RPAREN
+    ;
+
 expressionList
     : expression (COMMA expression)*
     ;
@@ -1178,8 +1198,11 @@ stateBodyElement // Reference: SysMLv2.md, Section 7.18.2 / Line 4035
     | inoutParameter
     ;
 
+// TargetTransitionUsage (SysML v2 8.2.2.18.3) after a state: 'accept' trigger, optional 'if' guard and 'do' effect,
+// 'then' target and ActionBody, e.g. 'accept when temp > max do send new OverTemp() to controller then degraded;'
 acceptTransition
-    : ACCEPT usageName? (COLON qualifiedName)? (VIA expression)? doActionClause? THEN expression SEMICOLON?
+    : ACCEPT usageName? (COLON qualifiedName)? acceptTiming? (VIA expression)? guardClause? doActionClause?
+      THEN expression usageBody?
     ;
 
 doActionClause
@@ -1247,8 +1270,9 @@ enumMemberBodyElement
     | namespaceBodyElement
     ;
 
+// ... 'then' TransitionSuccessionMember ActionBody (SysML v2 8.2.2.18.3): the target may be followed by a body
 transitionBody
-    : acceptClause? guardClause? effectClause? THEN expression SEMICOLON?
+    : acceptClause? guardClause? effectClause? THEN expression usageBody?
     ;
 
 // ============================================================================
@@ -1287,7 +1311,7 @@ assignStatement
 
 acceptClause
     : ACCEPT usageName? (COLON qualifiedName)? (VIA expression)? acceptTiming?
-    | ACCEPT qualifiedName (VIA expression)? acceptTiming?
+    | ACCEPT featureChain (VIA expression)? acceptTiming? // payload typed by a feature chain: 'accept Remote.start'
     ;
 
 guardClause
@@ -1315,12 +1339,16 @@ framedConcern
     | FRAME expression SEMICOLON
     ;
 
+// RequirementConstraintUsage (SysML v2 8.2.2.21.1) after 'assume' / 'require': a reference to an existing constraint
+// with optional multiplicity and body ('assume c1 [0..*];'), or a declaration introduced by 'constraint' and/or
+// user-defined keywords ('assume #goal constraint payloadMassLimit;', 'require #goal vehicleMassRequirement;')
 assumeConstraint
-    : ASSUME CONSTRAINT usageName? featureRelationships? (expression | usageBody)? SEMICOLON?
+    : ASSUME (hashAnnotation* CONSTRAINT | hashAnnotation+) usageName? featureRelationships? (expression | usageBody)? SEMICOLON?
+    | ASSUME featureChain featureRelationships? requirementBody
     ;
 
 requireConstraint
-    : REQUIRE CONSTRAINT? usageName? featureRelationships? expression? (requirementBody | SEMICOLON?)
+    : REQUIRE (hashAnnotation* CONSTRAINT | hashAnnotation+)? usageName? featureRelationships? expression? (requirementBody | SEMICOLON?)
     | REQUIRE expression (requirementBody | SEMICOLON?)
     ;
 
@@ -1346,6 +1374,7 @@ renderStatement
     : RENDER (AS qualifiedName | ID)? (SEMICOLON | usageBody)
     | RENDER RENDERING usageName? featureRelationships? (SEMICOLON | usageBody)
     | RENDER expression (SEMICOLON | usageBody)
+    | RENDER featureChain featureRelationships usageBody // ViewRenderingUsage reference with multiplicity: 'render r [0..*];'
     ;
 
 filterStatement
@@ -1538,10 +1567,12 @@ exponentiationExpression
     ;
 
 unaryExpression
-    : MINUS unaryExpression
+    : PLUS unaryExpression                                // KerML UnaryOperator '+'
+    | MINUS unaryExpression
     | BANG unaryExpression
     | NOT unaryExpression
     | TILDE unaryExpression
+    | ALL qualifiedName                                   // KerML ExtentExpression: 'all engineChoice'
     | primaryExpression
     ;
 

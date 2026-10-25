@@ -249,6 +249,9 @@ BY: 'by';
 SUBJECT: 'subject';
 FOR: 'for';
 ALIAS: 'alias';
+// 'def' on its own follows user-defined keywords: '#scenario def DeviceFailure'. It is reserved (SysML v2 8.2.2.1.2);
+// 'part def' and the other compound keywords are still single tokens by longest match.
+DEF: 'def';
 ASSIGN: 'assign';
 EVENT: 'event';
 THIS: 'this';
@@ -313,8 +316,12 @@ NULL_COALESCING: '??';
 // COMMENTS - Skip these tokens (MUST come before SLASH to match properly)
 // ============================================================================
 BLOCK_COMMENT: '/*' .*? '*/' -> skip;
-// Note: LINE_COMMENT sent to channel 1 for warning detection (not persisted to model)
-LINE_COMMENT: '//' ~[\r\n]* -> channel(1);
+// A multiline note '//* ... */' (KerML 8.2.2.2 MULTILINE_NOTE) may span lines and end mid-line, as in
+// 'attribute s = ( //* ... */ );'. It is not persisted either; hidden on channel 1 but not reported as a line comment.
+MULTILINE_NOTE: '//*' .*? '*/' -> channel(1);
+// Note: LINE_COMMENT sent to channel 1 for warning detection (not persisted to model). It cannot start with '//*',
+// which begins a multiline note.
+LINE_COMMENT: '//' (~[*\r\n] ~[\r\n]*)? -> channel(1);
 
 // ============================================================================
 // OPERATORS - Single character
