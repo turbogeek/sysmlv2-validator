@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
@@ -24,7 +25,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -36,6 +39,21 @@ import java.util.regex.Pattern;
  */
 public class SysMLv2ParserFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(SysMLv2ParserFacade.class);
+
+    /**
+     * Deepest nesting of grammar rules in a tree handed on to the tree walkers. They recurse once or
+     * more per rule; on a 1 MB stack the model index ran out at 2,900 rules deep (170 nested
+     * parentheses, 17 rules each) and the semantic checks and symbol table at 6,000 (2,000 nested
+     * packages). The deepest file of the OMG release, the CATIA libraries, test-suite and examples
+     * is 136 rules deep.
+     */
+    static final int MAX_TREE_DEPTH = 1_000;
+
+    /**
+     * Bracket nesting taken as the cause of a nesting error. The deepest file of the corpora above
+     * nests brackets 10 deep.
+     */
+    private static final int DEEP_BRACKETS = 50;
 
     /**
      * Represents a line comment found in the source.
@@ -407,6 +425,13 @@ public class SysMLv2ParserFacade {
             errorListener.getErrors().add(nestingTooDeep(tokens, parser.getCurrentToken()));
             tree = null;
         }
+        ParserRuleContext tooDeep = tree != null ? nestedTooDeep(tree) : null;
+        if (tooDeep != null) {
+            // The walkers that get the tree (index, semantic checks, symbol table, refactoring) are
+            // recursive too, and some run out of stack on trees the parser could still build
+            errorListener.getErrors().add(nestingTooDeep(tokens, tooDeep.getStart()));
+            tree = null;
+        }
         if (tree != null) {
             // Misspelled keywords the grammar accepted; one error per position
             List<SyntaxError> errors = errorListener.getErrors();
@@ -477,30 +502,66 @@ public class SysMLv2ParserFacade {
     }
 
     /**
-     * The error for a parse that ran out of stack. Where exactly the stack ran out depends on the
-     * thread's stack size and on the JIT, so the error is put where the brackets first reach their
-     * deepest nesting, which depends only on the source; without brackets, where parsing stopped.
+     * The first rule, in source order, nested more than {@link #MAX_TREE_DEPTH} rules deep, or null.
+     * Iterative, so that it cannot run out of stack itself.
      */
-    private static SyntaxError nestingTooDeep(CommonTokenStream tokens, Token stoppedAt) {
+    private static ParserRuleContext nestedTooDeep(ParseTree tree) {
+        Deque<ParseTree> pending = new ArrayDeque<>();
+        Deque<Integer> depths = new ArrayDeque<>();
+        pending.push(tree);
+        depths.push(1);
+        while (!pending.isEmpty()) {
+            ParseTree node = pending.pop();
+            int depth = depths.pop();
+            if (!(node instanceof ParserRuleContext ctx)) {
+                continue;
+            }
+            if (depth > MAX_TREE_DEPTH) {
+                return ctx;
+            }
+            for (int i = ctx.getChildCount() - 1; i >= 0; i--) {
+                pending.push(ctx.getChild(i));
+                depths.push(depth + 1);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The error for a source nested too deep: the parser ran out of stack, or its tree is deeper
+     * than {@link #MAX_TREE_DEPTH}. Which of the two happens, and where the stack ran out, depend
+     * on the thread's stack size and on the JIT, so the error is placed by the source alone: where
+     * the brackets first reach their deepest nesting when they are nested {@link #DEEP_BRACKETS}
+     * deep or more; otherwise, as for {@code not not ... true}, at the start of the declaration
+     * the nesting is in.
+     */
+    private static SyntaxError nestingTooDeep(CommonTokenStream tokens, Token inside) {
         tokens.fill();
         int depth = 0;
         int deepest = 0;
-        Token at = stoppedAt;
+        Token deepestBracket = null;
         for (Token t : tokens.getTokens()) {
             int type = t.getType();
             if (type == SysMLv2Lexer.LBRACE || type == SysMLv2Lexer.LPAREN || type == SysMLv2Lexer.LBRACK) {
                 if (++depth > deepest) {
                     deepest = depth;
-                    at = t;
+                    deepestBracket = t;
                 }
             } else if (type == SysMLv2Lexer.RBRACE || type == SysMLv2Lexer.RPAREN || type == SysMLv2Lexer.RBRACK) {
                 depth--;
             }
         }
-        String message = deepest > 0
-            ? "nesting too deep to parse: brackets nested " + deepest + " deep"
-            : "nesting too deep to parse at '" + abbreviate(at.getText()) + "'";
-        return new SyntaxError(at.getLine(), at.getCharPositionInLine(), message, at.toString());
+        if (deepest >= DEEP_BRACKETS) {
+            return new SyntaxError(deepestBracket.getLine(), deepestBracket.getCharPositionInLine(),
+                "nesting too deep to parse: brackets nested " + deepest + " deep", deepestBracket.toString());
+        }
+        Token start = inside;
+        for (Token t = previousOnChannel(tokens, inside.getTokenIndex()); !startsDeclaration(t);
+                t = previousOnChannel(tokens, t.getTokenIndex())) {
+            start = t;
+        }
+        return new SyntaxError(start.getLine(), start.getCharPositionInLine(),
+            "nesting too deep to parse at '" + abbreviate(start.getText()) + "'", start.toString());
     }
 
     static String abbreviate(String text) {

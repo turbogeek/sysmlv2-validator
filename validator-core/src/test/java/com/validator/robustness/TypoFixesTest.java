@@ -142,6 +142,47 @@ class TypoFixesTest {
         assertTrue(errors(parser.parseString(deepPackages(100), "x.sysml")).isEmpty());
     }
 
+    @Test
+    @DisplayName("Nesting the parser follows but the tree walkers cannot is a syntax error, not a StackOverflowError")
+    void nestingTooDeepForTheWalkersIsReported(@TempDir Path dir) throws IOException {
+        // 200 parentheses (3,430 rules deep) parsed, then the model index ran out of stack in validate(File).
+        // The package's '{' is one more bracket.
+        String model = deepParentheses(200);
+        Path file = dir.resolve("deep.sysml");
+        Files.writeString(file, model);
+        ValidationResult byFile =
+            assertTimeoutPreemptively(Duration.ofSeconds(60), () -> validator.validate(file.toFile()));
+        assertEquals(1, byFile.getErrorCount(), byFile.getErrors().toString());
+        ValidationError error = byFile.getErrors().get(0);
+        assertEquals("nesting too deep to parse: brackets nested 201 deep", error.getMessage());
+        assertEquals(2, error.getLine());
+        assertEquals(18 + 200 - 1, error.getColumn());
+        assertEquals(error.getMessage(), validator.validate(model, "deep.sysml").getErrors().get(0).getMessage());
+        RefactoringEngine refactoring = new RefactoringEngine();
+        refactoring.setErrorFreeOnly(false);
+        assertFalse(refactoring.analyzeContent(model, "deep.sysml").canApply());
+
+        // Just over the limit the parser surely follows: the same error, whatever the stack
+        ParseResult justOver = parser.parseString(deepParentheses(60), "x.sysml");
+        assertNull(justOver.getParseTree(), "no tree is handed on to the walkers");
+        assertEquals("nesting too deep to parse: brackets nested 61 deep", errors(justOver).get(0).getMessage());
+        assertEquals(18 + 60 - 1, errors(justOver).get(0).getCharPositionInLine());
+    }
+
+    @Test
+    @DisplayName("Nesting without brackets is reported at the start of its declaration")
+    void nestingWithoutBracketsIsReportedAtItsDeclaration() {
+        // Before: 'brackets nested 1 deep', at the package's '{'
+        for (int depth : new int[] {1_200, 5_000}) {
+            String model = "package P {\n    part def A;\n    attribute x = " + "not ".repeat(depth) + "true;\n}\n";
+            List<SyntaxError> errors = errors(parser.parseString(model, "x.sysml"));
+            assertEquals(1, errors.size(), errors.toString());
+            assertEquals("nesting too deep to parse at 'attribute'", errors.get(0).getMessage());
+            assertEquals(3, errors.get(0).getLine());
+            assertEquals(4, errors.get(0).getCharPositionInLine());
+        }
+    }
+
     // ---------------------------------------------------------------------------------------- long input
 
     @Test

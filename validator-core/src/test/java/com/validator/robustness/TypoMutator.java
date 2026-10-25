@@ -44,7 +44,7 @@ final class TypoMutator {
         SMART_QUOTES, NO_BREAK_SPACE, TAB_FOR_SPACE, ZERO_WIDTH_SPACE, NON_ASCII_IDENTIFIER, CRLF_LINE_ENDINGS,
         CR_LINE_ENDINGS, UTF8_BOM, LONG_IDENTIFIER, LONG_IDENTIFIER_AT_ERROR, LONG_LINE, TRUNCATE,
         EMPTY_FILE(true), WHITESPACE_ONLY(true), DEEP_PACKAGE_NESTING(true), DEEP_PAREN_NESTING(true),
-        DEEP_UNBALANCED_BRACES(true);
+        MID_PAREN_NESTING(true), DEEP_OPERATOR_NESTING(true), DEEP_UNBALANCED_BRACES(true);
 
         private final boolean wholeFile;
 
@@ -85,8 +85,13 @@ final class TypoMutator {
 
     /** Length of the identifiers of LONG_IDENTIFIER and LONG_IDENTIFIER_AT_ERROR. */
     static final int LONG_IDENTIFIER_LENGTH = 100_000;
-    /** Nesting depth of DEEP_PACKAGE_NESTING and DEEP_PAREN_NESTING. */
+    /** Nesting depth of DEEP_PACKAGE_NESTING, DEEP_PAREN_NESTING and DEEP_OPERATOR_NESTING. */
     static final int DEEP_NESTING = 5_000;
+    /**
+     * Parentheses of the attributes of MID_PAREN_NESTING: the parser follows them, and the model index ran out of
+     * stack on some of them (which ones depends on the JIT, so there are several).
+     */
+    static final int[] MID_NESTING = {140, 160, 180, 200, 220};
     /** Number of unclosed braces of DEEP_UNBALANCED_BRACES. */
     static final int DEEP_UNBALANCED = 1_500;
 
@@ -216,9 +221,14 @@ final class TypoMutator {
             case TRUNCATE -> truncate(rnd);
             case EMPTY_FILE -> synthetic(op, "", Expectation.NO_SYNTAX_ERROR);
             case WHITESPACE_ONLY -> synthetic(op, "  \n\t\r\n   \n", Expectation.NO_SYNTAX_ERROR);
-            // Valid, but deeper than the parser's stack goes on a default thread: parsed, or reported as too deep
+            // Valid, but deeper than the parser's stack goes on a default thread, or than the tree walkers after it
+            // go (MID_PAREN_NESTING): parsed, or reported as too deep
             case DEEP_PACKAGE_NESTING -> synthetic(op, deepPackages(DEEP_NESTING), Expectation.ANY);
             case DEEP_PAREN_NESTING -> synthetic(op, deepParentheses(DEEP_NESTING), Expectation.ANY);
+            case MID_PAREN_NESTING -> synthetic(op, midParentheses(), Expectation.ANY);
+            case DEEP_OPERATOR_NESTING -> synthetic(op,
+                "package DeepOperators {\n    attribute x = " + "not ".repeat(DEEP_NESTING) + "true;\n}\n",
+                Expectation.ANY);
             // One error per brace, and error recovery slows down with the depth: 5,000 braces took 9 s (five entry
             // points), so fewer; the 5,000-level stack overflow is checked by the valid nestings above
             case DEEP_UNBALANCED_BRACES -> synthetic(op, "package Deep {\n" + "{".repeat(DEEP_UNBALANCED) + "\n",
@@ -439,6 +449,16 @@ final class TypoMutator {
     /** An attribute whose value is a literal in {@code depth} pairs of parentheses. */
     static String deepParentheses(int depth) {
         return "package DeepExpression {\n    attribute x = " + "(".repeat(depth) + "1" + ")".repeat(depth) + ";\n}\n";
+    }
+
+    /** One attribute per depth of MID_NESTING, its value a literal in that many pairs of parentheses. */
+    static String midParentheses() {
+        StringBuilder text = new StringBuilder("package MidExpressions {\n");
+        for (int depth : MID_NESTING) {
+            text.append("    attribute x").append(depth).append(" = ").append("(".repeat(depth)).append('1')
+                .append(")".repeat(depth)).append(";\n");
+        }
+        return text.append("}\n").toString();
     }
 
     private Mutant wholeSource(Operator op, String text, boolean sameLines) {
