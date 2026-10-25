@@ -71,6 +71,37 @@
   (no issues)
   FEATURE V6d::probe : subsets V6d::mass
   resolveLocal(V6d, 'mass') -> ISQBase::mass
+### V6f.sysml
+  WARNING L6:19 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Vehicle
+  ERROR   L6:9 [validateAttributeUsageType_] An attribute must be typed by attribute definitions.
+  WARNING L9:19 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Vehicle
+  ERROR   L9:9 [validateAttributeUsageType_] An attribute must be typed by attribute definitions.
+  WARNING L12:19 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Vehicle
+  ERROR   L12:9 [validateAttributeUsageType_] An attribute must be typed by attribute definitions.
+  ERROR   L24:9 [validateOccurrenceUsageType_] An occurrence, item or part must be typed by occurrence definitions.
+  ERROR   L25:9 [validateOccurrenceUsageType_] An occurrence, item or part must be typed by occurrence definitions.
+  ERROR   L26:9 [validatePortUsageType_] A port must be typed by port definitions.
+  ERROR   L27:9 [validateActionUsageType_] An action must be typed by action definitions.
+  ERROR   L28:9 [validateOccurrenceUsageType_] An occurrence, item or part must be typed by occurrence definitions.
+  ERROR   L29:9 [validateUsageType_] A usage must be typed by definitions.
+  ERROR   L31:35 [validateUsageType_] A usage must be typed by definitions.
+  FEATURE V6f::CarTypedByItself::mass : typed by feature V6f::CarTypedByItself::mass
+  FEATURE V6f::CarTypedByLibraryUsage::mass : typed by feature ISQBase::mass
+  FEATURE V6f::CarTypedByUnit::mass : typed by feature SI::kilogram
+  FEATURE V6f::CarFixed::mass : redefines V6f::Vehicle::mass
+  FEATURE V6f::CarFixedSubsetting::mass : redefines V6f::Vehicle::mass, subsets ISQBase::mass
+  FEATURE V6f::Truck::e : typed by feature V6f::engine
+  FEATURE V6f::Truck::f : typed by feature V6f::fuel
+  FEATURE V6f::Truck::q : typed by feature V6f::p
+  FEATURE V6f::Truck::d : typed by feature V6f::drive
+  FEATURE V6f::Truck::o : typed by feature V6f::trip
+  FEATURE V6f::Truck::r : typed by feature V6f::engine
+  FEATURE V6f::EngineCheck::s : typed by feature V6f::engine
+  INHERITS V6f::CarTypedByItself [V6f::Vehicle::mass]
+  INHERITS V6f::CarTypedByLibraryUsage [V6f::Vehicle::mass]
+  INHERITS V6f::CarTypedByUnit [V6f::Vehicle::mass]
+  COMPUTED V6f::CarFixed::mass redefines [V6f::Vehicle::mass]
+  COMPUTED V6f::CarFixedSubsetting::mass redefines [V6f::Vehicle::mass]
 ### V7a.sysml
   (no issues)
   COMPUTED V7a::AuditedTransfer::target redefines [V7a::Transfer::source]
@@ -109,3 +140,96 @@
   COMPUTED V9::TestWithCutoff::cutoff::<anon>::y redefines [DataFunctions::'*'::y]
   COMPUTED V9::TestWithCutoff::cutoff::<anon>::y::<anon>::result redefines [Performances::Evaluation::result]
   COMPUTED V9::TestWithCutoff::cutoff::<anon>::result redefines [DataFunctions::'*'::result, Performances::Evaluation::result]
+### V10a.sysml
+  (no issues)
+  REF mass -> V10a::Vehicle::mass
+  REF mass -> V10a::Vehicle::mass
+  INHERITS V10a::CarSameName [V10a::Vehicle::mass]
+  INHERITS V10a::CarNewName [V10a::Vehicle::mass]
+  INHERITS V10a::myCar [V10a::Vehicle::mass as weight, V10a::Vehicle::mass]
+  COMPUTED V10a::myCar::m::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V10a::myCar::w::<anon>::result redefines [Performances::Evaluation::result]
+### V10b.sysml
+  WARNING L5:15 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Vehicle
+  WARNING L8:33 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'mass' from Vehicle
+  REF mass -> ISQBase::mass
+  FEATURE V10b::SportsCar::mass : redefines ISQBase::mass
+  INHERITS V10b::Car [V10b::Vehicle::mass]
+  COMPUTED V10b::Car::probe::<anon>::result redefines [Performances::Evaluation::result]
+  INHERITS V10b::SportsCar [V10b::Car::probe, V10b::Vehicle::mass]
+  COMPUTED V10b::SportsCar::mass redefines [ISQBase::mass]
+### V10c.sysml
+  WARNING L4:41 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'weight' from Vehicle
+  WARNING L5:51 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'weight' from Vehicle
+  INHERITS V10c::Car [V10c::Vehicle::mass, V10c::Vehicle::mass as weight]
+  INHERITS V10c::CarShortName [V10c::Vehicle::mass, V10c::Vehicle::mass as weight]
+### V10d.sysml
+  ERROR   L6:42 [org.eclipse.xtext.diagnostics.Diagnostic.Linking] Couldn't resolve reference to Element 'weight'.
+  ERROR   L7:43 [org.eclipse.xtext.diagnostics.Diagnostic.Linking] Couldn't resolve reference to Element 'weight'.
+  ERROR   L10:23 [org.eclipse.xtext.diagnostics.Diagnostic.Linking] Couldn't resolve reference to Element 'weight'.
+  WARNING L6:42 [validateBindingConnectorTypeConformance] Bound features should have conforming types
+  WARNING L7:43 [validateBindingConnectorTypeConformance] Bound features should have conforming types
+  WARNING L10:23 [validateBindingConnectorTypeConformance] Bound features should have conforming types
+  FEATURE V10d::CarViaName::mass : redefines V10d::Vehicle::mass
+  FEATURE V10d::CarViaAlias::mass : redefines V10d::Vehicle::mass
+  REF null -> <anon>
+  REF null -> <anon>
+  FEATURE V10d::c3::mass : redefines V10d::Vehicle::mass
+  REF null -> <anon>
+  COMPUTED V10d::CarViaName::mass redefines [V10d::Vehicle::mass]
+  COMPUTED V10d::CarViaAlias::mass redefines [V10d::Vehicle::mass]
+  INHERITS V10d::c1 [V10d::CarViaName::mass]
+  INHERITS V10d::c2 [V10d::CarViaAlias::mass]
+  COMPUTED V10d::c3::mass redefines [V10d::Vehicle::mass]
+### V10e.sysml
+  ERROR   L6:42 [org.eclipse.xtext.diagnostics.Diagnostic.Linking] Couldn't resolve reference to Element 'mass'.
+  WARNING L6:42 [validateBindingConnectorTypeConformance] Bound features should have conforming types
+  FEATURE V10e::CarRenamed::weight : redefines V10e::Vehicle::mass
+  REF null -> <anon>
+  REF weight -> V10e::CarRenamed::weight
+  REF mass -> V10e::Vehicle::mass
+  REF mass -> V10e::Vehicle::mass
+  COMPUTED V10e::CarRenamed::weight redefines [V10e::Vehicle::mass]
+  INHERITS V10e::CarAliased [V10e::Vehicle::mass]
+  INHERITS V10e::r [V10e::CarRenamed::weight]
+  INHERITS V10e::a [V10e::Vehicle::mass as weight, V10e::Vehicle::mass]
+### V10f.sysml
+  WARNING L8:5 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'weight' from Metric, Scale
+  WARNING L9:5 [validateNamespaceDistinguishablity] Duplicate of inherited member name 'weight' from Metric, Scale
+  REF mass -> V10f::Vehicle::mass
+  REF mass -> V10f::Vehicle::mass
+  REF weight -> V10f::Scale::weight
+  INHERITS V10f::Metric [V10f::Vehicle::mass]
+  INHERITS V10f::Imperial [V10f::Vehicle::mass]
+  INHERITS V10f::BothAliases [V10f::Vehicle::mass as weight, V10f::Vehicle::mass, V10f::Vehicle::mass as weight]
+  COMPUTED V10f::BothAliases::p::<anon>::result redefines [Performances::Evaluation::result]
+  INHERITS V10f::MetricFirst [V10f::Vehicle::mass as weight, V10f::Vehicle::mass, V10f::Scale::weight]
+  COMPUTED V10f::MetricFirst::q::<anon>::result redefines [Performances::Evaluation::result]
+  INHERITS V10f::ScaleFirst [V10f::Scale::weight, V10f::Vehicle::mass as weight, V10f::Vehicle::mass]
+  COMPUTED V10f::ScaleFirst::q::<anon>::result redefines [Performances::Evaluation::result]
+### V10g.sysml
+  (no issues)
+  FEATURE V10g::CarFixed::mass : redefines V10g::Vehicle::mass
+  REF mass -> V10g::CarFixed::mass
+  FEATURE V10g::myCarFixed::mass : redefines V10g::Vehicle::mass
+  REF mass -> V10g::myCarFixed::mass
+  REF mass -> V10g::Vehicle::mass
+  FEATURE V10g::CarRenamedKeepingName::weight : redefines V10g::Machine::mass
+  REF weight -> V10g::CarRenamedKeepingName::weight
+  REF weight -> V10g::CarRenamedKeepingName::weight
+  FEATURE V10g::WeighedCarFixed::scaleWeight : redefines V10g::Scale::weight
+  REF mass -> V10g::Machine::mass
+  COMPUTED V10g::CarFixed::mass redefines [V10g::Vehicle::mass]
+  COMPUTED V10g::CarFixed::w::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V10g::myCarFixed::mass redefines [V10g::Vehicle::mass]
+  COMPUTED V10g::myCarFixed::w::<anon>::result redefines [Performances::Evaluation::result]
+  INHERITS V10g::CarAliasFixed [V10g::Vehicle::mass, V10g::Vehicle::mass as weight]
+  COMPUTED V10g::CarAliasFixed::m::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V10g::CarRenamedKeepingName::weight redefines [V10g::Machine::mass]
+  INHERITS V10g::r [V10g::CarRenamedKeepingName::weight, V10g::CarRenamedKeepingName::weight as mass]
+  COMPUTED V10g::r::rm::<anon>::result redefines [Performances::Evaluation::result]
+  COMPUTED V10g::r::rw::<anon>::result redefines [Performances::Evaluation::result]
+  INHERITS V10g::Metric [V10g::Machine::mass]
+  INHERITS V10g::WeighedCarFixed [V10g::Machine::mass as weight, V10g::Machine::mass]
+  COMPUTED V10g::WeighedCarFixed::scaleWeight redefines [V10g::Scale::weight]
+  COMPUTED V10g::WeighedCarFixed::q::<anon>::result redefines [Performances::Evaluation::result]

@@ -11,6 +11,7 @@ import org.omg.sysml.interactive.SysMLInteractiveResult;
 import org.omg.sysml.lang.sysml.Element;
 import org.omg.sysml.lang.sysml.Feature;
 import org.omg.sysml.lang.sysml.FeatureReferenceExpression;
+import org.omg.sysml.lang.sysml.FeatureTyping;
 import org.omg.sysml.lang.sysml.Membership;
 import org.omg.sysml.lang.sysml.Namespace;
 import org.omg.sysml.lang.sysml.Redefinition;
@@ -18,7 +19,8 @@ import org.omg.sysml.lang.sysml.Subsetting;
 
 /**
  * Runs SysML files through the pilot implementation (SysMLInteractive, as the Jupyter kernel does) and prints
- * every diagnostic plus what redefinitions, subsettings and feature references resolved to.
+ * every diagnostic plus what redefinitions, subsettings, typings by a feature and feature references resolved to,
+ * and the inherited memberships of each type (an alias membership is shown as 'element as aliasName').
  * Usage: java -cp <kernel-all.jar> PilotProbe.java <sysml.library dir> <file.sysml>...
  */
 public class PilotProbe {
@@ -58,6 +60,11 @@ public class PilotProbe {
                         }
                     }
                     rel.removeIf(s -> s.contains("(implied)") && !s.startsWith("redefines"));
+                    for (FeatureTyping typing : f.getOwnedTyping()) {
+                        if (typing.getType() instanceof Feature) {
+                            rel.add("typed by feature " + qn(typing.getType()));
+                        }
+                    }
                     if (!rel.isEmpty()) {
                         System.out.println("  FEATURE " + qn(f) + " : " + String.join(", ", rel));
                     }
@@ -85,7 +92,9 @@ public class PilotProbe {
                     for (Membership m : org.omg.sysml.util.TypeUtil.getInheritedMembershipOf(t)) {
                         Element member = m.getMemberElement();
                         if (member != null && member.getName() != null && qn(member).startsWith(qn(t).split("::")[0] + "::")) {
-                            inherited.add(qn(member));
+                            String alias = m.getMemberName() != null && !m.getMemberName().equals(member.getName())
+                                ? " as " + m.getMemberName() : "";
+                            inherited.add(qn(member) + alias);
                         }
                     }
                     if (!inherited.isEmpty()) {
