@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * the rules, alternatives and tokens of SysMLv2Parser.g4, so it cannot see a construct of the OMG BNF that no rule
  * has; its "100% of what valid input can reach" is relative to the grammar. These cases were found by parsing the
  * BNF's productions one at a time; each is valid per SysML-textual-bnf.kebnf or KerML-textual-bnf.kebnf (the
- * production is named with each case). The neighbouring forms that parse today guard the check itself.
+ * production is named with each case). The neighbouring forms that parse today guard the check itself, and the former
+ * gaps that the grammar accepts now guard the fixes.
  */
 @DisplayName("Valid SysML v2 and KerML the parser rejects")
 class GrammarGapTest {
@@ -28,9 +29,32 @@ class GrammarGapTest {
         parserFacade = new SysMLv2ParserFacade();
     }
 
-    /** Forms next to the gaps below that parse today. */
+    /**
+     * Forms next to the gaps below that parse today, and former gaps that the grammar has a rule for now (unary '+',
+     * extents, collect, 'defined by', 'typed by', cross subsetting, filtered imports, 'metadata ... about' and guarded
+     * accept transitions), kept here so that they stay valid.
+     */
     static Stream<Arguments> acceptedNeighbours() {
         return Stream.of(
+            Arguments.of("unary plus (KerML UnaryOperator)", "members.sysml", "package P { attribute a = +1; }"),
+            Arguments.of("extent expression (KerML ExtentExpression)", "members.sysml",
+                "package P { attribute a = all P; }"),
+            Arguments.of("'.{' (KerML CollectExpression)", "members.sysml",
+                "package P { attribute a = (1, 2).{ in y; y }; }"),
+            Arguments.of("'defined by' (SysML DEFINED_BY)", "members.sysml",
+                "package P { part def Q; part p defined by Q; }"),
+            Arguments.of("'typed by' (SysML MetadataUsageDeclaration)", "members.sysml",
+                "package P { metadata def M { } metadata m typed by M; }"),
+            Arguments.of("'typed by' (KerML TYPED_BY)", "members.kerml",
+                "package K { classifier T; feature x typed by T; }"),
+            Arguments.of("'crosses' (SysML CROSSES)", "members.sysml", "package P { part q; part p crosses q; }"),
+            Arguments.of("'=>' (SysML CROSSES)", "members.sysml", "package P { part q; part p => q; }"),
+            Arguments.of("filtered import (SysML FilterPackage)", "members.sysml",
+                "package P { import Q::*[@M]; }"),
+            Arguments.of("'metadata' with 'about' (SysML MetadataUsage)", "members.sysml",
+                "package P { metadata def M { } part a; part b; metadata M about a, b; }"),
+            Arguments.of("accept with a guard (SysML TargetTransitionUsage)", "members.sysml",
+                "package P { state def S { state a; accept e if g then b; state b; } }"),
             Arguments.of("unary minus", "members.sysml", "package P { attribute a = -1; }"),
             Arguments.of("classification", "members.sysml", "package P { attribute a = x istype T; }"),
             Arguments.of("meta cast", "members.sysml", "package P { attribute a = x meta M; }"),
@@ -53,45 +77,26 @@ class GrammarGapTest {
     /** Valid forms that are syntax errors today, with the BNF production that makes them valid. */
     static Stream<Arguments> rejectedValidForms() {
         return Stream.of(
-            Arguments.of("unary plus (KerML UnaryOperator)", "members.sysml", "package P { attribute a = +1; }"),
-            Arguments.of("extent expression (KerML ExtentExpression)", "members.sysml",
-                "package P { attribute a = all P; }"),
             Arguments.of("'@@' (KerML MetaclassificationExpression)", "members.sysml",
                 "package P { metadata def M { } attribute x; attribute a = x @@ M; }"),
             Arguments.of("'*' (KerML LiteralInfinity)", "members.sysml", "package P { attribute a = *; }"),
             Arguments.of("trailing comma (KerML SequenceExpressionList)", "members.sysml",
                 "package P { attribute a = (1,); }"),
-            Arguments.of("'.{' (KerML CollectExpression)", "members.sysml",
-                "package P { attribute a = (1, 2).{ in y; y }; }"),
-            Arguments.of("'defined by' (SysML DEFINED_BY)", "members.sysml",
-                "package P { part def Q; part p defined by Q; }"),
-            Arguments.of("'typed by' (SysML MetadataUsageDeclaration)", "members.sysml",
-                "package P { metadata def M { } metadata m typed by M; }"),
-            Arguments.of("'typed by' (KerML TYPED_BY)", "members.kerml",
-                "package K { classifier T; feature x typed by T; }"),
-            Arguments.of("'crosses' (SysML CROSSES)", "members.sysml", "package P { part q; part p crosses q; }"),
-            Arguments.of("'=>' (SysML CROSSES)", "members.sysml", "package P { part q; part p => q; }"),
             Arguments.of("subsetting usage without a name (SysML UsageDeclaration)", "members.sysml",
                 "package P { part q; part p { :> q; } }"),
             Arguments.of("'subsets' usage without a name (SysML UsageDeclaration)", "members.sysml",
                 "package P { part q; part p { subsets q; } }"),
-            Arguments.of("filtered import (SysML FilterPackage)", "members.sysml",
-                "package P { import Q::*[@M]; }"),
-            Arguments.of("'metadata' with 'about' (SysML MetadataUsage)", "members.sysml",
-                "package P { metadata def M { } part a; part b; metadata M about a, b; }"),
             Arguments.of("'action' bodies of an if node (SysML ActionBodyParameter)", "members.sysml",
                 "package P { action a { if x action b { } else action c { } } }"),
             Arguments.of("'assert not constraint' (SysML AssertConstraintUsage)", "members.sysml",
                 "package P { part p { assert not constraint c { x > 0 } } }"),
             Arguments.of("guard-only target transition (SysML TargetTransitionUsage)", "members.sysml",
-                "package P { state def S { state a; if g then b; state b; } }"),
-            Arguments.of("accept with a guard (SysML TargetTransitionUsage)", "members.sysml",
-                "package P { state def S { state a; accept e if g then b; state b; } }"));
+                "package P { state def S { state a; if g then b; state b; } }"));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("acceptedNeighbours")
-    @DisplayName("Neighbouring forms parse")
+    @DisplayName("Neighbouring and fixed forms parse")
     void testAcceptedNeighbours(String description, String fileName, String source) {
         assertParses(fileName, source);
     }

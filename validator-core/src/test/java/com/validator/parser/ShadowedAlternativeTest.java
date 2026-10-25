@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * Valid SysML v2 and KerML members must parse as the members they are. Grammar coverage (GrammarCoverageTest) found rule
  * alternatives that no valid input reaches because an earlier alternative of the same rule accepts the keyword alone:
- * 'constraint c;' parses as an anonymous 'constraint' followed by a separate feature 'c;', without a syntax error.
+ * 'enum red { }' parses as an anonymous 'enum' followed by a separate value 'red { }', without a syntax error.
  * The validator then sees two elements where the model has one, named differently. Each case below is one member,
  * or a fixed number of members, in the body of the element around it; the body must have exactly that many elements.
  */
@@ -46,44 +46,59 @@ class ShadowedAlternativeTest {
         return Arguments.of("members.kerml", open, members, close, expected);
     }
 
-    /** Forms that parse as the expected elements today; they guard the cases below against a broken check. */
+    /**
+     * Forms that parse as the expected elements today; they guard the cases below against a broken check. The ';'
+     * forms of metadataDefinition, constraintUsage, concernUsage, metadataUsage, occurrenceUsage ('event a.b;'),
+     * subjectDeclaration, verifyRequirement and KerML's 'succession a then b;' were split once; the grammar now has one
+     * alternative with ';' or the body, or the longer form first, so they stay here. 'event Q::e;' and 'then event a.b;'
+     * parse as one element where no statement can follow the bare keyword; the cases below split them where one can.
+     */
     static Stream<Arguments> parsedAsWritten() {
         return Stream.of(
             sysml("", "metadata def Tag { }", "", 1),
+            sysml("", "metadata def Tag;", "", 1),
             sysml("part def V {", "constraint c { }", "}", 1),
+            sysml("part def V {", "constraint c;", "}", 1),
             sysml("part def V {", "assert constraint c { }", "}", 1),
+            sysml("part def V {", "assert constraint c;", "}", 1),
             sysml("part def V {", "concern c { }", "}", 1),
+            sysml("part def V {", "concern c;", "}", 1),
             sysml("part def V {", "metadata Tag { }", "}", 1),
+            sysml("part def V {", "metadata Tag;", "}", 1),
             sysml("part def V {", "event occurrence e;", "}", 1),
+            sysml("part def V {", "event a.b;", "}", 1),
+            sysml("", "event Q::e;", "", 1),
             sysml("requirement def R {", "subject v : V;", "}", 1),
+            sysml("requirement def R {", "subject v : V { }", "}", 1),
             sysml("requirement def R {", "verify requirement r : Q;", "}", 1),
+            sysml("requirement def R {", "verify r.req;", "}", 1),
             sysml("connection def C {", "end [0..1] item cart : Cart[1];", "}", 1),
             sysml("enum def E {", "enum red;", "}", 1),
             sysml("state def S {", "state off; transition t first off accept Sig then on;", "}", 2),
-            kerml("behavior B {", "succession s first a then b;", "}", 1));
+            sysml("state def S {", "state off; accept Q::Sig then on;", "}", 2),
+            sysml("state def S {", "state off; then event a.b;", "}", 2),
+            sysml("action def A {", "accept s : S;", "}", 1),
+            kerml("behavior B {", "succession s first a then b;", "}", 1),
+            kerml("behavior B {", "succession a then b;", "}", 1));
     }
 
     /**
-     * Valid SysML v2 and KerML that the parser splits into more elements than it has. In each rule the first
-     * alternative ends with an optional body that cannot be ';' (or an optional name and nothing else), so it matches
-     * the keyword alone and the rest of the member parses as another element; the alternative written for the member
-     * is never chosen. KerML's 'succession a then b;' (SuccessionDeclaration, whose 'first' is optional) parses as
-     * 'succession a' with 'a' as its name and a separate 'then b;'.
+     * Valid SysML v2 and KerML that the parser splits into more elements than it has. In each rule an earlier
+     * alternative matches the keyword alone, or the keyword and a name, because everything after it is optional, and
+     * the rest of the member parses as another element: an expression statement in a body that allows statements
+     * ('event Q::e;' and 'then event a.b;' parse as one element in a package or state body, see above), the next
+     * enumerated value, a separate item usage, or a succession. KerML's 'chains' (ChainingPart, KerML 8.2.4.3.1) has no
+     * rule at all, so 'feature f chains a.b = false;' parses as the feature 'f', the name 'chains' and an assignment.
      */
     static Stream<Arguments> splitByShadowedAlternative() {
         return Stream.of(
-            sysml("", "metadata def Tag;", "", 1),
-            sysml("part def V {", "constraint c;", "}", 1),
-            sysml("part def V {", "assert constraint c;", "}", 1),
-            sysml("part def V {", "concern c;", "}", 1),
-            sysml("part def V {", "metadata Tag;", "}", 1),
-            sysml("part def V {", "event a.b;", "}", 1),
-            sysml("requirement def R {", "subject v : V { }", "}", 1),
-            sysml("requirement def R {", "verify r.req;", "}", 1),
+            sysml("part def V {", "event Q::e;", "}", 1),
+            sysml("action def A {", "first start; then event a.b;", "}", 2),
+            sysml("action def A {", "accept a.b;", "}", 1),
             sysml("connection def C {", "end inCart [0..1] item cart : Cart[1];", "}", 1),
             sysml("enum def E {", "enum red { }", "}", 1),
             sysml("state def S {", "state off; accept Sig then on;", "}", 2),
-            kerml("behavior B {", "succession a then b;", "}", 1));
+            kerml("behavior B {", "feature f chains a.b = false;", "}", 1));
     }
 
     @ParameterizedTest(name = "{2}")
@@ -93,10 +108,10 @@ class ShadowedAlternativeTest {
         assertBodyElements(fileName, open, members, close, expected);
     }
 
-    @Disabled("bug: SysMLv2Parser.g4 shadows the ';' alternatives of metadataDefinition, constraintUsage, concernUsage, "
-        + "metadataUsage, occurrenceUsage (event), subjectDeclaration, verifyRequirement, endUsage, enumMember and "
-        + "stateBodyElement (acceptTransition), and successionUsage takes a KerML succession's first end as its name; "
-        + "found by grammar coverage, see GrammarCoverageTest")
+    @Disabled("bug: in SysMLv2Parser.g4 a bare 'event' (occurrenceUsage#8), 'then event' (thenStatement#13) and "
+        + "'accept' (acceptUsage) end the member before a qualified name or feature chain that a statement takes, "
+        + "endUsage#1 ends after 'end inCart [0..1]', enumMember#1 after 'enum', acceptUsage shadows acceptTransition "
+        + "after a state, and KerML 'chains' has no rule; found by grammar coverage, see GrammarCoverageTest")
     @ParameterizedTest(name = "{2}")
     @MethodSource("splitByShadowedAlternative")
     @DisplayName("Members that need the shadowed alternatives parse as the elements written")
