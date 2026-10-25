@@ -154,9 +154,9 @@ public class SysMLv2ValidatorImplTest {
                 require constraint meal.ingredients->size() >= 3;
             }
 
-            view BreakfastFlow : Views::ActionView {
+            view BreakfastFlow : Views::View {
                 expose MakeBreakfast::**;
-                render asDefault;
+                render Views::asTreeDiagram;
             }
             """;
 

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -26,7 +27,8 @@ import java.util.Properties;
  * 1. System property: -Dds.views.library.path=/path/to/DS_Views
  * 2. Environment variable: DS_VIEWS_LIBRARY_PATH
  * 3. Configuration file: validator.properties (ds.views.library.path=...)
- * 4. Default search paths (Cameo installation directories)
+ * 4. Default search paths (Cameo installation directories, then the bundled
+ *    "CATIA_SysML Libraries/26xR2" folder)
  */
 public class LibraryConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(LibraryConfig.class);
@@ -36,6 +38,7 @@ public class LibraryConfig {
     private static final String DS_VIEWS_LIBRARY_PROPERTY = "ds.views.library.path";
     private static final String DS_VIEWS_LIBRARY_ENV = "DS_VIEWS_LIBRARY_PATH";
     private static final String CONFIG_FILE = "validator.properties";
+    private static final String BUNDLED_DS_LIBRARY = "CATIA_SysML Libraries/26xR2";
 
     private final List<Path> libraryPaths = new ArrayList<>();
     private final List<Path> dsViewsPaths = new ArrayList<>();
@@ -209,6 +212,13 @@ public class LibraryConfig {
         defaultPaths.add("./DS_Views");
         defaultPaths.add("../DS_Views");
 
+        // Fall back to the Dassault libraries bundled with this repository
+        defaultPaths.add("./" + BUNDLED_DS_LIBRARY);
+        Path bundled = findBundledDSLibrary();
+        if (bundled != null) {
+            defaultPaths.add(bundled.toString());
+        }
+
         for (String pathStr : defaultPaths) {
             File dir = new File(pathStr);
             if (dir.exists() && dir.isDirectory()) {
@@ -217,6 +227,29 @@ public class LibraryConfig {
                 return;
             }
         }
+    }
+
+    /**
+     * Locates the bundled Dassault library folder by walking up from where this class was
+     * loaded (the CLI jar or target/classes), so it is found whatever the working directory.
+     */
+    static Path findBundledDSLibrary() {
+        try {
+            var source = LibraryConfig.class.getProtectionDomain().getCodeSource();
+            if (source == null) {
+                return null;
+            }
+            for (Path dir = Paths.get(source.getLocation().toURI()).getParent(); dir != null;
+                    dir = dir.getParent()) {
+                Path candidate = dir.resolve(BUNDLED_DS_LIBRARY);
+                if (candidate.toFile().isDirectory()) {
+                    return candidate;
+                }
+            }
+        } catch (URISyntaxException | SecurityException | IllegalArgumentException e) {
+            LOGGER.debug("Could not locate bundled DS library: {}", e.getMessage());
+        }
+        return null;
     }
 
     private void addLibraryPath(String pathStr) {
