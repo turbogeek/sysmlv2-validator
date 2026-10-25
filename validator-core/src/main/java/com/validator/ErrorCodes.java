@@ -186,6 +186,19 @@ public final class ErrorCodes {
      */
     public static final String SEMANTIC_BOUND_VALUE_OVERRIDDEN = "SEMANTIC_BOUND_VALUE_OVERRIDDEN";
 
+    /**
+     * A usage typed by a usage instead of a definition (error).
+     *
+     * <p>Cause: {@code part def Car :> Vehicle { attribute mass : mass; }} types {@code mass} by itself (the
+     * owner's own members are found first), and {@code attribute mass : ISQ::mass;} types it by the library's
+     * attribute usage {@code ISQ::mass}. A usage's types are classifiers, such as definitions
+     * ({@code Usage::definition : Classifier}, SysML 8.3.6.4), and a usage is a feature, not a classifier.
+     *
+     * <p>Resolution: type it by a definition ({@code attribute mass : MassValue;}), subset the library feature
+     * ({@code attribute mass :> ISQ::mass;}), or redefine the inherited one ({@code attribute :>> mass : MassValue;}).
+     */
+    public static final String SEMANTIC_TYPED_BY_USAGE = "SEMANTIC_TYPED_BY_USAGE";
+
     // =========================================================================
     // INHERITANCE WARNINGS - Multiple inheritance left unresolved
     // =========================================================================
@@ -278,7 +291,8 @@ public final class ErrorCodes {
      * A typing or subsetting that names the feature being declared (warning).
      *
      * <p>Cause: {@code attribute mass :> mass;}: the owner's own members are found first, so {@code mass}
-     * subsets itself instead of, e.g., {@code ISQ::mass}.
+     * subsets itself instead of, e.g., {@code ISQ::mass}. A SysML usage typed by itself
+     * ({@code attribute mass : mass;}) is reported as {@link #SEMANTIC_TYPED_BY_USAGE} instead.
      *
      * <p>Resolution: qualify the intended feature ({@code attribute mass :> ISQ::mass;}).
      */
@@ -305,10 +319,35 @@ public final class ErrorCodes {
      */
     public static final String PARAMETER_REDEFINES_TWO = "PARAMETER_REDEFINES_TWO";
 
+    /**
+     * An alias that shares a name with an inherited member it does not stand for (warning).
+     *
+     * <p>Cause: {@code part def Car :> Vehicle { alias mass for ISQ::mass; }}: owned members are found first, so
+     * {@code mass} in Car and its specializations means {@code ISQ::mass}, and {@code :>> mass} in a specialization
+     * redefines the library quantity instead of {@code Vehicle::mass}. Also reported when a type inherits, from two
+     * generals, an alias and a different member with one name: the general listed first wins.
+     *
+     * <p>Resolution: give the alias another name ({@code alias isqMass for ISQ::mass;}).
+     */
+    public static final String ALIAS_NAME_COLLISION = "ALIAS_NAME_COLLISION";
+
+    /**
+     * A redefinition that drops an inherited alias of the redefined feature (warning).
+     *
+     * <p>Cause: {@code part def Vehicle { attribute mass; alias weight for mass; }} and
+     * {@code part myCar : Vehicle { attribute :>> mass = 1500 [kg]; }}: KerML removeRedefinedFeatures removes every
+     * inherited membership of a redefined feature, aliases included, so {@code weight} does not resolve in
+     * {@code myCar} or its specializations (even when the redefinition is written {@code :>> weight}).
+     *
+     * <p>Resolution: declare the alias again after the redefinition ({@code alias weight for mass;}).
+     */
+    public static final String INHERITED_ALIAS_DROPPED = "INHERITED_ALIAS_DROPPED";
+
     /** The name-collision warning codes. */
     private static final Set<String> NAME_COLLISION_CODES = Set.of(
         DUPLICATE_MEMBER_NAME, INHERITED_NAME_REDECLARED, RENAMED_INHERITED_NAME_REUSED, NAME_SIMILAR_TO_INHERITED,
-        REDEFINITION_NOT_INHERITED, FEATURE_REFERS_TO_ITSELF, PARAMETER_POSITION_MISMATCH, PARAMETER_REDEFINES_TWO);
+        REDEFINITION_NOT_INHERITED, FEATURE_REFERS_TO_ITSELF, PARAMETER_POSITION_MISMATCH, PARAMETER_REDEFINES_TWO,
+        ALIAS_NAME_COLLISION, INHERITED_ALIAS_DROPPED);
 
     // =========================================================================
     // TYPE ERRORS - Type checking issues

@@ -204,4 +204,120 @@ package NameCollisionExamples {
             }
         }
     }
+
+    package V10_Aliases {
+        doc /* An alias gives an existing feature another name without creating a new feature, so it is the
+             * way to add a name to an inherited feature. But an alias carries no value, type or multiplicity,
+             * it competes with inherited names, and redefining a feature drops the aliases that the general
+             * declares for it. */
+        package AliasOrRename {
+            part def Vehicle { attribute mass : Real; }
+            part def CarPitfall :> Vehicle {
+                attribute curbMass :>> mass {
+                    doc /* PITFALL: meant as a second name for mass, but a named redefinition renames it: 'mass'
+                         * no longer resolves in CarPitfall or its specializations. Pilot: an error only where
+                         * 'mass' is used ("Couldn't resolve reference"). */
+                }
+            }
+            part def CarFixed :> Vehicle {
+                alias curbMass for mass {
+                    doc /* FIX: an alias adds the name; 'mass' and 'curbMass' both mean Vehicle::mass. */
+                }
+            }
+        }
+        package AliasHidesInheritedName {
+            part def Vehicle { attribute mass : Real; }
+            part def CarPitfall :> Vehicle {
+                alias mass for ISQ::mass {
+                    doc /* PITFALL: owned members are found first, so 'mass' here and in specializations means
+                         * ISQ::mass, and ':>> mass' in a specialization redefines the library quantity.
+                         * Pilot: warning "Duplicate of inherited member name 'mass' from Vehicle". */
+                }
+            }
+            part def CarFixed :> Vehicle {
+                alias isqMass for ISQ::mass {
+                    doc /* FIX: an alias name that no inherited member has. */
+                }
+            }
+        }
+        package FeatureNamedLikeInheritedAlias {
+            part def Vehicle { attribute mass : Real; alias weight for mass; }
+            part myCarPitfall : Vehicle {
+                attribute weight = 1500.0 {
+                    doc /* PITFALL: a new feature, not Vehicle::mass under its alias. Pilot: warning
+                         * "Duplicate of inherited member name 'weight' from Vehicle". */
+                }
+            }
+            part myCarFixed : Vehicle {
+                attribute :>> mass = 1500.0;
+                alias weight for mass {
+                    doc /* FIX: redefine the feature, and declare the alias again (see RedefinitionDropsAlias). */
+                }
+            }
+        }
+        package RedefinitionDropsAlias {
+            part def Vehicle { attribute mass : Real; alias weight for mass; }
+            part myCarPitfall : Vehicle {
+                attribute :>> weight = 1500.0 {
+                    doc /* PITFALL: this redefines Vehicle::mass through the alias, and the redefining feature is
+                         * named 'mass'. A redefinition drops every inherited membership of the feature it
+                         * redefines, aliases included, so 'weight' no longer resolves in myCarPitfall. Pilot: an
+                         * error only where 'weight' is used ("Couldn't resolve reference"). */
+                }
+            }
+            part myCarFixed : Vehicle {
+                attribute :>> mass = 1500.0;
+                alias weight for mass {
+                    doc /* FIX: declare the alias again after the redefinition; it now names myCarFixed::mass. */
+                }
+                attribute reportedWeight = weight;
+            }
+        }
+        package AliasFromTwoGenerals {
+            part def Vehicle { attribute mass : Real; }
+            part def Metric :> Vehicle { alias weight for mass; }
+            part def Scale { attribute weight : Real; }
+            part def WeighedCarPitfall :> Metric, Scale {
+                doc /* PITFALL: inherits the alias weight (for Vehicle::mass) and the feature Scale::weight.
+                     * 'weight' resolves to the one from the general listed first, here Vehicle::mass. Pilot:
+                     * warning "Duplicate of inherited member name 'weight' from Metric, Scale". */
+            }
+            part def WeighedCarFixed :> Metric, Scale {
+                attribute scaleWeight :>> Scale::weight {
+                    doc /* FIX: rename one of them in the specialization. */
+                }
+            }
+        }
+    }
+
+    package V11_QuantityTypedMass {
+        doc /* The car's mass as a mass quantity (ISQ::MassValue, values in kg). The pitfalls are those of V1
+             * and V2. Typing the attribute by 'mass' itself, by ISQ::mass or by kg is an error; see
+             * MassTypedByMass.sysml. */
+        private import ISQ::*;
+        private import SI::*;
+        part def Vehicle {
+            attribute mass :> ISQ::mass {
+                doc /* Subsets the library quantity ISQ::mass, so it is typed MassValue. */
+            }
+        }
+        part def CarPitfall :> Vehicle {
+            attribute mass : MassValue {
+                doc /* PITFALL: a second mass beside Vehicle::mass. Pilot: warning "Duplicate of inherited member
+                     * name 'mass' from Vehicle". */
+            }
+        }
+        part def CarFixed :> Vehicle {
+            attribute :>> mass : MassValue;
+        }
+        part myCarPitfall : Vehicle {
+            attribute mass = 1500 [kg] {
+                doc /* PITFALL: a new attribute; Vehicle::mass stays without a value. Pilot: warning "Duplicate of
+                     * inherited member name 'mass' from Vehicle". */
+            }
+        }
+        part myCarFixed : Vehicle {
+            attribute :>> mass = 1500 [kg];
+        }
+    }
 }

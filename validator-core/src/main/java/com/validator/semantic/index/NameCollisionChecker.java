@@ -36,6 +36,14 @@ import java.util.Set;
  *   <li>{@link ErrorCodes#SEMANTIC_BOUND_VALUE_OVERRIDDEN} (error): a redefinition gives a value to a
  *       feature whose value is bound ({@code =}) or initial ({@code :=}), not a default (KerML
  *       validateFeatureValueOverriding).</li>
+ *   <li>{@link ErrorCodes#SEMANTIC_TYPED_BY_USAGE} (error): {@code attribute mass : mass;} or
+ *       {@code attribute mass : ISQ::mass;} types a usage by a usage (itself, or the library quantity)
+ *       where a definition ({@code MassValue}) or a subsetting ({@code :> ISQ::mass}) was meant.</li>
+ *   <li>Aliases: an owned feature with the name of an inherited alias is reported as
+ *       {@link ErrorCodes#INHERITED_NAME_REDECLARED}; {@link ErrorCodes#ALIAS_NAME_COLLISION}: an alias takes
+ *       the name of an inherited member that it does not stand for, or a type inherits an alias and another
+ *       member with one name; {@link ErrorCodes#INHERITED_ALIAS_DROPPED}: a redefinition drops the inherited
+ *       aliases of the feature it redefines (KerML removeRedefinedFeatures), so their names stop resolving.</li>
  * </ul>
  *
  * <p>Parameters, subjects, objectives, actors, stakeholders and connector ends redefine by position, and
@@ -62,17 +70,35 @@ public final class NameCollisionChecker {
         "MetadataUsage", "SatisfyRequirement", "DependencyDeclaration", "TransitionUsage", "AcceptUsage",
         "SendUsage", "PerformUsage", "ExhibitUsage", "IncludeUsage", "AllocateUsage", "VerifyRequirement",
         "FramedConcern", "RequireConstraint", "AssumeConstraint", "ThenStatement");
+    /**
+     * Usages that SysML requires to be typed by definitions (validateUsageType and its specializations); the
+     * reference implementation reports each typed by a usage as an error.
+     */
+    private static final Set<String> DEFINITION_TYPED_KINDS = Set.of(
+        "AttributeUsage", "PartUsage", "ItemUsage", "PortUsage", "ActionUsage", "OccurrenceUsage", "RefUsage",
+        "StateUsage", "RequirementUsage", "ConstraintUsage", "CalcUsage", "EnumUsage", "InterfaceUsage",
+        "ActorUsage", "StakeholderUsage", "SubjectDeclaration", "InParameter", "OutParameter", "InoutParameter");
     /** Shortest name compared for typos; shorter names (x, id, in1) differ by one edit too often. */
     private static final int MIN_SIMILAR_LENGTH = 4;
 
     private final ModelIndex index;
     private final InheritanceChecker inheritance;
     private final Map<String, List<String>> inheritedMemo = new HashMap<>();
+    private final Map<String, Set<String>> hiddenMemo = new HashMap<>();
     private final Map<String, List<String>> parametersMemo = new HashMap<>();
     private final Map<String, Set<String>> redefinedByOwnedMemo = new HashMap<>();
     private final Map<String, Set<String>> closureMemo = new HashMap<>();
+    private final Map<String, List<InheritedAlias>> visibleAliasesMemo = new HashMap<>();
+    private final Map<String, List<InheritedAlias>> inheritedAliasesMemo = new HashMap<>();
     private final Set<String> closureInProgress = new HashSet<>();
     private final Set<String> parametersInProgress = new HashSet<>();
+    private final Set<String> aliasesInProgress = new HashSet<>();
+
+    /** An alias of a feature, as seen by a type that inherits it: the alias member and the feature it stands for. */
+    private record InheritedAlias(String alias, String feature) { }
+
+    /** The typings reported as {@link ErrorCodes#SEMANTIC_TYPED_BY_USAGE}, and the typing to suggest in fixes. */
+    private record TypedByUsage(Set<List<String>> typings, String typeText) { }
 
     /**
      * @param index the index of the libraries and every validated file
@@ -113,9 +139,12 @@ public final class NameCollisionChecker {
                 continue;
             }
             duplicates(e, filePath, result);
-            if (e.declaresFeature()) {
+            if (e.aliasTarget != null) {
+                aliasCollision(e, filePath, result);
+            } else if (e.declaresFeature()) {
                 checkFeature(e, filePath, result);
             }
+            inheritedAliasConflicts(e, filePath, result);
         }
         return result;
     }
@@ -176,15 +205,24 @@ public final class NameCollisionChecker {
         if (byName) {
             return;
         }
-        boolean selfReference = refersToItself(e, owner, filePath, result);
+        TypedByUsage typed = typedByUsage(e, owner, filePath, result);
+        boolean selfReference = refersToItself(e, owner, typed.typings(), filePath, result);
         redefinitionTargets(e, owner, filePath, result);
+        redefinedThroughAlias(e, owner, filePath, result);
+        droppedAliases(e, owner, filePath, result);
         if (!e.parameter && !selfReference) {
-            redeclaration(e, owner, filePath, result);
+            redeclaration(e, owner, typed.typeText(), filePath, result);
         }
     }
 
-    /** INHERITED_NAME_REDECLARED, RENAMED_INHERITED_NAME_REUSED and NAME_SIMILAR_TO_INHERITED for a new feature. */
-    private void redeclaration(IndexedElement e, String owner, String filePath, List<ValidationError> result) {
+    /**
+     * INHERITED_NAME_REDECLARED, RENAMED_INHERITED_NAME_REUSED and NAME_SIMILAR_TO_INHERITED for a new feature.
+     *
+     * @param typeText the typing to write in a suggested redefinition: the element's own, or a definition in
+     *     place of a usage it is wrongly typed by (null for none)
+     */
+    private void redeclaration(IndexedElement e, String owner, String typeText, String filePath,
+            List<ValidationError> result) {
         String name = e.name != null ? e.name : e.shortName;
         if (name == null || owner.isEmpty()) {
             return;
@@ -215,11 +253,33 @@ public final class NameCollisionChecker {
             String subsets = e.supertypes.stream().anyMatch(s -> s.size() > 1
                     && s.get(s.size() - 1).equals(name) && !e.redefines.contains(s))
                 ? " It subsets the inherited feature but does not replace it; use ':>>' (redefines), not ':>'." : "";
-            String fix = redefinitionText(e, name);
+            String fix = redefinitionText(e, name, typeText);
             String message = String.format("'%s' declares a new feature in '%s' with the same name as the inherited"
                     + " '%s' instead of redefining it, so '%s' has two features named '%s'.%s%s Redefine the"
                     + " inherited feature ('%s'), or give the new feature another name.",
                 name, ownerName, inheritance.display(target), ownerName, name, valueNote, subsets, fix);
+            result.add(warning(filePath, e.line, e.column, ErrorCodes.INHERITED_NAME_REDECLARED, message, fix));
+            return;
+        }
+        // The name of an inherited alias ('alias weight for mass;' in a general)
+        for (InheritedAlias a : inheritedAliases(owner)) {
+            String aliasName = overlap(e, inheritance.first(a.alias()));
+            if (aliasName == null || redefined.contains(a.feature())) {
+                continue;
+            }
+            String featureName = inheritance.effectiveName(a.feature());
+            String fix = redefinitionText(e, featureName, typeText);
+            String valueNote = e.valueText == null ? ""
+                : String.format(" The value '%s' goes to the new feature, not to '%s'.", e.valueText,
+                    inheritance.display(a.feature()));
+            String message = String.format("'%s' declares a new feature in '%s' with the name of the alias '%s', which"
+                    + " '%s' inherits for '%s', instead of redefining that feature, so '%s' names two members of"
+                    + " '%s'.%s Redefine the inherited feature ('%s'; a redefinition drops the inherited aliases of the"
+                    + " feature it redefines, so also declare 'alias %s for %s;' in '%s' if the name '%s' is still"
+                    + " used), or give the new feature another name.",
+                aliasName, ownerName, inheritance.display(a.alias()), ownerName, inheritance.display(a.feature()),
+                aliasName, ownerName, valueNote, fix, InheritanceChecker.sysmlName(aliasName),
+                InheritanceChecker.sysmlName(featureName), ownerName, aliasName);
             result.add(warning(filePath, e.line, e.column, ErrorCodes.INHERITED_NAME_REDECLARED, message, fix));
             return;
         }
@@ -247,7 +307,7 @@ public final class NameCollisionChecker {
         String similar = similarInherited(owner, name, inherited);
         if (similar != null && !namesInHeader(e, inheritance.effectiveName(similar))) {
             String other = inheritance.effectiveName(similar);
-            String fix = redefinitionText(e, other);
+            String fix = redefinitionText(e, other, typeText);
             String message = String.format("'%s' is a new feature of '%s', but '%s' inherits '%s', whose name differs"
                     + " by one letter. If '%s' is meant, redefine it ('%s'); otherwise rename '%s' so the two are"
                     + " not confused.",
@@ -257,16 +317,183 @@ public final class NameCollisionChecker {
     }
 
     /**
+     * SEMANTIC_TYPED_BY_USAGE: a usage typed by a usage, most often by its own name ({@code attribute mass :
+     * mass;}, where the owner's own members are found first), by a library quantity ({@code attribute mass :
+     * ISQ::mass;}) or by a unit ({@code attribute mass : kg;}), where a definition ({@code : MassValue}) or a
+     * subsetting ({@code :> ISQ::mass}) was meant.
+     *
+     * @return the typings reported, and the type to suggest in their place
+     */
+    private TypedByUsage typedByUsage(IndexedElement e, String owner, String filePath, List<ValidationError> result) {
+        Set<List<String>> reported = new LinkedHashSet<>();
+        if (!DEFINITION_TYPED_KINDS.contains(e.kind) || e.typeText == null
+                || filePath != null && filePath.endsWith(".kerml")) {
+            return new TypedByUsage(reported, e.typeText);
+        }
+        String name = e.name != null ? e.name : e.shortName;
+        String ownerName = owner.isEmpty() ? "its namespace" : "'" + inheritance.display(owner) + "'";
+        String suggested = null;
+        for (List<String> segs : typings(e)) {
+            boolean self = segs.size() == 1 && segs.get(0).equals(name);
+            String usage;
+            if (self) {
+                usage = e.qualifiedName;
+            } else {
+                usage = usageNamed(segs, owner);
+                if (usage == null) {
+                    continue;
+                }
+            }
+            reported.add(segs);
+            String written = String.join("::", segs);
+            // What was probably meant: the same-named feature outside the owner (ISQ::mass), or the usage itself
+            String meant = usage;
+            if (self) {
+                Set<String> elsewhere = outsideTargets(e.qualifiedName, inheritance.parentOf(owner), segs);
+                meant = elsewhere.isEmpty() ? null : elsewhere.iterator().next();
+            }
+            IndexedElement meantRecord = meant == null ? null : inheritance.first(meant);
+            String meantType = meantRecord == null ? null : meantRecord.typeText;
+            String quantity = meant == null ? null : quantityOfUnit(meant);
+            String fix = "";
+            if (quantity != null) {
+                meantType = quantity;
+                fix = String.format(" '%s' is a unit: type the feature by its quantity (': %s') and give values in"
+                    + " the unit ('= 1.0 [%s]').", inheritance.display(meant), quantity, written);
+            } else if (meant != null) {
+                String subset = self ? inheritance.display(meant) : written;
+                fix = meantType != null
+                    ? String.format(" Type it by a definition (': %s', the type of '%s') or subset the feature"
+                        + " (':> %s').", meantType, inheritance.display(meant), subset)
+                    : String.format(" Subset the feature instead (':> %s').", subset);
+            }
+            suggested = suggested != null ? suggested : meantType;
+            String what = self
+                ? String.format("'%s' is typed by itself: the name '%s' after ':' is looked up in %s first, where it"
+                    + " finds the feature being declared.", name, written, ownerName)
+                : String.format("'%s' is typed by '%s', which is %s.",
+                    name == null ? "?" : name, inheritance.display(usage), article(usage));
+            String message = what + " A usage is a feature, and a usage's types must be classifiers, such as"
+                + " definitions (SysML 8.3.6.4, Usage::definition; the reference implementation reports an error)."
+                + fix;
+            result.add(new ValidationError.Builder()
+                .filePath(filePath)
+                .line(e.line)
+                .column(e.column)
+                .message(message)
+                .errorCode(ErrorCodes.SEMANTIC_TYPED_BY_USAGE)
+                .severity(ValidationError.Severity.ERROR)
+                .build());
+        }
+        return new TypedByUsage(reported, reported.isEmpty() ? e.typeText : suggested);
+    }
+
+    /**
+     * For a unit such as {@code SI::kg} (an attribute usage typed {@code MassUnit}, a kind of
+     * {@code MeasurementUnit}): the quantity value definition its values belong to, {@code ISQ::MassValue},
+     * named as the ISQ library names it ({@code XUnit} / {@code XValue}); null if it is not a unit or no such
+     * definition is known.
+     */
+    private String quantityOfUnit(String usage) {
+        IndexedElement r = inheritance.first(usage);
+        if (r == null || !"AttributeUsage".equals(r.kind) || r.typeText == null || !r.typeText.endsWith("Unit")) {
+            return null;
+        }
+        List<List<String>> types = typings(r);
+        if (types.size() != 1) {
+            return null;
+        }
+        ModelIndex.Resolution type = index.resolve(types.get(0), inheritance.parentOf(usage));
+        if (type.getStatus() != ModelIndex.Status.FOUND) {
+            return null;
+        }
+        boolean unit = false;
+        for (String t : type.getTargets()) {
+            Set<String> ancestors = new LinkedHashSet<>(inheritance.ancestors(t));
+            ancestors.add(t);
+            unit |= ancestors.stream().anyMatch(a -> a.endsWith("::MeasurementUnit"));
+        }
+        String unitType = types.get(0).get(types.get(0).size() - 1);
+        String quantity = unitType.substring(0, unitType.length() - "Unit".length()) + "Value";
+        return unit && index.resolve(List.of("ISQ", quantity), "").getStatus() == ModelIndex.Status.FOUND
+            ? quantity : null;
+    }
+
+    /** The usage (or KerML feature) a typing names, aliases followed; null unless every target is one. */
+    private String usageNamed(List<String> segs, String owner) {
+        ModelIndex.Resolution r = index.resolve(segs, owner);
+        if (r.getStatus() != ModelIndex.Status.FOUND || r.getTargets().isEmpty()) {
+            return null;
+        }
+        Set<String> targets = new LinkedHashSet<>();
+        for (String t : r.getTargets()) {
+            IndexedElement record = inheritance.first(t);
+            if (record != null && record.aliasTarget != null) {
+                targets.addAll(inheritance.aliasTargets(record));
+            } else {
+                targets.add(t);
+            }
+        }
+        for (String t : targets) {
+            IndexedElement record = inheritance.first(t);
+            if (record == null || !record.declaresFeature()) {
+                return null;
+            }
+        }
+        return targets.isEmpty() ? null : targets.iterator().next();
+    }
+
+    /** "an attribute usage", "a part usage", ... for a usage; "a feature" otherwise. */
+    private String article(String usage) {
+        IndexedElement r = inheritance.first(usage);
+        if (r == null || r.kind == null || !r.kind.endsWith("Usage")) {
+            return "a feature";
+        }
+        String keyword = InheritanceChecker.KEYWORDS.get(r.kind.substring(0, r.kind.length() - "Usage".length()));
+        if (keyword == null) {
+            return "a usage";
+        }
+        return ("aeiou".indexOf(keyword.charAt(0)) >= 0 ? "an " : "a ") + keyword + " usage";
+    }
+
+    /** The typings written on an element ({@code : A, ~B}), as qualified-name segments. */
+    private static List<List<String>> typings(IndexedElement e) {
+        List<List<String>> result = new ArrayList<>();
+        if (e.typeText == null) {
+            return result;
+        }
+        for (String part : e.typeText.split(",")) {
+            String text = part.trim();
+            if (text.startsWith("~")) {
+                text = text.substring(1);
+            }
+            if (text.isEmpty() || text.contains(".")) {
+                continue;
+            }
+            List<String> segs = new ArrayList<>();
+            for (String seg : text.split("::")) {
+                segs.add(seg.length() > 1 && seg.startsWith("'") && seg.endsWith("'")
+                    ? seg.substring(1, seg.length() - 1) : seg);
+            }
+            result.add(segs);
+        }
+        return result;
+    }
+
+    /**
      * FEATURE_REFERS_TO_ITSELF: a typing or subsetting by the feature's own simple name. The owner's own
      * members are found first, so the name denotes the feature being declared.
+     *
+     * @param skip typings already reported as {@link ErrorCodes#SEMANTIC_TYPED_BY_USAGE}
      */
-    private boolean refersToItself(IndexedElement e, String owner, String filePath, List<ValidationError> result) {
+    private boolean refersToItself(IndexedElement e, String owner, Set<List<String>> skip, String filePath,
+            List<ValidationError> result) {
         String name = e.name != null ? e.name : e.shortName;
         if (name == null) {
             return false;
         }
         for (List<String> segs : e.supertypes) {
-            if (segs.size() == 1 && segs.get(0).equals(name) && !e.redefines.contains(segs)) {
+            if (segs.size() == 1 && segs.get(0).equals(name) && !e.redefines.contains(segs) && !skip.contains(segs)) {
                 String ownerName = owner.isEmpty() ? "its namespace" : "'" + inheritance.display(owner) + "'";
                 Set<String> elsewhere = outsideTargets(e.qualifiedName, inheritance.parentOf(owner), segs);
                 String example = elsewhere.isEmpty() ? ""
@@ -319,6 +546,232 @@ public final class NameCollisionChecker {
                     ":>> " + other));
             }
         }
+    }
+
+    /**
+     * ALIAS_NAME_COLLISION for an owned alias: it takes the name of a member the owner inherits but stands for
+     * something else. Owned members are found first, so the name now means the alias's target in the owner and
+     * its specializations.
+     */
+    private void aliasCollision(IndexedElement e, String filePath, List<ValidationError> result) {
+        String owner = e.parentName == null ? "" : e.parentName;
+        if (owner.isEmpty() || inheritance.generals(owner).isEmpty()) {
+            return;
+        }
+        Set<String> targets = inheritance.aliasTargets(e);
+        if (targets.isEmpty()) {
+            return;
+        }
+        Set<String> replaced = redefinedByOwned(owner);
+        String hidden = null;
+        String name = null;
+        for (String f : inheritedFeatures(owner)) {
+            name = overlap(e, inheritance.first(f));
+            if (name != null && !targets.contains(f) && !intersects(redefinitionClosure(f), replaced)) {
+                hidden = "'" + inheritance.display(f) + "'";
+                break;
+            }
+        }
+        if (hidden == null) {
+            for (InheritedAlias a : inheritedAliases(owner)) {
+                name = overlap(e, inheritance.first(a.alias()));
+                if (name != null && !targets.contains(a.feature())) {
+                    hidden = "'" + inheritance.display(a.feature()) + "' (through the alias '"
+                        + inheritance.display(a.alias()) + "')";
+                    break;
+                }
+            }
+        }
+        if (hidden == null) {
+            return;
+        }
+        String ownerName = inheritance.display(owner);
+        String target = inheritance.display(targets.iterator().next());
+        // A private alias is not visible to specializations
+        String reach = e.isPrivate ? String.format("'%s' in '%s' now means '%s'", name, ownerName, target)
+            : String.format("'%s' in '%s' and its specializations now means '%s', and ':>> %s' in a specialization"
+                + " redefines it", name, ownerName, target, InheritanceChecker.sysmlName(name));
+        String message = String.format("Alias '%s' in '%s' stands for '%s', but '%s' also inherits %s under the name"
+                + " '%s'. Owned members are found first, so %s. Give the alias another name.",
+            name, ownerName, target, ownerName, hidden, name, reach);
+        result.add(warning(filePath, e.line, e.column, ErrorCodes.ALIAS_NAME_COLLISION, message, null));
+    }
+
+    /**
+     * ALIAS_NAME_COLLISION for a type that inherits, from different generals, an alias and another member with
+     * the same name: the name resolves to the one from the general listed first.
+     */
+    private void inheritedAliasConflicts(IndexedElement e, String filePath, List<ValidationError> result) {
+        List<InheritedAlias> aliases = inheritedAliases(e.qualifiedName);
+        if (aliases.isEmpty()) {
+            return;
+        }
+        String type = e.qualifiedName;
+        Set<String> own = ownNames(type);
+        Set<String> replaced = redefinedByOwned(type);
+        Set<String> reported = new HashSet<>();
+        for (InheritedAlias a : aliases) {
+            IndexedElement alias = inheritance.first(a.alias());
+            for (String name : names(alias)) {
+                if (own.contains(name) || !reported.add(name)) {
+                    continue;
+                }
+                String aliasFrom = generalShowingAlias(type, a);
+                String other = null;
+                String otherFrom = null;
+                for (String f : inheritedFeatures(type)) {
+                    if (!f.equals(a.feature()) && name.equals(inheritance.effectiveName(f))
+                            && !intersects(redefinitionClosure(f), replaced)) {
+                        other = "the feature '" + inheritance.display(f) + "'";
+                        otherFrom = generalWithMember(type, f);
+                        break;
+                    }
+                }
+                for (InheritedAlias b : aliases) {
+                    if (other == null && !b.feature().equals(a.feature())
+                            && names(inheritance.first(b.alias())).contains(name)) {
+                        other = "the alias '" + inheritance.display(b.alias()) + "' for '"
+                            + inheritance.display(b.feature()) + "'";
+                        otherFrom = generalShowingAlias(type, b);
+                    }
+                }
+                if (other == null || aliasFrom == null || otherFrom == null || aliasFrom.equals(otherFrom)) {
+                    reported.remove(name);
+                    continue;
+                }
+                List<String> generals = inheritance.generals(type);
+                boolean aliasFirst = generals.indexOf(aliasFrom) < generals.indexOf(otherFrom);
+                String typeName = inheritance.display(type);
+                String message = String.format("'%s' inherits two different members named '%s': the alias '%s' for"
+                        + " '%s' (from '%s') and %s (from '%s'). '%s' in '%s' resolves to the one from the general"
+                        + " listed first, '%s'. Rename one of them, or redefine the feature in '%s' under a distinct"
+                        + " name.",
+                    typeName, name, inheritance.display(a.alias()), inheritance.display(a.feature()),
+                    inheritance.display(aliasFrom), other, inheritance.display(otherFrom), name, typeName,
+                    inheritance.display(aliasFirst ? aliasFrom : otherFrom), typeName);
+                result.add(warning(filePath, e.line, e.column, ErrorCodes.ALIAS_NAME_COLLISION, message, null));
+            }
+        }
+    }
+
+    /**
+     * ALIAS_NAME_COLLISION for {@code :>> name} that a general's alias turns away from the inherited feature of
+     * that name: {@code alias mass for ISQ::mass;} in Car makes {@code :>> mass} in a specialization of Car
+     * redefine {@code ISQ::mass}, and {@code Vehicle::mass} stays inherited beside it.
+     */
+    private void redefinedThroughAlias(IndexedElement e, String owner, String filePath,
+            List<ValidationError> result) {
+        if (owner.isEmpty() || e.redefines.size() != 1 || e.redefines.get(0).size() != 1) {
+            return;
+        }
+        String name = e.redefines.get(0).get(0);
+        Set<String> direct = redefinitionTargets(e.qualifiedName, owner, e.redefines.get(0));
+        InheritedAlias through = null;
+        for (String general : inheritance.generals(owner)) {
+            for (InheritedAlias a : visibleAliases(general)) {
+                if (direct.contains(a.feature()) && names(inheritance.first(a.alias())).contains(name)) {
+                    through = a;
+                    break;
+                }
+            }
+            if (through != null) {
+                break;
+            }
+        }
+        if (through == null) {
+            return;
+        }
+        Set<String> redefined = redefinitionClosure(e.qualifiedName);
+        Set<String> replaced = redefinedByOwned(owner);
+        for (String f : inheritedFeatures(owner)) {
+            if (name.equals(inheritance.effectiveName(f)) && !redefined.contains(f)
+                    && !intersects(redefinitionClosure(f), replaced)) {
+                String ownerName = inheritance.display(owner);
+                String message = String.format("':>> %s' in '%s' redefines '%s', because '%s' is the alias '%s' for it;"
+                        + " '%s' still inherits '%s', so it now has two features named '%s'. To redefine '%s', write"
+                        + " ':>> %s', and give the alias another name.",
+                    name, ownerName, inheritance.display(through.feature()), name, inheritance.display(through.alias()),
+                    ownerName, inheritance.display(f), name, inheritance.display(f), inheritance.qualifiedReference(f));
+                result.add(warning(filePath, e.line, e.column, ErrorCodes.ALIAS_NAME_COLLISION, message, null));
+                return;
+            }
+        }
+    }
+
+    /**
+     * INHERITED_ALIAS_DROPPED: a redefinition removes the owner's inherited memberships of the redefined
+     * feature, aliases included (KerML removeRedefinedFeatures), so an alias declared in a general for that
+     * feature no longer resolves in the owner, unless the owner declares the name again.
+     */
+    private void droppedAliases(IndexedElement e, String owner, String filePath, List<ValidationError> result) {
+        if (e.redefines.isEmpty() || owner.isEmpty()) {
+            return;
+        }
+        List<InheritedAlias> aliases = inheritableAliases(owner);
+        if (aliases.isEmpty()) {
+            return;
+        }
+        Set<String> direct = new LinkedHashSet<>();
+        for (List<String> segs : e.redefines) {
+            direct.addAll(redefinitionTargets(e.qualifiedName, owner, segs));
+        }
+        if (direct.isEmpty()) {
+            return;
+        }
+        String effective = e.name != null ? e.name
+            : e.shortName != null ? e.shortName : inheritance.effectiveName(direct.iterator().next());
+        Set<String> own = ownNames(owner);
+        String label = e.name != null ? "'" + e.name + "'" : "':>> " + String.join("::", e.redefines.get(0)) + "'";
+        String ownerName = inheritance.display(owner);
+        Set<String> reported = new HashSet<>();
+        for (InheritedAlias a : aliases) {
+            List<String> aliasNames = names(inheritance.first(a.alias()));
+            if (aliasNames.isEmpty() || aliasNames.contains(effective) || !Collections.disjoint(aliasNames, own)
+                    || !intersects(redefinitionClosure(a.feature()), direct) || !reported.add(a.alias())) {
+                continue;
+            }
+            String aliasName = aliasNames.get(0);
+            String dropped = String.format("%s redefines '%s', so '%s' no longer has '%s', the alias that '%s' declares"
+                    + " for it: a redefinition drops every inherited membership of the feature it redefines, aliases"
+                    + " included (KerML removeRedefinedFeatures), and the redefining feature is named '%s'.",
+                label, inheritance.display(a.feature()), ownerName, aliasName,
+                inheritance.display(inheritance.parentOf(a.alias())), effective);
+            // Another general may still supply a member with that name, which the name now means
+            String other = inheritedMemberNamed(owner, aliasName, a.feature());
+            if (other != null) {
+                result.add(warning(filePath, e.line, e.column, ErrorCodes.INHERITED_ALIAS_DROPPED, dropped
+                    + String.format(" '%s' in '%s' now means %s.", aliasName, ownerName, other), null));
+                continue;
+            }
+            String message = dropped + String.format(" '%s' does not resolve in '%s' or its specializations. If the"
+                    + " name is still used, declare the alias again in '%s' ('alias %s for %s;').",
+                aliasName, ownerName, ownerName, InheritanceChecker.sysmlName(aliasName),
+                InheritanceChecker.sysmlName(effective));
+            result.add(warning(filePath, e.line, e.column, ErrorCodes.INHERITED_ALIAS_DROPPED, message,
+                "alias " + InheritanceChecker.sysmlName(aliasName) + " for " + InheritanceChecker.sysmlName(effective)
+                    + ";"));
+        }
+    }
+
+    /**
+     * A member the owner still inherits under the name, other than the given feature and the features the
+     * owner's own features replace, described for a message ("the feature 'Scale::weight'"); null if none.
+     */
+    private String inheritedMemberNamed(String owner, String name, String except) {
+        Set<String> replaced = redefinedByOwned(owner);
+        for (String f : inheritedFeatures(owner)) {
+            if (!f.equals(except) && name.equals(inheritance.effectiveName(f))
+                    && !intersects(redefinitionClosure(f), replaced)) {
+                return "the feature '" + inheritance.display(f) + "'";
+            }
+        }
+        for (InheritedAlias b : inheritedAliases(owner)) {
+            if (!b.feature().equals(except) && names(inheritance.first(b.alias())).contains(name)) {
+                return "'" + inheritance.display(b.feature()) + "', through the alias '"
+                    + inheritance.display(b.alias()) + "'";
+            }
+        }
+        return null;
     }
 
     /** What a name resolves to from a namespace, other than the element itself and the namespace's members. */
@@ -450,7 +903,142 @@ public final class NameCollisionChecker {
         all.removeAll(hidden);
         List<String> result = List.copyOf(all);
         inheritedMemo.put(owner, result);
+        hiddenMemo.put(owner, hidden);
         return result;
+    }
+
+    /** The features that a feature inherited by the owner redefines, which the owner therefore does not inherit. */
+    private Set<String> hiddenFeatures(String owner) {
+        inheritedFeatures(owner);
+        return hiddenMemo.getOrDefault(owner, Set.of());
+    }
+
+    /** The aliases of features that a type shows its specializations: its own non-private ones and inherited ones. */
+    private List<InheritedAlias> visibleAliases(String type) {
+        List<InheritedAlias> cached = visibleAliasesMemo.get(type);
+        if (cached != null) {
+            return cached;
+        }
+        if (!aliasesInProgress.add(type)) {
+            return List.of();
+        }
+        List<InheritedAlias> result = new ArrayList<>();
+        try {
+            for (IndexedElement o : index.ownedElements(type)) {
+                if (o.aliasTarget == null || o.isPrivate || o.qualifiedName == null) {
+                    continue;
+                }
+                for (String t : inheritance.aliasTargets(o)) {
+                    IndexedElement r = inheritance.first(t);
+                    if (r != null && r.declaresFeature()) {
+                        result.add(new InheritedAlias(o.qualifiedName, t));
+                        break;
+                    }
+                }
+            }
+            result.addAll(inheritedAliases(type));
+        } finally {
+            aliasesInProgress.remove(type);
+        }
+        List<InheritedAlias> aliases = List.copyOf(result);
+        visibleAliasesMemo.put(type, aliases);
+        return aliases;
+    }
+
+    /** The aliases of features that a type's generals show it, before any is dropped (KerML inheritableMemberships). */
+    private List<InheritedAlias> inheritableAliases(String owner) {
+        Set<InheritedAlias> result = new LinkedHashSet<>();
+        for (String general : inheritance.generals(owner)) {
+            result.addAll(visibleAliases(general));
+        }
+        return List.copyOf(result);
+    }
+
+    /**
+     * The aliases of features that a type inherits: the inheritable ones, except the aliases of a feature that
+     * the type's own features redefine or that another inherited feature redefines. KerML removeRedefinedFeatures
+     * drops every membership of such a feature, aliases included.
+     */
+    private List<InheritedAlias> inheritedAliases(String owner) {
+        List<InheritedAlias> cached = inheritedAliasesMemo.get(owner);
+        if (cached != null) {
+            return cached;
+        }
+        List<InheritedAlias> inheritable = inheritableAliases(owner);
+        List<InheritedAlias> result = new ArrayList<>();
+        if (!inheritable.isEmpty()) {
+            Set<String> replaced = redefinedByOwned(owner);
+            Set<String> hidden = hiddenFeatures(owner);
+            for (InheritedAlias a : inheritable) {
+                if (!hidden.contains(a.feature()) && !intersects(redefinitionClosure(a.feature()), replaced)) {
+                    result.add(a);
+                }
+            }
+        }
+        List<InheritedAlias> aliases = List.copyOf(result);
+        inheritedAliasesMemo.put(owner, aliases);
+        return aliases;
+    }
+
+    /** The first general of a type, in declaration order, that shows it the alias. */
+    private String generalShowingAlias(String type, InheritedAlias alias) {
+        for (String general : inheritance.generals(type)) {
+            if (visibleAliases(general).contains(alias)) {
+                return general;
+            }
+        }
+        return null;
+    }
+
+    /** The first general of a type, in declaration order, of which the feature is a member. */
+    private String generalWithMember(String type, String feature) {
+        for (String general : inheritance.generals(type)) {
+            if (inheritance.members(general).contains(feature)) {
+                return general;
+            }
+        }
+        return null;
+    }
+
+    /** The declared names and short names of a namespace's own members (not names derived from redefinitions). */
+    private Set<String> ownNames(String namespace) {
+        Set<String> result = new HashSet<>();
+        for (IndexedElement o : index.ownedElements(namespace)) {
+            result.addAll(names(o));
+        }
+        return result;
+    }
+
+    /** An element's declared name and short name, if any. */
+    private static List<String> names(IndexedElement e) {
+        List<String> result = new ArrayList<>(2);
+        if (e != null && e.name != null) {
+            result.add(e.name);
+        }
+        if (e != null && e.shortName != null) {
+            result.add(e.shortName);
+        }
+        return result;
+    }
+
+    /**
+     * The name that two elements share: a declared name or short name of one equal to a declared name or short
+     * name of the other (the second element's effective name counts for an unnamed redefinition); null if none.
+     */
+    private static String overlap(IndexedElement a, IndexedElement b) {
+        if (a == null || b == null) {
+            return null;
+        }
+        List<String> theirs = names(b);
+        if (theirs.isEmpty() && b.effectiveName() != null) {
+            theirs.add(b.effectiveName());
+        }
+        for (String n : names(a)) {
+            if (theirs.contains(n)) {
+                return n;
+            }
+        }
+        return null;
     }
 
     /** The inherited feature whose name is one edit from {@code name}, unless the owner has a feature by that name. */
@@ -621,8 +1209,11 @@ public final class NameCollisionChecker {
         return false;
     }
 
-    /** A redefinition of {@code name} in the element's own style, e.g. "attribute :>> mass : Real = 1500.0;". */
-    private static String redefinitionText(IndexedElement e, String name) {
+    /**
+     * A redefinition of {@code name} in the element's own style with the given typing (none if null), e.g.
+     * "attribute :>> mass : Real = 1500.0;".
+     */
+    private static String redefinitionText(IndexedElement e, String name, String typeText) {
         StringBuilder sb = new StringBuilder();
         if (e.kind != null && e.kind.endsWith("Usage")) {
             String keyword = InheritanceChecker.KEYWORDS.get(e.kind.substring(0, e.kind.length() - "Usage".length()));
@@ -631,8 +1222,8 @@ public final class NameCollisionChecker {
             }
         }
         sb.append(":>> ").append(InheritanceChecker.sysmlName(name));
-        if (e.typeText != null) {
-            sb.append(" : ").append(e.typeText);
+        if (typeText != null) {
+            sb.append(" : ").append(typeText);
         }
         if (e.multiplicityText != null) {
             sb.append(' ').append(e.multiplicityText);

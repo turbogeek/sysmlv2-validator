@@ -775,7 +775,7 @@ public final class InheritanceChecker {
     }
 
     /** A feature's name as written to redefine it from elsewhere: its owner's name, '::', its name. */
-    private String qualifiedReference(String feature) {
+    String qualifiedReference(String feature) {
         String owner = parentOf(feature);
         IndexedElement o = first(owner);
         String ownerName = o == null || o.effectiveName() == null ? owner : sysmlName(o.effectiveName());
@@ -1089,11 +1089,23 @@ public final class InheritanceChecker {
     }
 
     /**
-     * The features of a type with the given name: the nearest ones among its members, else whatever the
-     * index finds as a member of the type (e.g. a feature hidden by a renaming redefinition).
+     * The features of a type with the given name, as seen from outside it (a specialization, or a qualified
+     * name): a non-private owned alias of that name (owned members are found before inherited ones, so
+     * {@code alias mass for ISQ::mass;} hides an inherited {@code mass}), else the nearest ones among its
+     * members, else whatever the index finds as a member of the type (e.g. a feature hidden by a renaming
+     * redefinition).
      */
     private Set<String> memberNamed(String type, String name, String self) {
         Set<String> result = new LinkedHashSet<>();
+        for (IndexedElement owned : index.ownedElements(type)) {
+            if (owned.aliasTarget != null && !owned.isPrivate && owned.qualifiedName != null
+                    && !owned.qualifiedName.equals(self) && (name.equals(owned.name) || name.equals(owned.shortName))) {
+                result.add(owned.qualifiedName);
+            }
+        }
+        if (!result.isEmpty()) {
+            return result;
+        }
         for (String m : members(type)) {
             if (!m.equals(self) && name.equals(effectiveName(m))) {
                 result.add(m);
@@ -1112,21 +1124,53 @@ public final class InheritanceChecker {
         return result;
     }
 
+    /** What an alias stands for: the elements its target names, aliases followed; empty if it does not resolve. */
+    Set<String> aliasTargets(IndexedElement alias) {
+        return alias.aliasTarget == null ? Set.of() : dealias(Set.of(alias.qualifiedName), 0);
+    }
+
+    /** The elements the given names stand for, aliases followed; an alias that does not resolve stands for none. */
     private Set<String> dealias(Set<String> targets, int depth) {
         Set<String> result = new LinkedHashSet<>();
         for (String t : targets) {
             IndexedElement r = first(t);
-            if (r != null && r.aliasTarget != null && depth < MAX_ALIAS_DEPTH) {
-                ModelIndex.Resolution target =
-                    index.resolve(r.aliasTarget, r.parentName == null ? "" : r.parentName);
-                if (target.getStatus() == ModelIndex.Status.FOUND) {
-                    result.addAll(dealias(target.getTargets(), depth + 1));
-                }
-            } else {
+            if (r == null || r.aliasTarget == null) {
                 result.add(t);
+            } else if (depth < MAX_ALIAS_DEPTH) {
+                result.addAll(dealias(aliasTarget(r), depth + 1));
             }
         }
         return result;
+    }
+
+    /**
+     * What an alias's target names, the alias itself excluded. A simple name is looked up first among the
+     * features of the alias's namespace by effective name, owned before inherited, as the reference
+     * implementation does: {@code alias weight for mass;} after {@code attribute :>> mass;} names that unnamed
+     * redefinition, and {@code alias mass for mass;} names the inherited {@code mass}, not itself.
+     */
+    private Set<String> aliasTarget(IndexedElement alias) {
+        String owner = alias.parentName == null ? "" : alias.parentName;
+        if (alias.aliasTarget.size() == 1 && !owner.isEmpty()) {
+            String name = alias.aliasTarget.get(0);
+            Set<String> found = new LinkedHashSet<>();
+            for (String m : members(owner)) {
+                if (name.equals(effectiveName(m))) {
+                    found.add(m);
+                    break;
+                }
+            }
+            if (!found.isEmpty()) {
+                return found;
+            }
+        }
+        ModelIndex.Resolution r = index.resolve(alias.aliasTarget, owner);
+        if (r.getStatus() != ModelIndex.Status.FOUND) {
+            return Set.of();
+        }
+        Set<String> targets = new LinkedHashSet<>(r.getTargets());
+        targets.remove(alias.qualifiedName);
+        return targets;
     }
 
     // ------------------------------------------------------------------------------------------

@@ -116,14 +116,31 @@ its fix.
 | `FEATURE_REFERS_TO_ITSELF` | `attribute mass :> mass;` (the owner's own members are found first) | `attribute mass :> ISQ::mass;` |
 | `PARAMETER_POSITION_MISMATCH` | `in target; in source;` under `Transfer { in source; in target; }` | declare parameters in the general's order |
 | `PARAMETER_REDEFINES_TWO` | `in target :>> target;` as parameter 1 of a `Transfer` specialization | declare parameters in the general's order |
+| `ALIAS_NAME_COLLISION` | `part def Car :> Vehicle { alias mass for ISQ::mass; }`: `mass` in `Car` and its specializations now means `ISQ::mass`, and `:>> mass` in a specialization redefines it. Also an alias and a different member with one name inherited from two generals. | `alias isqMass for ISQ::mass;` |
+| `INHERITED_ALIAS_DROPPED` | `part myCar : Vehicle { attribute :>> mass = 1500.0; }` where `Vehicle` declares `alias weight for mass;`: a redefinition drops the inherited aliases of the feature, so `weight` no longer resolves in `myCar` | `attribute :>> mass = 1500.0; alias weight for mass;` |
 
-All are warnings except one error:
+`INHERITED_NAME_REDECLARED` also covers a new feature with the name of an inherited alias
+(`attribute weight : Real;` where `Vehicle` declares `alias weight for mass;`). An alias of the inherited
+feature itself, such as `alias weight for mass;` in `Car :> Vehicle`, is not reported. It adds a name without
+adding a feature, so it is the way to give an inherited feature another name. Note that
+`attribute weight :>> mass;` instead renames the feature, and `mass` then no longer resolves.
+
+All are warnings except two errors:
 
 - `SEMANTIC_BOUND_VALUE_OVERRIDDEN`: a redefinition gives a value to a feature whose value is bound (`=`)
   or initial (`:=`), possibly through a chain of redefinitions. Only a `default` value may be overridden
   (KerML `validateFeatureValueOverriding`; the reference implementation reports "Cannot override a binding
   feature value"). Declaring a new feature with the same name instead is not a fix: that is the
   `INHERITED_NAME_REDECLARED` pitfall.
+- `SEMANTIC_TYPED_BY_USAGE`: a usage typed by a usage, which is a feature, where a classifier such as a
+  definition belongs. The usual cases are
+  `attribute mass : mass;` (the owner's own members are found first, so `mass` is the attribute itself),
+  `attribute mass : ISQ::mass;` (a library quantity) and `attribute mass : kg;` (a unit). Type it by a
+  definition (`: MassValue`), subset the library quantity (`:> ISQ::mass`), or redefine the inherited feature
+  (`attribute :>> mass : MassValue;`). The reference implementation reports these as errors too, for example
+  "An attribute must be typed by attribute definitions". A typed-by-itself attribute that also has the name of
+  an inherited feature gets `INHERITED_NAME_REDECLARED` as well, as in the reference implementation. KerML
+  files are not checked: there a feature may type a feature.
 
 Not reported as name collisions:
 
