@@ -9,7 +9,7 @@ This project provides a robust validation and parsing engine for SysMLv2 and Ker
 
 ## Build Instructions
 Requirements:
-- Java 17+
+- Java 25 (JDK 25+)
 - Maven
 
 Run `mvn clean install` to build the parser and core libraries.
