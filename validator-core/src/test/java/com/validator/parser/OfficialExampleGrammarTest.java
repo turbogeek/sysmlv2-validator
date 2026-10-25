@@ -1,10 +1,17 @@
 package com.validator.parser;
 
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,6 +50,22 @@ class OfficialExampleGrammarTest {
             }
         }
         return false;
+    }
+
+    /** Parses with SLL prediction only, failing on the first conflict, as the facade's fast first stage does. */
+    private static boolean parsesWithSllAlone(String text) {
+        SysMLv2Lexer lexer = new SysMLv2Lexer(CharStreams.fromString(text));
+        lexer.removeErrorListeners();
+        SysMLv2Parser parser = new SysMLv2Parser(new CommonTokenStream(lexer));
+        parser.removeErrorListeners();
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+        parser.setErrorHandler(new BailErrorStrategy());
+        try {
+            parser.compilationUnit();
+            return true;
+        } catch (ParseCancellationException e) {
+            return false;
+        }
     }
 
     // ---------------------------------------------------------------- notes (KerML 8.2.2.2 MULTILINE_NOTE)
@@ -284,6 +307,20 @@ class OfficialExampleGrammarTest {
             """));
     }
 
+    @Test
+    @DisplayName("Guarded succession: 'succession S first A1 if x == 0 then A2;'")
+    void testGuardedSuccession() {
+        assertParses(parse("""
+            action def DecisionTest {
+                attribute x = 1;
+                action A1;
+                action A2;
+                public succession S first A1
+                    if x == 0 then A2;
+            }
+            """));
+    }
+
     // ---------------------------------------------------------------- use cases (SysML 8.2.2.24)
 
     @Test
@@ -351,6 +388,19 @@ class OfficialExampleGrammarTest {
             """));
     }
 
+    @Test
+    @DisplayName("A flow needs its ';' or body (DefinitionBody)")
+    void testFlowWithoutBodyRejected() {
+        assertTrue(parse("""
+            package P {
+                part p {
+                    flow a.x to b.y
+                    part q;
+                }
+            }
+            """).hasErrors(), "Before the fix a bare 'flow' ended the usage and the rest was read as statements");
+    }
+
     // ---------------------------------------------------------------- expressions (KerML 8.2.5.8)
 
     @Test
@@ -367,5 +417,48 @@ class OfficialExampleGrammarTest {
                 attribute p = +1;
             }
             """));
+    }
+
+    @Test
+    @DisplayName("The non-BNF 'expression transition expression' form is rejected")
+    void testExpressionTransitionRejected() {
+        assertTrue(parse("package P { state def S { state a; state b; a transition b; } }").hasErrors());
+    }
+
+    // ---------------------------------------------------------------- feature declarations (SysML 8.2.2.6)
+
+    @Test
+    @DisplayName("Constraint usages with a typing and ';' parse without SLL ambiguity")
+    void testConstraintUsageForms() {
+        String text = """
+            package P {
+                constraint def C;
+                constraint c : C;
+                part q {
+                    assert constraint massConstraint : C;
+                    assert not c;
+                }
+            }
+            """;
+        assertParses(parse(text));
+        assertTrue(parsesWithSllAlone(text), "SLL prediction alone should suffice for constraint usages");
+    }
+
+    // ---------------------------------------------------------------- SLL prediction (parse speed)
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = {
+        "part def A { flow p1.torque to p2.torque; }",
+        "part def A { succession flow x.p to a1.aa.receiver; }",
+        "package P { @Risk about a::b { totalRisk = medium; } }",
+        "package P { use case u { include 'add fuel'[0..*] { subject v; } } }",
+        "package P { calc def F { return : Real = c->reduce '+' ?? zero; } }",
+        "package P { metadata def M specializes A, B; metadata : M; }"
+    })
+    @DisplayName("Valid forms that used to force a full LL re-parse now parse with SLL prediction alone")
+    void testFormsParseWithSllAlone(String text) {
+        assertParses(parse(text));
+        assertTrue(parsesWithSllAlone(text),
+            "SLL prediction should suffice; a conflict here makes the facade re-parse the whole file with LL");
     }
 }

@@ -105,9 +105,11 @@ hashAnnotation
     : HASH qualifiedName
     ;
 
+// The alternative with a body comes first: SLL prediction resolves a conflict to the lowest alternative, and the
+// shorter ones can end before the '{' ('@Risk about x { ... }' was otherwise read as '@Risk about x' plus a block).
 metadataAnnotation
-    : AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? (LPAREN annotationArguments RPAREN)?
-    | AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? metadataBody
+    : AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? metadataBody
+    | AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? (LPAREN annotationArguments RPAREN)?
     | AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? SEMICOLON?
     ;
 
@@ -405,8 +407,7 @@ flowDefinition
     ;
 
 metadataDefinition
-    : METADATA_DEF declarationName? shortName? typeRelationships? metadataDefBody?
-    | METADATA_DEF declarationName? shortName? typeRelationships? SEMICOLON
+    : METADATA_DEF declarationName? shortName? typeRelationships? (SEMICOLON | metadataDefBody)?
     ;
 
 individualDefinition
@@ -545,13 +546,12 @@ viewUsage
     : VIEW usageName? featureRelationships? viewBody?
     ;
 
+// One alternative per form, with the ';' and the body as choices of the same subrule: as separate alternatives that
+// differ only after the declaration, SLL prediction chose the bodiless one for 'constraint c : C;' and fell back to LL.
 constraintUsage
-    : CONSTRAINT usageName? featureRelationships? constraintBody?
-    | CONSTRAINT usageName? featureRelationships? SEMICOLON
-    | ASSERT CONSTRAINT usageName? featureRelationships? constraintBody?
-    | ASSERT CONSTRAINT usageName? featureRelationships? SEMICOLON
-    | ASSERT NOT? qualifiedName constraintBody?
-    | ASSERT NOT? qualifiedName SEMICOLON
+    : CONSTRAINT usageName? featureRelationships? (SEMICOLON | constraintBody)?
+    | ASSERT CONSTRAINT usageName? featureRelationships? (SEMICOLON | constraintBody)?
+    | ASSERT NOT? qualifiedName (SEMICOLON | constraintBody)?
     ;
 
 constraintBody
@@ -638,16 +638,18 @@ connectionUsage // Reference: SysMLv2.md, Section 7.13.2 / Line 2416
     | CONNECT connectorPart usageBody? // 'connect' ConnectorPart UsageBody: 'connect a to b { ... }', 'connect (a, b, c);'
     ;
 
+// SysML v2 8.2.2.13.4: 'flow' FlowDeclaration DefinitionBody. The body (';' or '{ ... }') is required: an optional one
+// let a bare 'flow' end the usage, so 'flow a.x to b.y;' was ambiguous under SLL prediction and forced a full LL re-parse.
 flowConnectionUsage
-    : FLOW usageName? featureRelationships? flowEndpoints? usageBody?
-    | FLOW usageName? featureRelationships? flowEndpoints? SEMICOLON?
+    : FLOW usageName? featureRelationships? flowEndpoints? usageBody
     | FLOW expression TO expression usageBody // FlowEndMember 'to' FlowEndMember DefinitionBody: 'flow a.x to b.y { ... }'
     ;
 
 successionUsage // Reference: SysMLv2.md, Section 7.17.4 / Line 3317
     : FIRST expression (THEN expression)? SEMICOLON?
     | THEN expression SEMICOLON?
-    | SUCCESSION FLOW? ALL? usageName? featureRelationships? successionFlowOf? successionEndpoints? (SEMICOLON | usageBody)?
+    | SUCCESSION FLOW? ALL? usageName? featureRelationships? successionFlowOf? successionEndpoints? usageBody
+    | SUCCESSION FLOW expression TO expression usageBody // SuccessionFlowUsage: 'succession flow a.x to b.y;'
     ;
 
 successionFlowOf
@@ -658,7 +660,6 @@ transitionUsage
     : TRANSITION usageName? transitionRelationships? transitionBody
     | TRANSITION usageName? FIRST expression transitionBody
     | TRANSITION featureChain transitionBody // source as a qualified name or chain, e.g. transition A::B then C;
-    | expression TRANSITION expression SEMICOLON? // Reference: SysMLv2.md, Section 7.18.3 / Line 4213
     ;
 
 satisfyRequirement
@@ -684,10 +685,11 @@ exhibitUsage
     ;
 
 includeUsage
-    : INCLUDE expression SEMICOLON?
       // IncludeUseCaseUsage reference form (SysML v2 8.2.2.24): OwnedReferenceSubsetting FeatureSpecializationPart?
-      // ValuePart? CaseBody, e.g. "include 'add fuel'[0..*] { subject vehicle; }"
-    | INCLUDE featureChain featureRelationships? valueInit? usageBody
+      // ValuePart? CaseBody, e.g. "include 'add fuel'[0..*] { subject vehicle; }". It comes first so that SLL
+      // prediction, which resolves a conflict to the lowest alternative, does not end at the shorter expression form.
+    : INCLUDE featureChain featureRelationships? valueInit? usageBody
+    | INCLUDE expression SEMICOLON?
     | INCLUDE USE_CASE usageName? featureRelationships? usageBody?
     | INCLUDE USE_CASE usageName? featureRelationships? SEMICOLON
     ;
@@ -731,8 +733,7 @@ stakeholderUsage
     ;
 
 concernUsage
-    : CONCERN usageName? featureRelationships? concernBody?
-    | CONCERN usageName? featureRelationships? SEMICOLON
+    : CONCERN usageName? featureRelationships? (SEMICOLON | concernBody)?
     ;
 
 concernBody
@@ -847,8 +848,7 @@ dependencyDeclaration
 // SysML v2 8.2.2.27: 'metadata' MetadataUsageDeclaration ( 'about' Annotation ( ',' Annotation )* )? MetadataBody,
 // e.g. 'metadata SafetyFeature about vehicle::seatBelt, vehicle::bumper;'
 metadataUsage
-    : METADATA usageName? featureRelationships? (ABOUT qualifiedName (COMMA qualifiedName)*)? metadataBody?
-    | METADATA usageName? featureRelationships? (ABOUT qualifiedName (COMMA qualifiedName)*)? SEMICOLON
+    : METADATA usageName? featureRelationships? (ABOUT qualifiedName (COMMA qualifiedName)*)? (SEMICOLON | metadataBody)?
     ;
 
 metadataBody
@@ -1078,7 +1078,7 @@ flowEndpoints
     ;
 
 successionEndpoints
-    : FIRST connectionEnd THEN connectionEnd
+    : FIRST connectionEnd guardClause? THEN connectionEnd // with a guard: GuardedSuccession 'first A1 if x == 0 then A2'
     | FROM connectionEnd TO connectionEnd
     | connectionEnd THEN connectionEnd
     ;
@@ -1389,8 +1389,12 @@ filterClause
 // VALUES AND INITIALIZATION
 // ============================================================================
 
+// KerML ExtentExpression 'all' Type (8.2.5.8.1) is accepted as a value ('= all engineChoice') and in parentheses
+// ('(all T)'), not as a general operand: at the start of a statement 'all' would also continue the sufficiency keyword
+// of a declaration ('feature all x : T { ... }'), and SLL prediction then scanned the whole body to choose.
 valueInit // Reference: SysMLv2.md, Section 7.13.4 / Line 2214
     : EQUALS expression
+    | EQUALS ALL qualifiedName
     | COLON_EQUALS expression
     | DEFAULT (EQUALS | COLON_EQUALS)? expression
     ;
@@ -1572,7 +1576,6 @@ unaryExpression
     | BANG unaryExpression
     | NOT unaryExpression
     | TILDE unaryExpression
-    | ALL qualifiedName                                   // KerML ExtentExpression: 'all engineChoice'
     | primaryExpression
     ;
 
@@ -1583,8 +1586,9 @@ primaryExpression
 sequenceSuffix
     : DOT name                                            // Member access
     | DOT METADATA                                        // Metadata access: Type.metadata (KerML MetadataAccessExpression)
-    | ARROW name (LPAREN argumentList? RPAREN)? bodyExpression? // Arrow operation
-    | ARROW name qualifiedName                            // Arrow operation with a function reference
+    | ARROW name qualifiedName                            // Arrow operation with a function reference: ->reduce '+'
+    | ARROW name (LPAREN argumentList? RPAREN)? bodyExpression? // Arrow operation (the function reference form comes
+                                                          // first: SLL prediction ends conflicts at the lowest alternative)
     | DOT QUESTION (LPAREN argumentList? RPAREN)? bodyExpression? // Filter operation
     | HASH LPAREN expression RPAREN                       // Positional Index
     | LBRACK expression RBRACK                            // Index
@@ -1604,6 +1608,7 @@ baseExpression
     | AS qualifiedName
     | collectionLiteral                                   // Collection literal
     | LPAREN expression RPAREN                            // Parenthesized
+    | LPAREN ALL qualifiedName RPAREN                     // Parenthesized extent expression: (all T)
     ;
 
 collectionLiteral
