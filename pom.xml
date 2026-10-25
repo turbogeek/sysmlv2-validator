@@ -34,9 +34,10 @@
         <spotbugs.version>4.10.5.0</spotbugs.version>
         <checkstyle.version>3.6.0</checkstyle.version>
 
-        <!-- Code coverage thresholds (increased for production quality) -->
-        <jacoco.line.coverage.minimum>0.70</jacoco.line.coverage.minimum>
-        <jacoco.branch.coverage.minimum>0.45</jacoco.branch.coverage.minimum>
+        <!-- Code coverage thresholds, a ratchet: raise them when coverage rises, never lower them. 2026-10-25
+             validator-core measured 84.2% lines and 68.7% branches; the minimums sit one point below. -->
+        <jacoco.line.coverage.minimum>0.83</jacoco.line.coverage.minimum>
+        <jacoco.branch.coverage.minimum>0.67</jacoco.branch.coverage.minimum>
         <pitest.mutation.threshold>80</pitest.mutation.threshold>
     </properties>
 
