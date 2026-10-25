@@ -26,7 +26,8 @@ import java.util.Set;
  * one ({@code end x crosses y;} as {@code end x}, {@code crosses} and {@code y;}). So an element
  * without its ';' is reported only where no such split can be the reason: before the '}' of its
  * body or the end of the file, or before an element on a later line that starts with a keyword
- * that only ever starts a declaration ({@link #STARTS_DECLARATION}).</p>
+ * that only ever starts a declaration ({@link #STARTS_DECLARATION}), unless the grammar is known to
+ * split a valid declaration there ({@link #maySplitOneDeclaration}).</p>
  *
  * <p>The check runs on trees without syntax errors only, so that the trees error recovery builds
  * do not add errors of their own. It reports what ANTLR reports for a missing token: "missing ';'
@@ -130,9 +131,28 @@ final class MissingTerminatorCheck {
         }
         if (next instanceof ParserRuleContext member && member.getStart() != null) {
             Token first = member.getStart();
-            return first.getLine() > last.getLine() && STARTS_DECLARATION.contains(first.getType()) ? first : null;
+            boolean declarationFollows =
+                first.getLine() > last.getLine() && STARTS_DECLARATION.contains(first.getType());
+            return declarationFollows && !maySplitOneDeclaration((ParserRuleContext) body.getChild(index), first)
+                ? first : null;
         }
         return null;
+    }
+
+    /**
+     * True when the grammar may have split one valid declaration into the member and the next one,
+     * as it does in the OMG release and the standard library on one line: after a keyword it does
+     * not model what follows ('succession flow', 'satisfy concern', 'timeslice part', 'snapshot
+     * part'), and in a connection end with a name, a multiplicity and a cross feature ('end inCart
+     * [0..1] item cart : ShoppingCart;'). Written over two lines, these must stay valid.
+     */
+    private static boolean maySplitOneDeclaration(ParserRuleContext member, Token next) {
+        String literal = SysMLv2Lexer.VOCABULARY.getLiteralName(member.getStop().getType());
+        boolean endsWithKeyword = literal != null && literal.length() > 2
+            && literal.substring(1, literal.length() - 1).chars().allMatch(c -> Character.isLetter(c) || c == ' ');
+        boolean endBeforeCrossFeature = member.getStart().getType() == SysMLv2Lexer.END
+            && next.getType() != SysMLv2Lexer.END;
+        return endsWithKeyword || endBeforeCrossFeature;
     }
 
     /**

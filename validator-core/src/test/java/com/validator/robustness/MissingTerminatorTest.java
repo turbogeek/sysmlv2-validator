@@ -65,6 +65,12 @@ class MissingTerminatorTest {
         assertTrue(errors("part def C {\n    part a;\n    part b;\n    connection ab\n        connect a to b;\n}\n")
             .isEmpty());
         assertTrue(errors("action def F {\n    action a;\n    action b;\n    first a\n        then b;\n}\n").isEmpty());
+        // Declarations the grammar splits in two (it accepts them on one line in the OMG release and the library)
+        assertTrue(errors("connection def S {\n    end inCart [0..1]\n        item cart : Cart[1];\n"
+            + "    end selected [0..*]\n        item product : Product[1];\n}\n").isEmpty());
+        assertTrue(errors("part def T {\n    timeslice\n        part b;\n    snapshot\n        part c;\n}\n")
+            .isEmpty());
+        assertTrue(errors("part def U {\n    satisfy\n        concern c;\n}\n").isEmpty());
     }
 
     @Test
