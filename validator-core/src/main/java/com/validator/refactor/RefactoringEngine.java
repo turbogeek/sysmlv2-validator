@@ -156,6 +156,12 @@ public class RefactoringEngine {
                     "File has parse errors - refactoring blocked");
         }
 
+        // No tree when the parser gave up (nesting too deep for its stack): nothing to analyze
+        if (parseResult.getParseTree() == null) {
+            return RefactoringPlan.blocked(filePath, parseErrors,
+                    "File could not be parsed - refactoring blocked");
+        }
+
         // Build symbol table
         SymbolTable symbolTable = SymbolTableBuilder.build(parseResult.getParseTree(), filePath);
 

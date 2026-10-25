@@ -24,6 +24,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Facade for parsing SysML v2 files using ANTLR 4.
@@ -165,6 +167,10 @@ public class SysMLv2ParserFacade {
      * Custom error listener to collect syntax errors with spelling suggestions.
      */
     private static class CollectingErrorListener extends BaseErrorListener {
+        /** Longest quotation of the input kept whole in an error message. */
+        private static final int MAX_QUOTED_INPUT = 60;
+        private static final Pattern QUOTED_INPUT_START = Pattern.compile("(input |at: |at )'");
+
         private final List<SyntaxError> errors = new ArrayList<>();
         private final SpellingSuggestionEngine suggestionEngine;
 
@@ -190,7 +196,31 @@ public class SysMLv2ParserFacade {
                 suggestions = suggestionEngine.suggestForError(tokenText);
             }
 
-            errors.add(new SyntaxError(line, charPositionInLine, msg, symbol, suggestions));
+            errors.add(new SyntaxError(line, charPositionInLine, abbreviateQuotedInput(msg), symbol, suggestions));
+        }
+
+        /**
+         * ANTLR quotes all the input a failed decision looked at, and the lexer the whole rest of
+         * an unterminated string: a 100,000-character name made a 200,000-character message, and
+         * 5,000 unclosed braces made messages that grew with every error. Keep the start and the
+         * end of a long quoted input. The input is the first quotation after "input " or "at: "
+         * (or "at " in a missing-token message) and ends before " expecting" or at the end of the
+         * message; it may itself contain quotes, so the expected-token list is left as it is.
+         */
+        private static String abbreviateQuotedInput(String msg) {
+            Matcher start = QUOTED_INPUT_START.matcher(msg);
+            if (!start.find()) {
+                return msg;
+            }
+            int open = start.end();
+            int close = msg.indexOf("' expecting", open);
+            if (close < 0) {
+                close = msg.endsWith("'") ? msg.length() - 1 : -1;
+            }
+            if (close - open <= MAX_QUOTED_INPUT) {
+                return msg;
+            }
+            return msg.substring(0, open + 40) + "..." + msg.substring(close - 17);
         }
 
         /**
@@ -263,7 +293,7 @@ public class SysMLv2ParserFacade {
         LOGGER.debug("Parsing source: {} ({} characters)", fileName, sourceCode.length());
 
         // Create lexer
-        CharStream input = CharStreams.fromString(sourceCode);
+        CharStream input = CharStreams.fromString(normalizeLayout(sourceCode));
         SysMLv2Lexer lexer = new SysMLv2Lexer(input);
 
         // Create error listener
@@ -280,28 +310,18 @@ public class SysMLv2ParserFacade {
             demoteSysMLOnlyKeywords(tokens);
         }
 
-        // Two-stage parse (ANTLR 4 recommended practice): try the fast SLL prediction mode with a
-        // bail-out error strategy; only if that fails, re-parse with full LL prediction and normal
-        // error recovery. Valid input gets the same tree; invalid input gets the same errors.
         long startTime = System.currentTimeMillis();
         SysMLv2Parser parser = new SysMLv2Parser(tokens);
         parser.removeErrorListeners();
-        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-        parser.setErrorHandler(new BailErrorStrategy());
         ParseTree tree;
         try {
-            tree = parser.compilationUnit();
-        } catch (ParseCancellationException e) {
+            tree = parse(parser, tokens, errorListener, fileName);
+        } catch (StackOverflowError e) {
+            // The parser is recursive descent: nesting deep enough (about 400 parentheses or 1,500
+            // packages on a 1 MB thread stack) exhausts the stack. Report it instead of letting the
+            // Error escape; there is no tree.
+            errorListener.getErrors().add(nestingTooDeep(tokens, parser.getCurrentToken()));
             tree = null;
-        }
-        if (tree == null) {
-            LOGGER.debug("SLL parse of {} failed; re-parsing with full LL prediction", fileName);
-            tokens.seek(0);
-            parser.reset();
-            parser.addErrorListener(errorListener);
-            parser.setErrorHandler(new DefaultErrorStrategy());
-            parser.getInterpreter().setPredictionMode(PredictionMode.LL);
-            tree = parser.compilationUnit();
         }
         long parseTime = System.currentTimeMillis() - startTime;
 
@@ -312,6 +332,85 @@ public class SysMLv2ParserFacade {
             parseTime, errorListener.getErrors().size(), lineComments.size());
 
         return new ParseResult(tree, errorListener.getErrors(), lineComments);
+    }
+
+    /**
+     * Two-stage parse (ANTLR 4 recommended practice): try the fast SLL prediction mode with a
+     * bail-out error strategy; only if that fails, re-parse with full LL prediction and normal
+     * error recovery. Valid input gets the same tree; invalid input gets the same errors.
+     */
+    private static ParseTree parse(SysMLv2Parser parser, CommonTokenStream tokens,
+                                   CollectingErrorListener errorListener, String fileName) {
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+        parser.setErrorHandler(new BailErrorStrategy());
+        try {
+            return parser.compilationUnit();
+        } catch (ParseCancellationException e) {
+            LOGGER.debug("SLL parse of {} failed; re-parsing with full LL prediction", fileName);
+        }
+        tokens.seek(0);
+        parser.reset();
+        parser.addErrorListener(errorListener);
+        parser.setErrorHandler(new DefaultErrorStrategy());
+        parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+        return parser.compilationUnit();
+    }
+
+    /**
+     * Layout that the lexer would get wrong, replaced one character for one so that offsets into
+     * the source do not change. A UTF-8 byte order mark at the start (some editors write one and
+     * Files.readString keeps it) is not whitespace to the lexer, which reported a token
+     * recognition error on every such file; it becomes a space. A lone CR (old Mac line ends) is
+     * skipped as whitespace but ANTLR counts only LF as a line break, so every error and warning
+     * in such a file was reported on line 1; it becomes a LF.
+     */
+    static String normalizeLayout(String source) {
+        boolean bom = !source.isEmpty() && source.charAt(0) == '\uFEFF';
+        int cr = source.indexOf('\r');
+        if (!bom && cr < 0) {
+            return source;
+        }
+        char[] chars = source.toCharArray();
+        if (bom) {
+            chars[0] = ' ';
+        }
+        for (int i = Math.max(cr, 0); i < chars.length; i++) {
+            if (chars[i] == '\r' && (i + 1 == chars.length || chars[i + 1] != '\n')) {
+                chars[i] = '\n';
+            }
+        }
+        return new String(chars);
+    }
+
+    /**
+     * The error for a parse that ran out of stack. Where exactly the stack ran out depends on the
+     * thread's stack size and on the JIT, so the error is put where the brackets first reach their
+     * deepest nesting, which depends only on the source; without brackets, where parsing stopped.
+     */
+    private static SyntaxError nestingTooDeep(CommonTokenStream tokens, Token stoppedAt) {
+        tokens.fill();
+        int depth = 0;
+        int deepest = 0;
+        Token at = stoppedAt;
+        for (Token t : tokens.getTokens()) {
+            int type = t.getType();
+            if (type == SysMLv2Lexer.LBRACE || type == SysMLv2Lexer.LPAREN || type == SysMLv2Lexer.LBRACK) {
+                if (++depth > deepest) {
+                    deepest = depth;
+                    at = t;
+                }
+            } else if (type == SysMLv2Lexer.RBRACE || type == SysMLv2Lexer.RPAREN || type == SysMLv2Lexer.RBRACK) {
+                depth--;
+            }
+        }
+        String message = deepest > 0
+            ? "nesting too deep to parse: brackets nested " + deepest + " deep"
+            : "nesting too deep to parse at '" + abbreviate(at.getText()) + "'";
+        return new SyntaxError(at.getLine(), at.getCharPositionInLine(), message, at.toString());
+    }
+
+    private static String abbreviate(String text) {
+        return text.length() > 40 ? text.substring(0, 40) + "..." : text;
     }
 
     /**

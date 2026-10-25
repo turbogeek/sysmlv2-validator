@@ -75,6 +75,11 @@ public final class SpellingSuggestionEngine {
                     return Collections.emptyList();
                 }
 
+                // The edit distance is at least the difference in length: skip the table for
+                // candidates that cannot be close (a 100,000-character name took seconds per error)
+                if (Math.abs(input.length() - candidate.length()) > MAX_EDIT_DISTANCE) {
+                    continue;
+                }
                 int distance = levenshteinDistance(input.toLowerCase(), candidate.toLowerCase());
                 if (distance > 0 && distance <= MAX_EDIT_DISTANCE) {
                     double confidence = calculateConfidence(input, candidate, distance);
