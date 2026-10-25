@@ -83,7 +83,65 @@
                     <listener>true</listener>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- The timing test runs in a JVM of its own (the performance-jvm profile below). In the JVM
+                         shared by all test classes, the classes before it warm the JIT and ANTLR's prediction
+                         cache, which is static: on 2026-10-25 that made the vehicle model's first build 15 s
+                         instead of 27 s, so the recorded times depended on the order of the test classes.
+                         -Dtest overrides this exclusion. -->
+                    <excludes>
+                        <exclude>**/SemanticAnalysisIntegrationTest.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Runs the timing test in a fresh JVM of its own, just before the other tests, while the build has
+             started no other test JVM. Inactive with -Dtest, which selects the tests to run in the default JVM
+             instead (-Dtest=SemanticAnalysisIntegrationTest runs it alone there, with JaCoCo's agent unless
+             -Djacoco.skip=true). -->
+        <profile>
+            <id>performance-jvm</id>
+            <activation>
+                <property>
+                    <name>!test</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>performance</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/SemanticAnalysisIntegrationTest.java</include>
+                                    </includes>
+                                    <excludes combine.self="override"/>
+                                    <!-- Not ${argLine}, which holds JaCoCo's agent: its probes slow the validator
+                                         but not the JDK code of the reference workload, which made the ratios
+                                         1.1-1.5 x those without it on 2026-10-25. The timing test therefore adds
+                                         no coverage. -Xshare:auto is the JVM's default, and keeps the value
+                                         from being empty. -->
+                                    <argLine>-Xshare:auto</argLine>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
