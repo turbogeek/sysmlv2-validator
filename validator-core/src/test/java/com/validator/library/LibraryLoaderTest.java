@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +19,7 @@ import java.util.zip.ZipOutputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -160,18 +160,8 @@ class LibraryLoaderTest {
         LibraryLoader loader = new LibraryLoader(cache, new StandardLibraryManager());
         loader.loadLibraries(config(List.of(), List.of()));
         assertEquals(1, loader.getLoaded().size());
-        try {
-            loader.getLoaded().clear();
-        } catch (UnsupportedOperationException expected) {
-            assertEquals(1, loader.getLoaded().size());
-            return;
-        }
-        throw new AssertionError("getLoaded() should be unmodifiable");
-    }
-
-    /** Keeps OutputStream imported for the zip writer's type in older javac versions. */
-    @SuppressWarnings("unused")
-    private static OutputStream unused() {
-        return OutputStream.nullOutputStream();
+        assertThrows(UnsupportedOperationException.class, () -> loader.getLoaded().clear());
+        assertThrows(UnsupportedOperationException.class, () -> loader.getDiagnostics().clear());
+        assertEquals(1, loader.getLoaded().size());
     }
 }
