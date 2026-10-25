@@ -3,6 +3,7 @@ package com.validator;
 import com.validator.parser.SysMLv2ParserFacade;
 import com.validator.semantic.SymbolTable;
 import com.validator.semantic.SymbolTableBuilder;
+import com.validator.testutil.TestPaths;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,10 +28,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Official SysML v2 Release Examples")
 class OfficialExamplesTest {
 
-    private static final String KERML_EXAMPLES_PATH =
-        "E:/_Documents/git/SysML-v2-Release/kerml/src/examples";
-    private static final String SYSML_SRC_PATH =
-        "E:/_Documents/git/SysML-v2-Release/sysml/src";
+    private static final String KERML_EXAMPLES_PATH = TestPaths.sysmlReleaseRoot()
+        .map(root -> root.resolve("kerml/src/examples").toString())
+        .orElse("SysML-v2-Release/kerml/src/examples");
+    private static final String SYSML_SRC_PATH = TestPaths.sysmlReleaseRoot()
+        .map(root -> root.resolve("sysml/src").toString())
+        .orElse("SysML-v2-Release/sysml/src");
 
     private static SysMLv2ParserFacade parserFacade;
 

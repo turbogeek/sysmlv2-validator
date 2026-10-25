@@ -2,6 +2,7 @@ package com.validator.semantic;
 
 import com.validator.parser.SysMLv2ParserFacade;
 import com.validator.testutil.PerformanceReference;
+import com.validator.testutil.TestPaths;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.*;
 
@@ -29,10 +30,7 @@ public class SemanticAnalysisIntegrationTest {
     @BeforeAll
     public static void setUpAll() {
         // Find test suite directory
-        testSuiteRoot = Paths.get("E:/_Documents/git/sysml-validator/test-suite");
-        if (!Files.exists(testSuiteRoot)) {
-            testSuiteRoot = Paths.get("test-suite");
-        }
+        testSuiteRoot = TestPaths.testSuiteRoot();
 
         // Initialize standard library
         standardLibrary = new StandardLibraryManager();
