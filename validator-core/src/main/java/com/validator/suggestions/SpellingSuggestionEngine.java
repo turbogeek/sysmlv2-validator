@@ -56,6 +56,16 @@ public final class SpellingSuggestionEngine {
     }
 
     /**
+     * Create an engine that suggests language keywords only, for a word that stands where a
+     * keyword is expected (the start of a declaration).
+     *
+     * @return a new keyword-only engine
+     */
+    public static SpellingSuggestionEngine keywordsOnly() {
+        return new SpellingSuggestionEngine(List.of(new KeywordProvider()));
+    }
+
+    /**
      * Get spelling suggestions for a potentially misspelled identifier.
      *
      * @param input the input string to find suggestions for
@@ -75,6 +85,11 @@ public final class SpellingSuggestionEngine {
                     return Collections.emptyList();
                 }
 
+                // The edit distance is at least the difference in length: skip the table for
+                // candidates that cannot be close (a 100,000-character name took seconds per error)
+                if (Math.abs(input.length() - candidate.length()) > MAX_EDIT_DISTANCE) {
+                    continue;
+                }
                 int distance = levenshteinDistance(input.toLowerCase(), candidate.toLowerCase());
                 if (distance > 0 && distance <= MAX_EDIT_DISTANCE) {
                     double confidence = calculateConfidence(input, candidate, distance);

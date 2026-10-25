@@ -1,6 +1,7 @@
 package com.validator.parser;
 
 import com.validator.suggestions.SpellingSuggestionEngine;
+import com.validator.suggestions.SuggestionResult;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -8,9 +9,12 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.Vocabulary;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -21,9 +25,13 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Facade for parsing SysML v2 files using ANTLR 4.
@@ -31,6 +39,21 @@ import java.util.Set;
  */
 public class SysMLv2ParserFacade {
     private static final Logger LOGGER = LoggerFactory.getLogger(SysMLv2ParserFacade.class);
+
+    /**
+     * Deepest nesting of grammar rules in a tree handed on to the tree walkers. They recurse once or
+     * more per rule; on a 1 MB stack the model index ran out at 2,900 rules deep (170 nested
+     * parentheses, 17 rules each) and the semantic checks and symbol table at 6,000 (2,000 nested
+     * packages). The deepest file of the OMG release, the CATIA libraries, test-suite and examples
+     * is 136 rules deep.
+     */
+    static final int MAX_TREE_DEPTH = 1_000;
+
+    /**
+     * Bracket nesting taken as the cause of a nesting error. The deepest file of the corpora above
+     * nests brackets 10 deep.
+     */
+    private static final int DEEP_BRACKETS = 50;
 
     /**
      * Represents a line comment found in the source.
@@ -165,11 +188,19 @@ public class SysMLv2ParserFacade {
      * Custom error listener to collect syntax errors with spelling suggestions.
      */
     private static class CollectingErrorListener extends BaseErrorListener {
+        /** Longest quotation of the input kept whole in an error message. */
+        private static final int MAX_QUOTED_INPUT = 60;
+        private static final Pattern QUOTED_INPUT_START = Pattern.compile("(input |at: |at )'");
+        /** Tokens searched back from an error for the start of its declaration. */
+        private static final int MAX_DECLARATION_LOOKBACK = 64;
+
         private final List<SyntaxError> errors = new ArrayList<>();
         private final SpellingSuggestionEngine suggestionEngine;
+        private final SpellingSuggestionEngine keywordEngine;
 
         CollectingErrorListener() {
             this.suggestionEngine = new SpellingSuggestionEngine();
+            this.keywordEngine = SpellingSuggestionEngine.keywordsOnly();
         }
 
         @Override
@@ -190,7 +221,69 @@ public class SysMLv2ParserFacade {
                 suggestions = suggestionEngine.suggestForError(tokenText);
             }
 
-            errors.add(new SyntaxError(line, charPositionInLine, msg, symbol, suggestions));
+            // A misspelled keyword ('prat def X', 'atribute x : Real') lexes as a name and the error
+            // is reported at a later token, so offer the keywords for that name first
+            Token misspelled = recognizer instanceof Parser parser && offendingSymbol instanceof Token offending
+                ? misspelledKeyword(parser.getInputStream(), offending) : null;
+            if (misspelled != null) {
+                List<String> merged = new ArrayList<>(keywordSuggestions(keywordEngine, misspelled.getText()));
+                suggestions.stream().filter(s -> !merged.contains(s)).forEach(merged::add);
+                suggestions = merged;
+            }
+
+            errors.add(new SyntaxError(line, charPositionInLine, abbreviateQuotedInput(msg), symbol, suggestions));
+        }
+
+        /**
+         * ANTLR quotes all the input a failed decision looked at, and the lexer the whole rest of
+         * an unterminated string: a 100,000-character name made a 200,000-character message, and
+         * 5,000 unclosed braces made messages that grew with every error. Keep the start and the
+         * end of a long quoted input. The input is the first quotation after "input " or "at: "
+         * (or "at " in a missing-token message) and ends before " expecting" or at the end of the
+         * message; it may itself contain quotes, so the expected-token list is left as it is.
+         */
+        private static String abbreviateQuotedInput(String msg) {
+            Matcher start = QUOTED_INPUT_START.matcher(msg);
+            if (!start.find()) {
+                return msg;
+            }
+            int open = start.end();
+            int close = msg.indexOf("' expecting", open);
+            if (close < 0) {
+                close = msg.endsWith("'") ? msg.length() - 1 : -1;
+            }
+            if (close - open <= MAX_QUOTED_INPUT) {
+                return msg;
+            }
+            return msg.substring(0, open + 40) + "..." + msg.substring(close - 17);
+        }
+
+        /**
+         * The first token of the declaration the error is in (the declaration starts after the
+         * nearest ';', '{' or '}'), when it is a name followed by another name: two names in a row
+         * never start a declaration, so the first is most likely a misspelled keyword. The search
+         * goes back a bounded number of tokens, so that errors in a long run of tokens without a
+         * declaration boundary stay cheap.
+         */
+        private static Token misspelledKeyword(TokenStream tokens, Token offending) {
+            if (offending.getTokenIndex() < 0) {
+                return null;
+            }
+            Token first = offending;
+            int steps = 0;
+            for (Token t = previousOnChannel(tokens, offending.getTokenIndex()); !startsDeclaration(t);
+                    t = previousOnChannel(tokens, t.getTokenIndex())) {
+                if (++steps > MAX_DECLARATION_LOOKBACK) {
+                    return null;
+                }
+                first = t;
+            }
+            if (first.getType() != SysMLv2Lexer.ID) {
+                return null;
+            }
+            Token second = nextOnChannel(tokens, first.getTokenIndex());
+            return second != null && (second.getType() == SysMLv2Lexer.ID || second.getType() == SysMLv2Lexer.QUOTED_ID)
+                ? first : null;
         }
 
         /**
@@ -239,6 +332,45 @@ public class SysMLv2ParserFacade {
         }
     }
 
+    /** True when a declaration can start after this token: ';', '{', '}' or the start of the file (null). */
+    static boolean startsDeclaration(Token before) {
+        return before == null || before.getType() == SysMLv2Lexer.SEMICOLON
+            || before.getType() == SysMLv2Lexer.LBRACE || before.getType() == SysMLv2Lexer.RBRACE;
+    }
+
+    /** The token before the given index on the default channel, or null at the start. */
+    static Token previousOnChannel(TokenStream tokens, int index) {
+        for (int i = index - 1; i >= 0; i--) {
+            Token t = tokens.get(i);
+            if (t.getChannel() == Token.DEFAULT_CHANNEL) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    /** The token after the given index on the default channel (or EOF), or null past the end. */
+    static Token nextOnChannel(TokenStream tokens, int index) {
+        for (int i = index + 1; i < tokens.size(); i++) {
+            Token t = tokens.get(i);
+            if (t.getChannel() == Token.DEFAULT_CHANNEL || t.getType() == Token.EOF) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    /** Keywords at most two edits from a word that stands where a keyword is expected. */
+    static List<String> keywordSuggestions(SpellingSuggestionEngine keywordEngine, String word) {
+        if (word.length() < 2) {
+            return List.of();
+        }
+        return keywordEngine.suggest(word).stream()
+            .filter(s -> s.getDistance() <= 2)
+            .map(SuggestionResult::getSuggestion)
+            .toList();
+    }
+
     /**
      * Parse a SysML v2 file.
      *
@@ -263,7 +395,7 @@ public class SysMLv2ParserFacade {
         LOGGER.debug("Parsing source: {} ({} characters)", fileName, sourceCode.length());
 
         // Create lexer
-        CharStream input = CharStreams.fromString(sourceCode);
+        CharStream input = CharStreams.fromString(normalizeLayout(sourceCode));
         SysMLv2Lexer lexer = new SysMLv2Lexer(input);
 
         // Create error listener
@@ -280,28 +412,41 @@ public class SysMLv2ParserFacade {
             demoteSysMLOnlyKeywords(tokens);
         }
 
-        // Two-stage parse (ANTLR 4 recommended practice): try the fast SLL prediction mode with a
-        // bail-out error strategy; only if that fails, re-parse with full LL prediction and normal
-        // error recovery. Valid input gets the same tree; invalid input gets the same errors.
         long startTime = System.currentTimeMillis();
         SysMLv2Parser parser = new SysMLv2Parser(tokens);
         parser.removeErrorListeners();
-        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
-        parser.setErrorHandler(new BailErrorStrategy());
         ParseTree tree;
         try {
-            tree = parser.compilationUnit();
-        } catch (ParseCancellationException e) {
+            tree = parse(parser, tokens, errorListener, fileName);
+        } catch (StackOverflowError e) {
+            // The parser is recursive descent: nesting deep enough (about 400 parentheses or 1,500
+            // packages on a 1 MB thread stack) exhausts the stack. Report it instead of letting the
+            // Error escape; there is no tree.
+            errorListener.getErrors().add(nestingTooDeep(tokens, parser.getCurrentToken()));
             tree = null;
         }
-        if (tree == null) {
-            LOGGER.debug("SLL parse of {} failed; re-parsing with full LL prediction", fileName);
-            tokens.seek(0);
-            parser.reset();
-            parser.addErrorListener(errorListener);
-            parser.setErrorHandler(new DefaultErrorStrategy());
-            parser.getInterpreter().setPredictionMode(PredictionMode.LL);
-            tree = parser.compilationUnit();
+        ParserRuleContext tooDeep = tree != null ? nestedTooDeep(tree) : null;
+        if (tooDeep != null) {
+            // The walkers that get the tree (index, semantic checks, symbol table, refactoring) are
+            // recursive too, and some run out of stack on trees the parser could still build
+            errorListener.getErrors().add(nestingTooDeep(tokens, tooDeep.getStart()));
+            tree = null;
+        }
+        if (tree != null) {
+            // Misspelled keywords and dropped ';' the grammar accepted; one error per position. The
+            // dropped ';' only on a tree that error recovery did not build.
+            List<SyntaxError> errors = errorListener.getErrors();
+            List<SyntaxError> accepted = new ArrayList<>(
+                MisspelledKeywordCheck.check(tree, tokens, errorListener.keywordEngine));
+            if (errors.isEmpty()) {
+                accepted.addAll(MissingTerminatorCheck.check(tree, tokens));
+            }
+            for (SyntaxError error : accepted) {
+                if (errors.stream().noneMatch(e -> e.getLine() == error.getLine()
+                        && e.getCharPositionInLine() == error.getCharPositionInLine())) {
+                    errors.add(error);
+                }
+            }
         }
         long parseTime = System.currentTimeMillis() - startTime;
 
@@ -315,11 +460,126 @@ public class SysMLv2ParserFacade {
     }
 
     /**
+     * Two-stage parse (ANTLR 4 recommended practice): try the fast SLL prediction mode with a
+     * bail-out error strategy; only if that fails, re-parse with full LL prediction and normal
+     * error recovery. Valid input gets the same tree; invalid input gets the same errors.
+     */
+    private static ParseTree parse(SysMLv2Parser parser, CommonTokenStream tokens,
+                                   CollectingErrorListener errorListener, String fileName) {
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+        parser.setErrorHandler(new BailErrorStrategy());
+        try {
+            return parser.compilationUnit();
+        } catch (ParseCancellationException e) {
+            LOGGER.debug("SLL parse of {} failed; re-parsing with full LL prediction", fileName);
+        }
+        tokens.seek(0);
+        parser.reset();
+        parser.addErrorListener(errorListener);
+        parser.setErrorHandler(new DefaultErrorStrategy());
+        parser.getInterpreter().setPredictionMode(PredictionMode.LL);
+        return parser.compilationUnit();
+    }
+
+    /**
+     * Layout that the lexer would get wrong, replaced one character for one so that offsets into
+     * the source do not change. A UTF-8 byte order mark at the start (some editors write one and
+     * Files.readString keeps it) is not whitespace to the lexer, which reported a token
+     * recognition error on every such file; it becomes a space. A lone CR (old Mac line ends) is
+     * skipped as whitespace but ANTLR counts only LF as a line break, so every error and warning
+     * in such a file was reported on line 1; it becomes a LF.
+     */
+    static String normalizeLayout(String source) {
+        boolean bom = !source.isEmpty() && source.charAt(0) == '\uFEFF';
+        int cr = source.indexOf('\r');
+        if (!bom && cr < 0) {
+            return source;
+        }
+        char[] chars = source.toCharArray();
+        if (bom) {
+            chars[0] = ' ';
+        }
+        for (int i = Math.max(cr, 0); i < chars.length; i++) {
+            if (chars[i] == '\r' && (i + 1 == chars.length || chars[i + 1] != '\n')) {
+                chars[i] = '\n';
+            }
+        }
+        return new String(chars);
+    }
+
+    /**
+     * The first rule, in source order, nested more than {@link #MAX_TREE_DEPTH} rules deep, or null.
+     * Iterative, so that it cannot run out of stack itself.
+     */
+    private static ParserRuleContext nestedTooDeep(ParseTree tree) {
+        Deque<ParseTree> pending = new ArrayDeque<>();
+        Deque<Integer> depths = new ArrayDeque<>();
+        pending.push(tree);
+        depths.push(1);
+        while (!pending.isEmpty()) {
+            ParseTree node = pending.pop();
+            int depth = depths.pop();
+            if (!(node instanceof ParserRuleContext ctx)) {
+                continue;
+            }
+            if (depth > MAX_TREE_DEPTH) {
+                return ctx;
+            }
+            for (int i = ctx.getChildCount() - 1; i >= 0; i--) {
+                pending.push(ctx.getChild(i));
+                depths.push(depth + 1);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The error for a source nested too deep: the parser ran out of stack, or its tree is deeper
+     * than {@link #MAX_TREE_DEPTH}. Which of the two happens, and where the stack ran out, depend
+     * on the thread's stack size and on the JIT, so the error is placed by the source alone: where
+     * the brackets first reach their deepest nesting when they are nested {@link #DEEP_BRACKETS}
+     * deep or more; otherwise, as for {@code not not ... true}, at the start of the declaration
+     * the nesting is in.
+     */
+    private static SyntaxError nestingTooDeep(CommonTokenStream tokens, Token inside) {
+        tokens.fill();
+        int depth = 0;
+        int deepest = 0;
+        Token deepestBracket = null;
+        for (Token t : tokens.getTokens()) {
+            int type = t.getType();
+            if (type == SysMLv2Lexer.LBRACE || type == SysMLv2Lexer.LPAREN || type == SysMLv2Lexer.LBRACK) {
+                if (++depth > deepest) {
+                    deepest = depth;
+                    deepestBracket = t;
+                }
+            } else if (type == SysMLv2Lexer.RBRACE || type == SysMLv2Lexer.RPAREN || type == SysMLv2Lexer.RBRACK) {
+                depth--;
+            }
+        }
+        if (deepest >= DEEP_BRACKETS) {
+            return new SyntaxError(deepestBracket.getLine(), deepestBracket.getCharPositionInLine(),
+                "nesting too deep to parse: brackets nested " + deepest + " deep", deepestBracket.toString());
+        }
+        Token start = inside;
+        for (Token t = previousOnChannel(tokens, inside.getTokenIndex()); !startsDeclaration(t);
+                t = previousOnChannel(tokens, t.getTokenIndex())) {
+            start = t;
+        }
+        return new SyntaxError(start.getLine(), start.getCharPositionInLine(),
+            "nesting too deep to parse at '" + abbreviate(start.getText()) + "'", start.toString());
+    }
+
+    static String abbreviate(String text) {
+        return text.length() > 40 ? text.substring(0, 40) + "..." : text;
+    }
+
+    /**
      * KerML reserved words (KerML 8.2.2.1.2). The lexer is shared with SysML, whose additional
      * reserved words ('part', 'state', 'entry', 'frame', 'accept', ...) are ordinary names in a
      * .kerml file; the standard library's kernel files rely on that.
      */
-    private static final Set<String> KERML_KEYWORDS = Set.of(
+    static final Set<String> KERML_KEYWORDS = Set.of(
         "about", "abstract", "alias", "all", "and", "as", "assoc", "behavior", "binding", "bool", "by",
         "chains", "class", "classifier", "comment", "composite", "conjugate", "conjugates", "conjugation",
         "connector", "const", "crosses", "datatype", "default", "dependency", "derived", "differences",
