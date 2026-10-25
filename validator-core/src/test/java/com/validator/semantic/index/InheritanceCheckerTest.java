@@ -578,6 +578,106 @@ class InheritanceCheckerTest {
     }
 
     @Test
+    @DisplayName("Numbers are compared by value: '4' and '4.0' are duplicates, not a contradiction")
+    void equalNumbersAreDuplicates() {
+        for (String[] pair : List.of(new String[] {"4", "4.0"}, new String[] {"1e3", "1000"},
+                new String[] {"2.50 [kg]", "2.5[kg]"})) {
+            List<ValidationWarning> warnings = check("""
+                package P {
+                    part def A { attribute f; }
+                    part def B :> A { attribute :>> f = %s; }
+                    part def C :> A { attribute :>> f = %s; }
+                    part def D :> B, C;
+                }
+                """.formatted(pair[0], pair[1]));
+            assertEquals(1, warnings.size(), pair[0] + " / " + pair[1] + messages(warnings));
+            String m = warnings.get(0).getMessage();
+            assertTrue(m.contains("They are duplicates"), m);
+            assertTrue(!m.contains("contradict"), m);
+        }
+
+        assertEquals("4", InheritanceChecker.literalKey("= 4.0"));
+        assertEquals("4", InheritanceChecker.literalKey("default = 4"));
+        assertEquals("1E+3[kg]", InheritanceChecker.literalKey(":= 1000 [kg]"));
+        assertEquals("\"FR4 PCB\"", InheritanceChecker.literalKey("= \"FR4 PCB\""));
+        assertEquals(null, InheritanceChecker.literalKey("= size * 2"));
+
+        // Spaces inside strings matter: "FR4 PCB" and "FR4PCB" are different values
+        List<ValidationWarning> strings = check("""
+            package P {
+                part def A { attribute material; }
+                part def B :> A { attribute :>> material = "FR4 PCB"; }
+                part def C :> A { attribute :>> material = "FR4PCB"; }
+                part def D :> B, C;
+            }
+            """);
+        assertEquals(1, strings.size(), messages(strings));
+        assertTrue(strings.get(0).getMessage().contains("contradict (different value)"), messages(strings));
+    }
+
+    @Test
+    @DisplayName("Enumeration literals are values: different literals contradict, the same literal repeats")
+    void enumerationLiteralsAreCompared() {
+        String base = """
+            package P {
+                enum def Color { enum red; enum green; }
+                part def A { attribute color : Color; attribute other : Color; }
+            """;
+        List<ValidationWarning> warnings = check(base + """
+                part def B :> A { attribute :>> color = Color::red; attribute :>> other = Color::green; }
+                part def C :> A { attribute :>> color = Color::green; attribute :>> other = Color::green; }
+                part def D :> B, C;
+            }
+            """);
+        assertEquals(2, warnings.size(), messages(warnings));
+        String color = find(warnings, "'P::A::color'");
+        assertTrue(color.contains("contradict (different value)"), color);
+        assertTrue(color.contains("'P::B::color' (via 'P::B'; = Color::red)"), color);
+        assertTrue(find(warnings, "'P::A::other'").contains("They are duplicates"), messages(warnings));
+
+        assertEquals(List.of(), check(base + """
+                part def B :> A { attribute :>> color = Color::red; }
+                part def C :> A { attribute :>> color = other; }
+                part def D :> B, C;
+            }
+            """), "a feature reference may name either literal, so it is not compared");
+    }
+
+    @Test
+    @DisplayName("Redefining a same-named feature of an unrelated type does not resolve the diamond")
+    void unrelatedQualifiedRedefinitionDoesNotResolve() {
+        List<ValidationWarning> warnings = check(DIAMOND + """
+                part def Z { attribute f; }
+                part def D :> B, C { attribute g :>> Z::f; }
+            }
+            """);
+        assertEquals(1, warnings.size(), messages(warnings));
+        assertTrue(warnings.get(0).getMessage().startsWith("Diamond inheritance in 'P::D'"), messages(warnings));
+
+        assertEquals(List.of(), check(DIAMOND + """
+                part def D :> B, C { attribute :>> C::f = 3; }
+            }
+            """), "redefining a branch's redefinition by qualified name resolves it");
+    }
+
+    @Test
+    @DisplayName("The suggested redefinition quotes a name that is not a basic name")
+    void suggestedRedefinitionQuotesNames() {
+        List<ValidationWarning> warnings = check("""
+            package P {
+                part def 'Base Type' { attribute 'max speed'; }
+                part def Left :> 'Base Type' { attribute :>> 'max speed' = 1; }
+                part def Right :> 'Base Type' { attribute :>> 'max speed' = 2; }
+                part def Both :> Left, Right;
+            }
+            """);
+        assertEquals(1, warnings.size(), messages(warnings));
+        String m = warnings.get(0).getMessage();
+        assertTrue(m.contains("(for example 'attribute :>> 'max speed' = ...;')"), m);
+        assertTrue(m.contains("'P::Base Type::max speed' of common ancestor 'P::Base Type'"), m);
+    }
+
+    @Test
     @DisplayName("Multiplicities without a common value contradict; unrelated types contradict")
     void disjointMultiplicitiesAndUnrelatedTypesContradict() {
         List<ValidationWarning> warnings = check("""

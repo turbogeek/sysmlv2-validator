@@ -25,10 +25,12 @@ part def HybridVehicle :> ElectricVehicle, CombustionVehicle;   // warning: rang
 The message names D, the feature, the common ancestor, each branch with its redefinition, and whether the
 redefinitions:
 
-- **contradict**: different literal values (numbers with or without units, strings, Booleans), types where
-  neither specializes the other, multiplicities that share no value (`[1]` and `[2..*]`), or bodies that
-  redefine a nested feature in contradicting ways;
+- **contradict**: different literal values (numbers with or without units, strings, Booleans) or
+  enumeration literals (`= Color::red` and `= Color::green`), types where neither specializes the other,
+  multiplicities that share no value (`[1]` and `[2..*]`), or bodies that redefine a nested feature in
+  contradicting ways;
 - **are duplicates**: written the same way on both branches (`= 4` and `= 4`), so the model repeats itself.
+  Numbers are compared by value, so `= 4` and `= 4.0` are duplicates too.
 
 A redefinition without a value of its own carries the values of the features it redefines, so two bare
 redefinitions (`attribute :>> dim;`) contradict when the values they inherit differ.
@@ -48,7 +50,8 @@ part def HybridVehicle :> ElectricVehicle, CombustionVehicle {
 
 Redefining `f` by name (`attribute :>> range ...`, `attribute range :>> range ...`), redefining either
 branch's redefinition (`:>> ElectricVehicle::range`), or redefining the ancestor's feature
-(`:>> Vehicle::range`) all count as resolving it.
+(`:>> Vehicle::range`) all count as resolving it. Redefining a feature of the same name in an unrelated
+type (`:>> Other::range`) does not.
 
 ### MULTIPLE_INHERITANCE_NAME_CONFLICT
 

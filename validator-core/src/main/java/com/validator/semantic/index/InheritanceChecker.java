@@ -3,6 +3,7 @@ package com.validator.semantic.index;
 import com.validator.ErrorCodes;
 import com.validator.ValidationWarning;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -27,9 +29,9 @@ import java.util.regex.Pattern;
  *   <li>{@link ErrorCodes#DIAMOND_INHERITANCE_CONFLICT}: a feature f of a common ancestor is redefined
  *       along two branches by different features, and D does not redefine f (or either branch's
  *       redefinition). D then holds both redefinitions of f. Reported when they contradict each other
- *       (different literal values, unrelated types, multiplicities without a common value, or contradicting
- *       nested redefinitions) or merely repeat each other; not when one only refines the other
- *       compatibly (see {@link #classify}).</li>
+ *       (different literal values or enumeration literals, unrelated types, multiplicities without a common
+ *       value, or contradicting nested redefinitions) or merely repeat each other; not when one only refines
+ *       the other compatibly (see {@link #classify}).</li>
  *   <li>{@link ErrorCodes#MULTIPLE_INHERITANCE_NAME_CONFLICT}: two generals contribute different features
  *       with the same name, neither redefining the other, and D does not redefine that name.</li>
  * </ul>
@@ -69,7 +71,7 @@ public final class InheritanceChecker {
     private final Map<String, Set<String>> ancestorsMemo = new HashMap<>();
     private final Map<String, List<String>> membersMemo = new HashMap<>();
     private final Map<String, Set<String>> closureMemo = new HashMap<>();
-    private final Map<String, Set<String>> valuesMemo = new HashMap<>();
+    private final Map<String, Set<Value>> valuesMemo = new HashMap<>();
     /** Features with a redefinition (in their chain) that does not resolve. */
     private final Set<String> unresolvedChains = new HashSet<>();
     private final Set<String> generalsInProgress = new HashSet<>();
@@ -143,13 +145,17 @@ public final class InheritanceChecker {
             return;
         }
 
-        // What D redefines itself: by name and by resolved target
+        // What D redefines itself: by resolved target, and by name when it names the feature by its simple
+        // name (or by a name that does not resolve). ':>> Other::f' of an unrelated Other does not resolve f.
         Set<String> resolvedNames = new HashSet<>();
         Set<String> resolvedTargets = new HashSet<>();
         for (IndexedElement owned : index.ownedElements(d)) {
             for (List<String> segs : owned.redefines) {
-                resolvedNames.add(segs.get(segs.size() - 1));
-                resolvedTargets.addAll(resolveReference(owned.qualifiedName, d, segs, true));
+                Set<String> targets = resolveReference(owned.qualifiedName, d, segs, true);
+                resolvedTargets.addAll(targets);
+                if (segs.size() == 1 || targets.isEmpty()) {
+                    resolvedNames.add(segs.get(segs.size() - 1));
+                }
             }
         }
 
@@ -260,9 +266,10 @@ public final class InheritanceChecker {
 
     /**
      * Classify the redefinitions of one feature that an element inherits along different branches. They
-     * contradict when two have different literal values, unrelated types (neither specializes the other) or
-     * multiplicities with no common value, or when their bodies redefine a nested feature in a
-     * contradicting way. They are duplicates when they are written the same way and add nothing nested.
+     * contradict when two have different literal values or enumeration literals, unrelated types (neither
+     * specializes the other) or multiplicities with no common value, or when their bodies redefine a nested
+     * feature in a contradicting way. They are duplicates when they are written the same way (equal numbers
+     * counting as the same) and add nothing nested.
      * Anything else (one narrows the type, adds a value or multiplicity the other leaves open, or adds
      * nested features the other lacks) is a compatible refinement, which is not reported.
      *
@@ -276,13 +283,14 @@ public final class InheritanceChecker {
                 records.add(r);
             }
         }
-        // Only literal values can be shown to differ ('= mRef.dimensions' and '= 3' may well agree). A
-        // redefinition without a value of its own has the values of the features it redefines.
+        // Only literal values and enumeration literals can be shown to differ ('= mRef.dimensions' and '= 3'
+        // may well agree). A redefinition without a value of its own has the values of the features it
+        // redefines.
         Set<String> literalValues = new HashSet<>();
         for (String f : features) {
-            for (String value : values(f)) {
-                if (isLiteralValue(value)) {
-                    literalValues.add(squash(value).replaceFirst("^(default)?(=|:=)?", ""));
+            for (Value value : values(f)) {
+                if (value.key() != null) {
+                    literalValues.add(value.key());
                 }
             }
         }
@@ -322,10 +330,13 @@ public final class InheritanceChecker {
         if (!reasons.isEmpty()) {
             return Verdict.CONTRADICTION;
         }
-        // Redefinitions written the same way repeat each other; two that add nothing do not
+        // Redefinitions written the same way repeat each other (equal literals such as '4' and '4.0' count as
+        // the same); two that add nothing do not
         Set<String> texts = new HashSet<>();
         for (IndexedElement r : records) {
-            texts.add(squash(r.typeText) + "\u0000" + squash(r.multiplicityText) + "\u0000" + squash(r.valueText));
+            String key = r.valueText == null ? null : valueKey(r);
+            texts.add(squash(r.typeText) + "\u0000" + squash(r.multiplicityText) + "\u0000"
+                + (key != null ? key : squash(r.valueText)));
         }
         boolean empty = texts.equals(Set.of("\u0000\u0000"));
         return texts.size() <= 1 && !empty && withBodies.isEmpty() ? Verdict.DUPLICATE : Verdict.COMPATIBLE;
@@ -335,25 +346,104 @@ public final class InheritanceChecker {
         "(?:default\\s*)?(?:=|:=)?\\s*(?:[-+]?\\d+(?:\\.\\d+)?(?:[eE][-+]?\\d+)?(?:\\s*\\[[^\\]]*\\])?"
             + "|\"(?:[^\"\\\\]|\\\\.)*\"|true|false|null)");
 
+    /** A value's number and optional unit, after 'default', '=' or ':=' and whitespace are removed. */
+    private static final Pattern NUMBER_WITH_UNIT = Pattern.compile(
+        "([-+]?\\d+(?:\\.\\d+)?(?:[eE][-+]?\\d+)?)(\\[[^\\]]*\\])?");
+
+    /** A value that is a name, possibly qualified, e.g. {@code Color::red} or {@code 'Fuel Kind'::diesel}. */
+    private static final Pattern NAME_VALUE = Pattern.compile(
+        "(?:'(?:[^'\\\\]|\\\\.)*'|[A-Za-z_]\\w*)(?:\\s*::\\s*(?:'(?:[^'\\\\]|\\\\.)*'|[A-Za-z_]\\w*))*");
+
+    /**
+     * A value as written, and the key it is compared by when it is a literal or an enumeration literal (null
+     * for any other expression, which cannot be compared).
+     */
+    private record Value(String text, String key) { }
+
     /** A value that is a number (with an optional unit), a string, a Boolean or null. */
     static boolean isLiteralValue(String valueText) {
         return valueText != null && LITERAL_VALUE.matcher(valueText.trim()).matches();
     }
 
     /**
+     * The key a literal value is compared by, or null when it is not a literal. Numbers are compared by
+     * value ({@code 4}, {@code 4.0} and {@code 4e0} are equal), units and strings as written, and defaults
+     * like bound values.
+     */
+    static String literalKey(String valueText) {
+        if (!isLiteralValue(valueText)) {
+            return null;
+        }
+        String literal = valueText.trim().replaceFirst("^default\\s*", "").replaceFirst("^:?=\\s*", "");
+        if (literal.startsWith("\"")) {
+            return literal; // spaces inside a string are part of the value
+        }
+        literal = squash(literal);
+        Matcher number = NUMBER_WITH_UNIT.matcher(literal);
+        if (number.matches()) {
+            String unit = number.group(2) == null ? "" : number.group(2);
+            return new BigDecimal(number.group(1)).stripTrailingZeros() + unit;
+        }
+        return literal;
+    }
+
+    /**
+     * The key a feature's own value is compared by: its literal key, or for a name that resolves to
+     * enumeration literals (e.g. {@code = Color::red}) the qualified names of those literals; else null.
+     */
+    private String valueKey(IndexedElement r) {
+        String literal = literalKey(r.valueText);
+        if (literal != null || r.valueText == null) {
+            return literal;
+        }
+        String name = r.valueText.trim().replaceFirst("^default\\s*", "").replaceFirst("^:?=\\s*", "");
+        if (!NAME_VALUE.matcher(name).matches()) {
+            return null;
+        }
+        List<String> segs = new ArrayList<>();
+        for (String seg : name.split("::")) {
+            segs.add(ModelIndexBuilder.normalize(seg.trim()));
+        }
+        // Names in a value resolve in the feature (whose types' members it has), else around it
+        ModelIndex.Resolution res = index.resolve(segs, r.qualifiedName);
+        if (res.getStatus() != ModelIndex.Status.FOUND) {
+            return null;
+        }
+        Set<String> literals = new TreeSet<>(dealias(res.getTargets(), 0));
+        for (String target : literals) {
+            if (!isEnumerationLiteral(first(target))) {
+                return null;
+            }
+        }
+        return literals.isEmpty() ? null : "enum:" + String.join(",", literals);
+    }
+
+    /** True for an enumeration literal: a member of an enumeration definition. */
+    private boolean isEnumerationLiteral(IndexedElement r) {
+        if (r == null || r.kind == null) {
+            return false;
+        }
+        if ("EnumMember".equals(r.kind)) {
+            return true;
+        }
+        IndexedElement owner = r.parentName == null ? null : first(r.parentName);
+        return "EnumUsage".equals(r.kind) && owner != null && "EnumDefinition".equals(owner.kind);
+    }
+
+    /**
      * The values a feature is given: its own, else (for a redefinition without a value) the values of the
      * features it redefines.
      */
-    private Set<String> values(String feature) {
-        Set<String> cached = valuesMemo.get(feature);
+    private Set<Value> values(String feature) {
+        Set<Value> cached = valuesMemo.get(feature);
         if (cached != null) {
             return cached;
         }
         valuesMemo.put(feature, Set.of()); // guards a redefinition cycle
-        Set<String> result = new LinkedHashSet<>();
+        Set<Value> result = new LinkedHashSet<>();
         IndexedElement r = first(feature);
         if (r != null && r.valueText != null) {
-            result.add(r.valueText);
+            result.add(new Value(r.valueText, valueKey(r)));
         } else if (r != null) {
             String owner = r.parentName == null ? "" : r.parentName;
             for (List<String> segs : r.redefines) {
@@ -636,8 +726,13 @@ public final class InheritanceChecker {
             }
             valued |= r.valueText != null;
         }
-        String name = c.name() == null ? "?" : c.name();
+        String name = c.name() == null ? "?" : sysmlName(c.name());
         return "'" + (keyword == null ? "" : keyword + " ") + ":>> " + name + (valued ? " = ...;'" : ";'");
+    }
+
+    /** A name as it is written in SysML: quoted unless it is a basic name ({@code 'max speed'}). */
+    private static String sysmlName(String name) {
+        return name.matches("[A-Za-z_]\\w*") ? name : "'" + name.replace("\\", "\\\\").replace("'", "\\'") + "'";
     }
 
     private boolean isCommonAncestor(String ancestor, List<String> generals, Conflict c) {
@@ -672,7 +767,11 @@ public final class InheritanceChecker {
         if (r.valueText != null) {
             parts.add(r.valueText);
         } else if (!values(feature).isEmpty()) {
-            parts.add("inherits " + String.join(" and ", values(feature)));
+            List<String> inherited = new ArrayList<>();
+            for (Value value : values(feature)) {
+                inherited.add(value.text());
+            }
+            parts.add("inherits " + String.join(" and ", inherited));
         }
         return String.join(" ", parts);
     }
