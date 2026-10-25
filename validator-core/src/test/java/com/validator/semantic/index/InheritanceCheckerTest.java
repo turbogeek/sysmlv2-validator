@@ -306,6 +306,43 @@ class InheritanceCheckerTest {
     }
 
     @Test
+    @DisplayName("Redefining only one of the same-named features leaves the name conflict")
+    void nameConflictPartlyResolved() {
+        List<ValidationWarning> warnings = check("""
+            package P {
+                part def B { attribute mass; }
+                part def C { attribute mass; }
+                part def D :> B, C { attribute :>> B::mass = 5; }
+            }
+            """);
+        assertEquals(1, warnings.size(), messages(warnings));
+        assertEquals(ErrorCodes.MULTIPLE_INHERITANCE_NAME_CONFLICT, warnings.get(0).getErrorCode());
+        assertTrue(warnings.get(0).getMessage().contains("feature named 'mass'"), messages(warnings));
+    }
+
+    @Test
+    @DisplayName("A qualified redefinition hides only the feature it names from what a type passes on")
+    void qualifiedRedefinitionHidesOnlyItsTarget() {
+        List<ValidationWarning> warnings = check("""
+            package P {
+                part def X { attribute g; }
+                part def Y { attribute g; }
+                part def T :> X, Y { attribute g2 :>> X::g; attribute g :>> Y::g; }
+                part def U :> X, Y { attribute g2 :>> X::g; }
+                part def W { attribute g; }
+                part def D :> U, W;
+                part def E :> T, W;
+            }
+            """);
+        // U passes on Y::g (only X::g is redefined), so D has Y::g and W::g; T redefines both, so E has T::g
+        assertEquals(2, warnings.size(), messages(warnings));
+        String d = find(warnings, "conflict in 'P::D'");
+        assertTrue(d.contains("'P::Y::g' (via 'P::U')") && d.contains("'P::W::g' (via 'P::W')"), d);
+        String e = find(warnings, "conflict in 'P::E'");
+        assertTrue(e.contains("'P::T::g' (via 'P::T')") && e.contains("'P::W::g' (via 'P::W')"), e);
+    }
+
+    @Test
     @DisplayName("A name conflict among parameters is not reported (parameters redefine by position)")
     void parametersAreNotCompared() {
         assertEquals(List.of(), check("""

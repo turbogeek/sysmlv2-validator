@@ -33,7 +33,8 @@ import java.util.regex.Pattern;
  *       value, or contradicting nested redefinitions) or merely repeat each other; not when one only refines
  *       the other compatibly (see {@link #classify}).</li>
  *   <li>{@link ErrorCodes#MULTIPLE_INHERITANCE_NAME_CONFLICT}: two generals contribute different features
- *       with the same name, neither redefining the other, and D does not redefine that name.</li>
+ *       with the same name, neither redefining the other, and D does not redefine that name (or redefines
+ *       them so that only one feature of that name is left).</li>
  * </ul>
  *
  * <p>A redefinition along a branch is the nearest one walking from the general up to the ancestor,
@@ -148,11 +149,11 @@ public final class InheritanceChecker {
         // What D redefines itself: by resolved target, and by name when it names the feature by its simple
         // name (or by a name that does not resolve). ':>> Other::f' of an unrelated Other does not resolve f.
         Set<String> resolvedNames = new HashSet<>();
-        Set<String> resolvedTargets = new HashSet<>();
+        Map<String, Set<String>> ownedTargets = new LinkedHashMap<>();
         for (IndexedElement owned : index.ownedElements(d)) {
             for (List<String> segs : owned.redefines) {
                 Set<String> targets = resolveReference(owned.qualifiedName, d, segs, true);
-                resolvedTargets.addAll(targets);
+                ownedTargets.computeIfAbsent(owned.qualifiedName, k -> new HashSet<>()).addAll(targets);
                 if (segs.size() == 1 || targets.isEmpty()) {
                     resolvedNames.add(segs.get(segs.size() - 1));
                 }
@@ -160,7 +161,7 @@ public final class InheritanceChecker {
         }
 
         for (Conflict c : conflicts) {
-            if (resolved(c, resolvedNames, resolvedTargets)) {
+            if (resolved(c, resolvedNames, ownedTargets)) {
                 continue;
             }
             List<String> reasons = new ArrayList<>();
@@ -636,7 +637,17 @@ public final class InheritanceChecker {
         return best;
     }
 
-    private boolean resolved(Conflict c, Set<String> resolvedNames, Set<String> resolvedTargets) {
+    /**
+     * True when D resolves a conflict itself. A diamond is resolved by redefining f by name, f itself or
+     * either branch's redefinition. A name conflict is resolved by redefining the name, or when D's
+     * redefinitions leave at most one feature of that name: {@code attribute mass :>> B::mass, C::mass;}
+     * does, {@code attribute :>> B::mass = 5;} does not (C's 'mass' remains beside D's new 'mass').
+     *
+     * @param ownedTargets each feature of D that redefines, mapped to the features it redefines
+     */
+    private boolean resolved(Conflict c, Set<String> resolvedNames, Map<String, Set<String>> ownedTargets) {
+        Set<String> resolvedTargets = new HashSet<>();
+        ownedTargets.values().forEach(resolvedTargets::addAll);
         Set<String> names = new HashSet<>();
         Set<String> chains = new HashSet<>();
         if (c.name() != null) {
@@ -645,14 +656,31 @@ public final class InheritanceChecker {
         if (c.ancestorFeature() != null) {
             chains.add(c.ancestorFeature());
         }
+        int remaining = 0;
         for (String f : c.features().keySet()) {
             String name = effectiveName(f);
             if (name != null) {
                 names.add(name);
             }
             chains.addAll(closure(f));
+            if (!intersects(closure(f), resolvedTargets)) {
+                remaining++;
+            }
         }
-        return intersects(names, resolvedNames) || intersects(chains, resolvedTargets);
+        if (intersects(names, resolvedNames)) {
+            return true;
+        }
+        if (c.ancestorFeature() != null) {
+            return intersects(chains, resolvedTargets);
+        }
+        // D's own redefinitions that keep the name add a feature of that name
+        for (Map.Entry<String, Set<String>> owned : ownedTargets.entrySet()) {
+            if (c.name() != null && c.name().equals(effectiveName(owned.getKey()))
+                    && intersects(chains, owned.getValue())) {
+                remaining++;
+            }
+        }
+        return remaining <= 1;
     }
 
     // ------------------------------------------------------------------------------------------
@@ -904,12 +932,16 @@ public final class InheritanceChecker {
                     continue;
                 }
                 result.add(owned.qualifiedName);
-                for (List<String> segs : owned.redefines) {
-                    redefinedNames.add(segs.get(segs.size() - 1));
-                }
                 for (String r : closure(owned.qualifiedName)) {
                     if (!r.equals(owned.qualifiedName)) {
                         redefined.add(r);
+                    }
+                }
+                // ':>> f' hides every inherited f; ':>> B::f' only B's (unless it does not resolve)
+                boolean unresolved = unresolvedChains.contains(owned.qualifiedName);
+                for (List<String> segs : owned.redefines) {
+                    if (segs.size() == 1 || unresolved) {
+                        redefinedNames.add(segs.get(segs.size() - 1));
                     }
                 }
             }

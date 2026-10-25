@@ -66,7 +66,8 @@ part def HybridVehicle :> ElectricVehicle, CombustionVehicle;   // warning: two 
 
 Resolve it by redefining both in D (`attribute serviceInterval :>> ElectricVehicle::serviceInterval,
 CombustionVehicle::serviceInterval;`), by renaming one of them, or by moving the feature into a common
-supertype.
+supertype. Redefining only one of them under the same name (`attribute :>> ElectricVehicle::serviceInterval;`)
+is not enough: the other one remains beside D's new `serviceInterval`.
 
 ### Not reported
 
