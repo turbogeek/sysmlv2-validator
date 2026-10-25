@@ -10,6 +10,7 @@ package com.validator;
  *   <li>SYNTAX_* - Parsing and syntax errors</li>
  *   <li>IMPORT_* - Import resolution errors</li>
  *   <li>SEMANTIC_* - Semantic analysis errors</li>
+ *   <li>*_INHERITANCE_* - Multiple-inheritance warnings (diamonds and name conflicts)</li>
  *   <li>TYPE_* - Type checking errors</li>
  *   <li>IO_* - File I/O errors</li>
  * </ul>
@@ -169,6 +170,36 @@ public final class ErrorCodes {
      * <p>Resolution: Restructure the model to break the cycle.
      */
     public static final String SEMANTIC_CIRCULAR_DEPENDENCY = "SEMANTIC_CIRCULAR_DEPENDENCY";
+
+    // =========================================================================
+    // INHERITANCE WARNINGS - Multiple inheritance left unresolved
+    // =========================================================================
+
+    /**
+     * Diamond inheritance with conflicting redefinitions (warning).
+     *
+     * <p>Cause: an element D has two or more general types (e.g. {@code part def D :> B, C} or
+     * {@code part d : B, C}) that share a common ancestor A, and a feature f of A is redefined along two
+     * branches by different features ({@code B} has {@code :>> f = 4}, {@code C} has {@code :>> f = 6}).
+     * D inherits both redefinitions. The message says whether they contradict (different value, unrelated
+     * types, multiplicities without a common value) or merely repeat each other. Redefinitions that only
+     * refine each other compatibly (a subtype, an added value or bound) are not reported.
+     *
+     * <p>Resolution: redefine f in D to state which applies (e.g. {@code attribute :>> f = 4;}), or move the
+     * redefinition into a common supertype of B and C so it is inherited once.
+     */
+    public static final String DIAMOND_INHERITANCE_CONFLICT = "DIAMOND_INHERITANCE_CONFLICT";
+
+    /**
+     * Two inherited features with the same name (warning).
+     *
+     * <p>Cause: two general types of an element contribute different features with the same name, neither
+     * redefining the other, so the element has two features with that name.
+     *
+     * <p>Resolution: redefine the name in the element (e.g. {@code attribute mass :>> B::mass, C::mass;}),
+     * rename one of the features, or move the feature into a common supertype.
+     */
+    public static final String MULTIPLE_INHERITANCE_NAME_CONFLICT = "MULTIPLE_INHERITANCE_NAME_CONFLICT";
 
     // =========================================================================
     // TYPE ERRORS - Type checking issues
@@ -540,6 +571,9 @@ public final class ErrorCodes {
         }
         if (errorCode.startsWith("SEMANTIC_")) {
             return "Semantic Error";
+        }
+        if (DIAMOND_INHERITANCE_CONFLICT.equals(errorCode) || MULTIPLE_INHERITANCE_NAME_CONFLICT.equals(errorCode)) {
+            return "Inheritance Warning";
         }
         if (errorCode.startsWith("TYPE_")) {
             return "Type Error";
