@@ -125,6 +125,22 @@ check made by the same test.
 
 ## Per version
 
+The first run, of 0.1.0-SNAPSHOT, was recorded while other engineering sessions shared the machine (load average
+14.5 at its start and 12.0 at its end, on 12 CPUs); its ratios are within the noise measured under that load. A run
+on a quiet machine may well have lower first-build ratios.
+
 <!-- BEGIN GENERATED from history.csv by com.validator.testutil.PerformanceReadme; do not edit by hand -->
-No runs recorded yet.
+### Latest run of each version
+
+| Version | Runs | Recorded (UTC) | Commit | JDK | OS / arch | CPUs | Load | Reference ms | Slowdown | Note |
+|---|---:|---|---|---|---|---:|---:|---:|---:|---|
+| 0.1.0-SNAPSHOT | 1 | 2026-10-25T16:29:18Z | 23060a8 | 25.0.2 Homebrew | Mac OS X 26.5 x86_64 | 12 | 12.0 | 26.9 | 1.18 | seed; machine shared with parallel engineering sessions (their standalone JVMs running, no other Maven build): load 14.5 at start, 12.0 at end |
+
+### Ratio to the reference, latest run of each version
+
+Time over the reference workload's time in the same run; lower is faster. `-`: not timed in that version.
+
+| Version | 12_simple_vehicle_model.sysml (first-build) | StockTicker_SolutionDomain.sysml (warm-median-of-5) | StockTickerSystem.sysml (first-build) | StockTicker_ProblemDomain_WhiteBox.sysml (warm-median-of-5) | StockTicker_ImplementationDomain.sysml (warm-median-of-5) | suite:stockticker (first-builds-total) | suite:positive (first-builds-total) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 0.1.0-SNAPSHOT | 1048 | 0.552 | 69.0 | 0.646 | 0.201 | 353 | 1503 |
 <!-- END GENERATED -->
