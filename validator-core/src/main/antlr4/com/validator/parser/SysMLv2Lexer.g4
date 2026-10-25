@@ -51,6 +51,7 @@ ASSOC_STRUCT: 'assoc' WS+ 'struct' {atWordEnd()}?;
 USE_CASE: 'use' WS+ 'case' {atWordEnd()}?;
 DEFINED_BY: 'defined' WS+ 'by' {atWordEnd()}?;
 TYPED_BY: 'typed' WS+ 'by' {atWordEnd()}?;
+FEATURED_BY: 'featured' WS+ 'by' {atWordEnd()}?;
 
 // ============================================================================
 // KEYWORDS - Core Structure
@@ -167,6 +168,7 @@ UNIONS: 'unions';
 INTERSECTS: 'intersects';
 DIFFERENCES: 'differences';
 DISJOINT: 'disjoint';
+CROSSES: 'crosses';
 TYPING: 'typing';
 FEATURING: 'featuring';
 DEPENDENCY: 'dependency';
@@ -349,6 +351,7 @@ TILDE: '~';
 QUESTION: '?';
 AT_SIGN: '@';
 HASH: '#';
+DOLLAR: '$';
 CARET: '^';
 
 // ============================================================================

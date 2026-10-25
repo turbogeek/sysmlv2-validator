@@ -35,6 +35,10 @@ class OfficialExampleGrammarTest {
         return parserFacade.parseString(text, "official-gap.sysml");
     }
 
+    private SysMLv2ParserFacade.ParseResult parseKerml(String text) {
+        return parserFacade.parseString(text, "official-gap.kerml");
+    }
+
     private static void assertParses(SysMLv2ParserFacade.ParseResult result) {
         assertFalse(result.hasErrors(), "Should parse without errors: " + result.getSyntaxErrors());
     }
@@ -177,6 +181,20 @@ class OfficialExampleGrammarTest {
                     text = "A body after the annotated elements";
                 }
                 @SafetyFeature about vehicle::bumper;
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("'@' metadata with a declared name or an empty one: '@m : M;', '@ : M;'")
+    void testMetadataAnnotationDeclaration() {
+        assertParses(parse("""
+            package P {
+                metadata def Security;
+                part y {
+                    @ : Security;
+                    @tag : Security;
+                }
             }
             """));
     }
@@ -420,12 +438,56 @@ class OfficialExampleGrammarTest {
     }
 
     @Test
+    @DisplayName("Collect 'x.{ ... }', function-reference arrow '->reduce \"+\"' and global '$::' names")
+    void testCollectReduceAndGlobalScope() {
+        assertParses(parse("""
+            package P {
+                attribute x = (1, 2, 3);
+                attribute c1 = x.{in xx; xx + 1};
+                attribute s = x->reduce '+' ?? 0;
+                part def E :> $::Parts::Part;
+            }
+            """));
+    }
+
+    @Test
     @DisplayName("The non-BNF 'expression transition expression' form is rejected")
     void testExpressionTransitionRejected() {
         assertTrue(parse("package P { state def S { state a; state b; a transition b; } }").hasErrors());
     }
 
     // ---------------------------------------------------------------- feature declarations (SysML 8.2.2.6)
+
+    @Test
+    @DisplayName("Typing with 'defined by', crossing with 'crosses' and '=>'")
+    void testDefinedByAndCrosses() {
+        assertParses(parse("""
+            package P {
+                part def Engine;
+                part engine defined by Engine;
+                connection def C {
+                    end a : Engine crosses b.x;
+                    end b : Engine => a.y;
+                }
+            }
+            """));
+    }
+
+    @Test
+    @DisplayName("DefaultReferenceUsage with RefPrefix only: 'derived x : A;', 'constant c = 1;', 'protected in w : A;'")
+    void testPrefixedReferenceUsages() {
+        assertParses(parse("""
+            package P {
+                part def A {
+                    derived x : A;
+                    constant c = 1;
+                    abstract y : A;
+                    in derived d : A;
+                    protected in w : A;
+                }
+            }
+            """));
+    }
 
     @Test
     @DisplayName("Constraint usages with a typing and ';' parse without SLL ambiguity")
@@ -442,6 +504,44 @@ class OfficialExampleGrammarTest {
             """;
         assertParses(parse(text));
         assertTrue(parsesWithSllAlone(text), "SLL prediction alone should suffice for constraint usages");
+    }
+
+    @Test
+    @DisplayName("Documentation with a short name: 'doc <d1> /* ... */'")
+    void testDocumentationShortName() {
+        assertParses(parse("""
+            package P {
+                part def A {
+                    doc <d1> /* Documentation comment on A */
+                    comment about d1 locale "en_US" /* Comment about the documentation */
+                }
+            }
+            """));
+    }
+
+    // ---------------------------------------------------------------- KerML (.kerml) feature syntax
+
+    @Test
+    @DisplayName("KerML: 'typed by', 'featured by', prefixed features and feature chains in unions")
+    void testKermlFeatureSyntax() {
+        assertParses(parseKerml("""
+            package Features {
+                class A;
+                class C;
+                class MassedThing {
+                    feature mass : ScalarValues::Real;
+                    composite subcomponents: MassedThing[0..*];
+                }
+                behavior B {
+                    in x1;
+                    out var y1;
+                }
+                feature x typed by A;
+                feature y1 : A :> x featured by C;
+                feature b : A;
+                feature h1 unions x, b.mass;
+            }
+            """));
     }
 
     // ---------------------------------------------------------------- SLL prediction (parse speed)

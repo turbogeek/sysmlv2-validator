@@ -28,6 +28,7 @@ namespaceBodyElement
       | aliasDeclaration
       | importDeclaration
       | implicitFeatureDeclaration
+      | prefixedFeatureDeclaration
       | member
       | metadataAnnotation
       | filterStatement
@@ -66,6 +67,22 @@ aliasDeclaration
 
 implicitFeatureDeclaration
     : declarationName featureRelationships? valueInit? (SEMICOLON | usageBody)
+    ;
+
+// A feature declared with modifier keywords but no kind keyword: SysML DefaultReferenceUsage = RefPrefix Usage
+// ('derived x : A;', 'constant c = 1;') and KerML BasicFeaturePrefix FeatureDeclaration ('composite parts : P[*];',
+// 'out var y;'). At least one modifier is required: a direction alone is an in/out/inout parameter.
+prefixedFeatureDeclaration
+    : directionPrefix? featureModifier+ declarationName? featureRelationships? valueInit? (SEMICOLON | usageBody)
+    ;
+
+featureModifier
+    : DERIVED
+    | ABSTRACT
+    | VARIATION
+    | CONSTANT
+    | COMPOSITE
+    | VAR
     ;
 
 aliasName
@@ -107,10 +124,15 @@ hashAnnotation
 
 // The alternative with a body comes first: SLL prediction resolves a conflict to the lowest alternative, and the
 // shorter ones can end before the '{' ('@Risk about x { ... }' was otherwise read as '@Risk about x' plus a block).
+// MetadataUsageDeclaration = ( Identification ( ':' | 'typed' 'by' ) )? type: '@Risk', '@r : Risk', '@ : Risk'.
 metadataAnnotation
-    : AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? metadataBody
-    | AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? (LPAREN annotationArguments RPAREN)?
-    | AT_SIGN qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? SEMICOLON?
+    : AT_SIGN metadataDeclaredName? qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? metadataBody
+    | AT_SIGN metadataDeclaredName? qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? (LPAREN annotationArguments RPAREN)?
+    | AT_SIGN metadataDeclaredName? qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? SEMICOLON?
+    ;
+
+metadataDeclaredName
+    : usageName? (COLON | TYPED_BY)
     ;
 
 annotationArguments
@@ -950,8 +972,9 @@ shortName
     : LT name GT
     ;
 
+// KerML 8.2.3.3: QualifiedName = ( '$' '::' )? ( NAME '::' )* NAME, where '$::' starts at the global namespace
 qualifiedName
-    : name (DOUBLE_COLON name)*
+    : (DOLLAR DOUBLE_COLON)? name (DOUBLE_COLON name)*
     ;
 
 featureChain
@@ -985,6 +1008,8 @@ featureRelationships
 
 featureRelationship
     : typeRelationship
+    | crossesClause
+    | FEATURED_BY qualifiedName (COMMA qualifiedName)* // KerML TypeFeaturingPart: 'feature f : A featured by C;'
     | INVERSE OF (featureChain | qualifiedName)
     | multiplicityClause
     | valueInit
@@ -1010,28 +1035,34 @@ referencesClause
     : (REFERENCE_SUBSETTING | REFERENCES) (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
+// Crosses (SysML v2 8.2.2.6.5, KerML 8.2.4.3.1): CROSSES = '=>' | 'crosses', e.g. 'end cart : Cart crosses product.inCart;'
+crossesClause
+    : (CROSSES_OP | CROSSES) (featureChain | qualifiedName)
+    ;
+
 conjugatesClause
     : (TILDE | CONJUGATES) qualifiedName // Reference: SysMLv2.md, Section 7.12.3 / Line 2158
     ;
 
+// SysML DEFINED_BY = ':' | 'defined' 'by'; KerML TYPED_BY = ':' | 'typed' 'by' (both lexed as compound keywords)
 typingClause
-    : COLON TILDE? qualifiedName (COMMA TILDE? qualifiedName)*
+    : (COLON | DEFINED_BY | TYPED_BY) TILDE? qualifiedName (COMMA TILDE? qualifiedName)*
     ;
 
 unionsClause
-    : UNIONS qualifiedName (COMMA qualifiedName)*
+    : UNIONS (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 intersectsClause
-    : INTERSECTS qualifiedName (COMMA qualifiedName)*
+    : INTERSECTS (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 differencesClause
-    : DIFFERENCES qualifiedName (COMMA qualifiedName)*
+    : DIFFERENCES (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 disjointClause
-    : DISJOINT FROM? qualifiedName (COMMA qualifiedName)*
+    : DISJOINT FROM? (featureChain | qualifiedName) (COMMA (featureChain | qualifiedName))*
     ;
 
 multiplicityClause
@@ -1118,9 +1149,10 @@ returnFeature
     : RETURN (REF | FEATURE | PART | ATTRIBUTE | PORT | ITEM | ACTION | STATE | REQUIREMENT | CALC | CONSTRAINT | EVENT | OCCURRENCE)? usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)
     ;
 
+// Parameters may have a visibility like any other member: 'protected in c : C;'
 inParameter
-    : IN usageName? featureRelationships? parameterValueInit? usageBody
-    | IN usageName? featureRelationships? parameterValueInit? SEMICOLON
+    : visibility? IN usageName? featureRelationships? parameterValueInit? usageBody
+    | visibility? IN usageName? featureRelationships? parameterValueInit? SEMICOLON
     ;
 
 parameterValueInit
@@ -1130,13 +1162,13 @@ parameterValueInit
     ;
 
 outParameter
-    : OUT usageName? featureRelationships? valueInit? usageBody
-    | OUT usageName? featureRelationships? valueInit? SEMICOLON
+    : visibility? OUT usageName? featureRelationships? valueInit? usageBody
+    | visibility? OUT usageName? featureRelationships? valueInit? SEMICOLON
     ;
 
 inoutParameter
-    : INOUT usageName? featureRelationships? valueInit? usageBody
-    | INOUT usageName? featureRelationships? valueInit? SEMICOLON
+    : visibility? INOUT usageName? featureRelationships? valueInit? usageBody
+    | visibility? INOUT usageName? featureRelationships? valueInit? SEMICOLON
     ;
 
 usageBody
@@ -1590,6 +1622,7 @@ sequenceSuffix
     | ARROW name (LPAREN argumentList? RPAREN)? bodyExpression? // Arrow operation (the function reference form comes
                                                           // first: SLL prediction ends conflicts at the lowest alternative)
     | DOT QUESTION (LPAREN argumentList? RPAREN)? bodyExpression? // Filter operation
+    | DOT bodyExpression                                  // Collect operation: x.{in e; e + 1}
     | HASH LPAREN expression RPAREN                       // Positional Index
     | LBRACK expression RBRACK                            // Index
     | LPAREN argumentList? RPAREN                         // Invocation
@@ -1673,8 +1706,10 @@ comment
     : COMMENT_KW usageName? (ABOUT qualifiedName (COMMA qualifiedName)*)? (LOCALE STRING)? documentationBody? SEMICOLON?
     ;
 
+// 'doc' Identification: only a short name ('doc <d1> /* ... */'); the comment body is skipped by the lexer, so a
+// plain name after 'doc' could not be told apart from the next element's name
 documentation
-    : DOC (LOCALE STRING)? documentationBody? SEMICOLON?
+    : DOC shortName? (LOCALE STRING)? documentationBody? SEMICOLON?
     | REP usageName? (LANGUAGE STRING)? documentationBody? SEMICOLON?
     | LOCALE STRING documentationBody? SEMICOLON?
     ;
