@@ -1,9 +1,16 @@
 package com.validator;
 
+import com.validator.parser.SysMLv2Lexer;
+import com.validator.parser.SysMLv2Parser;
 import com.validator.parser.SysMLv2ParserFacade;
 import com.validator.semantic.SymbolTable;
 import com.validator.semantic.SymbolTableBuilder;
 import com.validator.testutil.TestPaths;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +42,25 @@ class OfficialExamplesTest {
         .map(root -> root.resolve("sysml/src").toString())
         .orElse("SysML-v2-Release/sysml/src");
 
+    /*
+     * Ratchets: the number of official files that parse without syntax errors. They may only go up. When a grammar
+     * change makes more files parse, raise them to the new count; never lower them to make a change pass.
+     */
+
+    /** sysml/src: all 252 files of the 2026-10 release checkout. */
+    private static final int MIN_CLEAN_SYSML_FILES = 252;
+
+    /** sysml/src files that parse with SLL prediction alone, without the facade's slower full-LL re-parse. */
+    private static final int MIN_SLL_CLEAN_SYSML_FILES = 252;
+
+    /**
+     * kerml/src/examples: 54 of 58. The four that fail need KerML relationship members the grammar does not have yet
+     * ('featuring F of y by C;', 'inverse B::g of A::f;', 'conjugation c conjugate X conjugates Y;' and the 'chains'
+     * feature part). Note that the three ProductSelection_*.kerml files count as clean only because the unsupported
+     * 'member' keyword is read as an expression statement.
+     */
+    private static final int MIN_CLEAN_KERML_FILES = 54;
+
     private static SysMLv2ParserFacade parserFacade;
 
     @BeforeAll
@@ -63,8 +89,10 @@ class OfficialExamplesTest {
             });
         }
 
-        // Soft assertion - we want to see the results
         assertTrue(results.totalFiles > 0, "Should find KerML files");
+        assertTrue(results.filesSuccessful >= MIN_CLEAN_KERML_FILES,
+            "KerML examples parsing without syntax errors dropped to " + results.filesSuccessful + " (minimum "
+                + MIN_CLEAN_KERML_FILES + "); failing: " + failingFiles(results));
     }
 
     @Test
@@ -78,6 +106,7 @@ class OfficialExamplesTest {
 
         TestResults results = parseFilesInDirectory(sysmlPath, ".sysml");
         printResults("SysML Sources", results);
+        System.out.printf("SLL-only parses:     %d%n", results.filesSllClean);
 
         // Store detailed errors for analysis
         if (!results.errors.isEmpty()) {
@@ -88,8 +117,41 @@ class OfficialExamplesTest {
             });
         }
 
-        // Soft assertion
         assertTrue(results.totalFiles > 0, "Should find SysML files");
+        assertTrue(results.filesSuccessful >= MIN_CLEAN_SYSML_FILES,
+            "SysML sources parsing without syntax errors dropped to " + results.filesSuccessful + " (minimum "
+                + MIN_CLEAN_SYSML_FILES + "); failing: " + failingFiles(results));
+        assertTrue(results.filesSllClean >= MIN_SLL_CLEAN_SYSML_FILES,
+            "SysML sources parsing with SLL prediction alone dropped to " + results.filesSllClean + " (minimum "
+                + MIN_SLL_CLEAN_SYSML_FILES + "): a grammar ambiguity now forces a full LL re-parse of "
+                + results.sllFallbackFiles);
+    }
+
+    private static String failingFiles(TestResults results) {
+        return results.errors.stream()
+            .map(e -> Paths.get(e.file).getFileName() + " " + e.errors.stream().limit(1).toList())
+            .toList()
+            .toString();
+    }
+
+    /**
+     * Parses with SLL prediction alone and fails on the first conflict, as the facade's fast first stage does. A
+     * file that parses without errors but fails here costs a second, full LL parse (that re-parse made a warm parse
+     * of the test suite's 12_simple_vehicle_model.sysml take about 7 s instead of 0.1 s).
+     */
+    private static boolean parsesWithSllAlone(String content) {
+        SysMLv2Lexer lexer = new SysMLv2Lexer(CharStreams.fromString(content));
+        lexer.removeErrorListeners();
+        SysMLv2Parser parser = new SysMLv2Parser(new CommonTokenStream(lexer));
+        parser.removeErrorListeners();
+        parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
+        parser.setErrorHandler(new BailErrorStrategy());
+        try {
+            parser.compilationUnit();
+            return true;
+        } catch (ParseCancellationException e) {
+            return false;
+        }
     }
 
     @Test
@@ -144,6 +206,14 @@ class OfficialExamplesTest {
                         results.errors.add(fileError);
                     } else {
                         results.filesSuccessful++;
+                        // The SLL check needs the facade's KerML keyword handling, so it covers .sysml files only
+                        if (extension.equals(".sysml")) {
+                            if (parsesWithSllAlone(content)) {
+                                results.filesSllClean++;
+                            } else {
+                                results.sllFallbackFiles.add(file.getFileName().toString());
+                            }
+                        }
 
                         // Try to build symbol table
                         try {
@@ -247,6 +317,8 @@ class OfficialExamplesTest {
     static class TestResults {
         int totalFiles = 0;
         int filesSuccessful = 0;
+        int filesSllClean = 0;
+        List<String> sllFallbackFiles = new ArrayList<>();
         int filesWithErrors = 0;
         int readErrors = 0;
         int symbolTableErrors = 0;
