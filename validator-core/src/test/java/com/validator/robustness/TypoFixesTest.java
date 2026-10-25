@@ -214,7 +214,10 @@ class TypoFixesTest {
         for (SyntaxError e : errors) {
             // Before: the message quoted both names whole, 200,000 characters
             assertTrue(e.getMessage().length() < 5_000, "message of " + e.getMessage().length() + " characters");
+            // Before: the offending token was quoted whole, 100,000 characters
+            assertTrue(e.toString().length() < 5_000, "toString of " + e.toString().length() + " characters");
         }
+        assertTrue(errors.get(0).toString().contains("='Typoxxx"), errors.get(0).toString());
         assertTrue(errors.get(0).getMessage().contains("Typoxxx"), errors.get(0).getMessage());
         assertTrue(errors.get(0).getMessage().contains("..."), errors.get(0).getMessage());
     }

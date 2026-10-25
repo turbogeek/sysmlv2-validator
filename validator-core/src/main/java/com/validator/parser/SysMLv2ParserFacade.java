@@ -56,6 +56,9 @@ public class SysMLv2ParserFacade {
      */
     private static final int DEEP_BRACKETS = 50;
 
+    /** Longest quotation of the input kept whole in an error message. */
+    private static final int MAX_QUOTED_INPUT = 60;
+
     /**
      * Represents a line comment found in the source.
      * Note: Line comments (//) are NOT persisted to the model in SysML v2.
@@ -173,11 +176,22 @@ public class SysMLv2ParserFacade {
             return !suggestions.isEmpty();
         }
 
+        /**
+         * The error with its offending token, whose text is abbreviated as a long quoted input is in
+         * the message: a 100,000-character name made a string of 100,000 characters.
+         */
         @Override
         public String toString() {
+            // ANTLR's token string: [@7,35:38='name',<248>,2:23]
+            String symbol = offendingSymbol;
+            int open = symbol.indexOf("='");
+            int close = symbol.lastIndexOf("',<");
+            if (open >= 0 && close > open) {
+                symbol = abbreviateQuotation(symbol, open + 2, close);
+            }
             StringBuilder sb = new StringBuilder();
             sb.append(String.format("Line %d:%d - %s (at '%s')",
-                line, charPositionInLine, message, offendingSymbol));
+                line, charPositionInLine, message, symbol));
             if (!suggestions.isEmpty()) {
                 sb.append(". Did you mean: ").append(String.join(", ", suggestions)).append("?");
             }
@@ -189,8 +203,6 @@ public class SysMLv2ParserFacade {
      * Custom error listener to collect syntax errors with spelling suggestions.
      */
     private static class CollectingErrorListener extends BaseErrorListener {
-        /** Longest quotation of the input kept whole in an error message. */
-        private static final int MAX_QUOTED_INPUT = 60;
         private static final Pattern QUOTED_INPUT_START = Pattern.compile("(input |at: |at )'");
         /** Tokens searched back from an error for the start of its declaration. */
         private static final int MAX_DECLARATION_LOOKBACK = 64;
@@ -253,10 +265,7 @@ public class SysMLv2ParserFacade {
             if (close < 0) {
                 close = msg.endsWith("'") ? msg.length() - 1 : -1;
             }
-            if (close - open <= MAX_QUOTED_INPUT) {
-                return msg;
-            }
-            return msg.substring(0, open + 40) + "..." + msg.substring(close - 17);
+            return abbreviateQuotation(msg, open, close);
         }
 
         /**
@@ -621,6 +630,17 @@ public class SysMLv2ParserFacade {
 
     static String abbreviate(String text) {
         return text.length() > 40 ? text.substring(0, 40) + "..." : text;
+    }
+
+    /**
+     * The text with the quotation from {@code open} (inclusive) to {@code close} (exclusive) cut to
+     * its first 40 and last 17 characters when it is longer than {@link #MAX_QUOTED_INPUT}.
+     */
+    static String abbreviateQuotation(String text, int open, int close) {
+        if (close - open <= MAX_QUOTED_INPUT) {
+            return text;
+        }
+        return text.substring(0, open + 40) + "..." + text.substring(close - 17);
     }
 
     /**
