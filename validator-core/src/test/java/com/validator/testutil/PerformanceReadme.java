@@ -17,7 +17,7 @@ import java.util.Optional;
 /**
  * Keeps the per-version tables of docs/performance/README.md in step with docs/performance/history.csv. Only the
  * part between {@link #BEGIN} and {@link #END} is generated; the prose around it is edited by hand. The timing test
- * regenerates it whenever it appends to the history, PerformanceHistoryTest fails when the committed README and
+ * regenerates it whenever it appends to the history, PerformanceReadmeTest fails when the committed README and
  * history disagree, and after editing the history by hand it is regenerated with:
  * java validator-core/src/test/java/com/validator/testutil/PerformanceReadme.java
  */
@@ -52,8 +52,12 @@ public final class PerformanceReadme {
         }
     }
 
-    /** The README text with its generated part replaced by the tables of {@code history}. */
+    /**
+     * The README text with its generated part replaced by the tables of {@code history}, with \n line ends (a checkout
+     * with core.autocrlf has \r\n).
+     */
     public static String update(String readme, PerformanceHistory history) {
+        readme = readme.replace("\r\n", "\n");
         int begin = readme.indexOf(BEGIN);
         int end = readme.indexOf(END);
         if (begin < 0 || end < begin) {
@@ -62,8 +66,9 @@ public final class PerformanceReadme {
         return readme.substring(0, begin + BEGIN.length()) + "\n" + render(history) + readme.substring(end);
     }
 
-    /** The generated part of the README now, or nothing if it has none. */
+    /** The generated part of the README now, with \n line ends, or nothing if it has none. */
     public static Optional<String> generatedPart(String readme) {
+        readme = readme.replace("\r\n", "\n");
         int begin = readme.indexOf(BEGIN);
         int end = readme.indexOf(END);
         return begin < 0 || end < begin ? Optional.empty()

@@ -77,6 +77,17 @@ class PerformanceReadmeTest {
     }
 
     @Test
+    @DisplayName("Should read a README checked out with CRLF line ends (core.autocrlf) like one with LF")
+    void readsCrlfReadme() {
+        String lf = PerformanceReadme.update(PROSE_BEFORE + PerformanceReadme.BEGIN + "\n" + PerformanceReadme.END
+            + PROSE_AFTER, history());
+        String crlf = lf.replace("\n", "\r\n");
+
+        assertEquals(PerformanceReadme.render(history()), PerformanceReadme.generatedPart(crlf).orElseThrow());
+        assertEquals(lf, PerformanceReadme.update(crlf, history()));
+    }
+
+    @Test
     @DisplayName("Should regenerate a README file from a history file")
     void regeneratesFiles(@TempDir Path dir) throws IOException {
         Path csv = dir.resolve("history.csv");

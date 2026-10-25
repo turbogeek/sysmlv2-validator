@@ -101,10 +101,10 @@
     </build>
 
     <profiles>
-        <!-- Runs the timing test in a fresh JVM of its own, just before the other tests: in the test phase it
-             would run after jacoco:report, whose report would then miss its coverage. Inactive with -Dtest, which
-             selects the tests to run in the default JVM instead (-Dtest=SemanticAnalysisIntegrationTest runs it
-             alone there). -->
+        <!-- Runs the timing test in a fresh JVM of its own, just before the other tests, while the build has
+             started no other test JVM. Inactive with -Dtest, which selects the tests to run in the default JVM
+             instead (-Dtest=SemanticAnalysisIntegrationTest runs it alone there, with JaCoCo's agent unless
+             -Djacoco.skip=true). -->
         <profile>
             <id>performance-jvm</id>
             <activation>
