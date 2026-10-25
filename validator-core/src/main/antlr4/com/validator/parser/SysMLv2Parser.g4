@@ -639,6 +639,7 @@ successionFlowOf
 transitionUsage
     : TRANSITION usageName? transitionRelationships? transitionBody
     | TRANSITION usageName? FIRST expression transitionBody
+    | TRANSITION featureChain transitionBody // source as a qualified name or chain, e.g. transition A::B then C;
     | expression TRANSITION expression SEMICOLON? // Reference: SysMLv2.md, Section 7.18.3 / Line 4213
     ;
 
@@ -1396,13 +1397,13 @@ thenStatement
     | THEN JOIN usageName? SEMICOLON
     | THEN TERMINATE expression? SEMICOLON
     | THEN ACTION usageName? featureRelationships? usageBody
-    | THEN ACTION usageName? WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
+    | THEN ACTION usageName? WHILE expression LBRACE usageBodyElement* RBRACE (UNTIL expression)? SEMICOLON?
     | THEN STATE usageName? featureRelationships? stateUsageBody
     | THEN STATE usageName? featureRelationships? SEMICOLON
     | THEN EVENT OCCURRENCE? usageName? featureRelationships? usageBody?
     | THEN EVENT OCCURRENCE? usageName? featureRelationships? SEMICOLON
     | THEN EVENT expression SEMICOLON?
-    | THEN WHILE expression LBRACE statement* RBRACE (UNTIL expression)? SEMICOLON?
+    | THEN WHILE expression LBRACE usageBodyElement* RBRACE (UNTIL expression)? SEMICOLON?
     | THEN (ACTION usageName? featureRelationships?)? ASSIGN expression COLON_EQUALS expression SEMICOLON?
     | THEN ifStatement
     | THEN visibility? member
@@ -1445,16 +1446,21 @@ elseClause
     : ELSE LBRACE usageBodyElement* RBRACE
     ;
 
+// Loop bodies are ActionBodyParameters: ('action' UsageDeclaration?)? '{' ActionBodyItem* '}'
+loopBodyParameter
+    : (ACTION usageName? featureRelationships?)? LBRACE usageBodyElement* RBRACE
+    ;
+
 whileStatement
-    : WHILE expression LBRACE statement* RBRACE
+    : WHILE expression loopBodyParameter (UNTIL expression SEMICOLON?)?
     ;
 
 loopStatement // Reference: SysMLv2.md, Section 7.17.3 / Line 3867
-    : LOOP expression? LBRACE statement* RBRACE (UNTIL expression SEMICOLON?)?
+    : LOOP loopBodyParameter (UNTIL expression SEMICOLON?)?
     ;
 
 forStatement
-    : FOR usageName featureRelationships? IN expression LBRACE statement* RBRACE
+    : FOR usageName featureRelationships? IN expression loopBodyParameter
     ;
 
 assignmentStatement
