@@ -203,9 +203,13 @@ class TypoFixesTest {
         String name = "Typo" + "x".repeat(100_000);
         List<SyntaxError> errors = errors(parser.parseString(
             "package P {\n    part def A :> " + name + " " + name + ";\n    part p = = " + name + ";\n}\n", "long.sysml"));
-        assertEquals(2, errors.size(), errors.toString());
-        assertTrue(errors.get(1).getMessage().contains("'package', 'import'"),
-            "the expected-token list is left whole: " + errors.get(1).getMessage());
+        // Line 2: no viable alternative at the second name, where the specialization list cannot go on. Recovery
+        // consumes nothing; the package body then takes the first name for the start of a feature declaration
+        // ('name;') and reports the second name, at the same position, as extraneous input. Line 3: the second '='.
+        assertEquals(3, errors.size(), errors.toString());
+        assertEquals(List.of(2, 2, 3), errors.stream().map(SyntaxError::getLine).toList(), errors.toString());
+        assertTrue(errors.get(2).getMessage().contains("'package', 'import'"),
+            "the expected-token list is left whole: " + errors.get(2).getMessage());
         assertFalse(errors.isEmpty());
         for (SyntaxError e : errors) {
             // Before: the message quoted both names whole, 200,000 characters
