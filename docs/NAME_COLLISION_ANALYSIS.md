@@ -19,7 +19,7 @@
 - **[SRC]**: verified by reading the cited source lines.
 - **[TEST]**: verified by reading an Xpect test in the pilot repository that asserts this diagnostic. The test was read, not run.
 - **[RUN]**: confirmed by running the model in pilot 0.62.0 and 0.63.0 (§2.10).
-- **[RUN]**: inferred by tracing the cited source. Not confirmed by execution (only one claim remains in this category).
+- **[INF]**: inferred by tracing the cited source. Not confirmed by execution (only one claim remains in this category).
 
 Appendix A lists every pilot claim with its evidence level.
 
@@ -27,7 +27,7 @@ Appendix A lists every pilot claim with its evidence level.
 
 ## 1. Summary
 
-**The problem in five lines**
+**The problem in six lines**
 
 1. In KerML and SysML v2, any named feature or usage declaration creates a **new** feature. It is related to an inherited feature only through `:>>`/`redefines`, or through the few positional implicit redefinitions (parameters, ends).
 2. So `part def Car :> Vehicle { attribute mass : Real; }` and `part myCar : Car { attribute mass = 1500.0; }` each add *another* feature named `mass`. Constraints, roll-ups and requirements written against `Vehicle::mass` never see the value.
@@ -39,11 +39,22 @@ Appendix A lists every pilot claim with its evidence level.
    - swapped parameter order, because parameters redefine by position and not by name;
    - an explicit by-name parameter redefinition that the pilot also pairs by position, making it redefine two parameters (confirmed by running the pilot).
 5. There is also an incentive problem. Overriding a bound value with the correct form (`:>> mass = …`) is an **error**, while the incorrect form is only a **warning**.
+6. **Aliases** are part of the remedy and add two hazards (V10):
+   - `alias weight for mass;` gives an inherited feature another name without creating a feature, so an alias is the right tool when the intent is only to name it;
+   - but an alias can take an inherited feature's name and redirect it, `:>>` included, with only a warning;
+   - and redefining a feature silently drops the aliases a general declared for it. The alias name then fails to resolve, an error reported only where the name is used, far from the cause.
 
 **Proposed resolution (detail in §5)**
 
 - **Specification**
-  - Add a dedicated validation constraint, reported as an **error**: an owned feature whose (effective) name or short name equals that of an inheritable feature must redefine it.
+  - Add a dedicated validation constraint, reported as an **error**, in two parts:
+    - an owned feature whose (effective) name or short name equals that of an inheritable feature, **or of an inheritable alias of a feature**, must redefine that feature;
+    - an owned **alias** whose name or short name equals that of an inheritable member must stand for the same element.
+
+    Aliasing the inherited feature, under its own name or another, stays valid: it creates no feature (V10a).
+    Two OCL fixes make that true of the formal rules too: a same-element case in `isDistinguishableFrom` (K2), and
+    a rule-1 fix in `removeRedefinedFeatures`, without which an alias and its feature remove each other (K10).
+  - Specify what happens to a general's aliases of a feature that a specialization redefines. Today they are silently dropped (K9).
   - Remove the metaclass escape from `Membership::isDistinguishableFrom`.
   - Fix the text/OCL inconsistencies: imported-membership hiding, `resolveLocal` ordering, parameter redefinition text vs. OCL, and the unformalized "redefined features must be inheritable" rule.
   - Add non-normative advisory checks (warnings) for near-miss names, renamed diamonds, positional mismatches and redefinition targets that are not inherited.
@@ -51,6 +62,7 @@ Appendix A lists every pilot claim with its evidence level.
 - **Pilot implementation**
   - Make the check an error with a specific message and a **quick fix that inserts `:>>`**.
   - Add the advisory checks, including a "did you mean `:>> mass`?" hint for typos.
+  - Report the alias cases as specifically, and make the linking error for a dropped alias name its cause.
   - Make the two name-resolution algorithms in the pilot agree.
 
 ---
@@ -328,6 +340,34 @@ package V6d {
 
 **(e) Global namespace.** If two root namespaces define the same top-level name, KerML 8.2.3.5.4 (p.85) explicitly leaves the choice undetermined. This is out of scope here but is the same class of hazard. See Sensmetry's *Unspecified Behavior in KerML Name Resolution* (attachment on issues.omg.org, linked to KERML_-43).
 
+**(f) A usage typed by its own name: "the car's mass is of type mass".**
+
+```sysml
+package V6f {
+    private import ISQ::*;
+    private import SI::*;
+    part def Vehicle { attribute mass : MassValue; }
+    part def CarTypedByItself :> Vehicle {
+        attribute mass : mass;              // intended: Vehicle's mass, typed as a mass quantity
+    }
+    part def CarTypedByLibraryUsage :> Vehicle {
+        attribute mass : ISQ::mass;         // intended: typed by the library quantity 'mass'
+    }
+    part def CarTypedByUnit :> Vehicle {
+        attribute mass : kg;                // intended: a mass in kilograms
+    }
+}
+```
+
+- As in (a), `mass` after `:` is resolved in `CarTypedByItself` first, where it finds the attribute being declared. The attribute is typed by **itself** **[RUN]**.
+- `ISQ::mass` is an attribute *usage* (the library's mass quantity, typed `MassValue`), not a definition. So is the unit `kg` (`SI::kilogram`, typed `MassUnit`).
+- A usage's types are classifiers: `Usage::/definition : Classifier` (SysML 8.3.6.4, p.270), nominally definitions, though kernel classifiers such as `ScalarValues::Real` are allowed too. An attribute usage's types are data types: `AttributeUsage::/attributeDefinition : DataType` (8.3.7.3, p.280). A usage is a feature, not a classifier, so it cannot be a usage's type.
+- The pilot reports an **error** for each of the three forms, `An attribute must be typed by attribute definitions`, plus the V1 warning `Duplicate of inherited member name 'mass' from Vehicle`, because each declaration is also a second `mass` **[RUN]**. Its messages are stricter than the specification's wording (definitions only).
+- The pilot reports the same kind of error for part, item, port, action, occurrence and `ref` usages and a subject typed by a usage (`V6f.sysml`, `Truck` and `EngineCheck`) **[RUN]**.
+- Unlike (a), this case is caught. It is listed because the error names neither the cause (the name found the feature itself, or a library usage) nor the intended forms:
+  - `attribute :>> mass : MassValue;` redefines `Vehicle::mass` with the quantity type;
+  - `attribute :>> mass :> ISQ::mass;` redefines it and subsets the library quantity, which brings its type.
+
 ### V7. Implicit redefinition the language already performs, by position and not by name
 
 **(a) Swapped parameters.**
@@ -426,14 +466,168 @@ SysML 7.13.4 *Feature Values*:
 
 Separately, `TestRecord::cutoff : Integer` is given a Rational-valued default expression.
 
+### V10. Aliases: another name for an inherited feature, and its hazards
+
+An alias is a non-owning membership. `alias weight for mass;` makes `weight` another name for `mass` in the aliasing
+namespace without creating an element (KerML 7.2.5.2, p.22). A feature aliased in a type is related to the type by a
+plain membership, not a feature membership, so it is not an owned feature of the type (KerML 7.3.2.6, p.30). Alias
+memberships are inherited like any other visible membership (R4).
+
+**(a) The intended use: another name for the inherited feature, not a new feature.**
+
+```sysml
+package V10a {
+    private import ScalarValues::*;
+    part def Vehicle { attribute mass : Real; }
+    part def CarSameName :> Vehicle { alias mass for Vehicle::mass; }
+    part def CarNewName :> Vehicle { alias weight for mass; }
+    part myCar : CarNewName {
+        attribute m = mass;
+        attribute w = weight;
+    }
+}
+```
+
+- No diagnostic. By the prose of 7.2.5.2, distinguishability compares names only between memberships of *different*
+  elements (the OCL lacks this case; S12, K2). The pilot filters with `m.memberElement != memElement` ([L482, L493](https://github.com/Systems-Modeling/SysML-v2-Pilot-Implementation/blob/692170b71867353b8f90341e61556f49a5beb0e5/org.omg.kerml.xtext/src/org/omg/kerml/xtext/validation/KerMLValidator.xtend#L478-L501)),
+  so even an alias that repeats the inherited name for the same feature is valid **[SRC, RUN]**.
+- `myCar` inherits `Vehicle::mass` under both names, and both references resolve to it **[RUN]**. As formalized,
+  rule 1 of `removeRedefinedFeatures` would remove both memberships from `myCar`, because they share an element
+  (S16, K10).
+- **So the name can be aliased instead of redefined when the intent is only to name the inherited feature.**
+  - An alias carries no value, type or multiplicity. When the modeler means to *change* the feature (V1, V2), a
+    redefinition is still required.
+  - An alias is not robust to specialization; see (d).
+
+**(b) An owned alias takes an inherited feature's name and redirects it.**
+
+```sysml
+package V10b {
+    private import ScalarValues::*;
+    part def Vehicle { attribute mass : Real; }
+    part def Car :> Vehicle {
+        alias mass for ISQ::mass;           // intended: a shorthand for the library quantity
+        attribute probe = mass;
+    }
+    part def SportsCar :> Car { attribute :>> mass; }
+}
+```
+
+- Two memberships of `Car` named `mass` stand for different elements, which violates distinguishability. The pilot
+  warns `Duplicate of inherited member name 'mass' from Vehicle` on the alias **[RUN]**.
+- Owned memberships are found before inherited ones (V6a), so `mass` in `Car` now means `ISQBase::mass`, and `probe`
+  is bound to the library quantity **[RUN]**.
+- In `SportsCar`, `:>> mass` resolves through `Car`'s alias and redefines `ISQBase::mass`, not `Vehicle::mass`. The
+  pilot warns `Duplicate of inherited member name 'mass' from Vehicle` there too **[RUN]**.
+- The first draft of K1 could not catch this: it constrains owned *features*, and an alias is not a feature.
+
+**(c) An owned feature takes the name of an inherited alias.**
+
+```sysml
+package V10c {
+    private import ScalarValues::*;
+    part def Vehicle { attribute mass : Real; alias weight for mass; }
+    part def Car :> Vehicle { attribute weight : Real; }          // intended: Vehicle's mass, by its alias
+    part def CarShortName :> Vehicle { attribute <weight> w : Real; }
+}
+```
+
+- This is V1 reached through an alias name: `Car::weight` is a second, unrelated feature. The pilot warns
+  `Duplicate of inherited member name 'weight' from Vehicle` on both declarations **[RUN]**.
+- The first draft of K1 would miss it too. It selected the inherited memberships with
+  `selectByKind(FeatureMembership)`, and an inherited alias is a plain `Membership`.
+
+**(d) A redefinition drops the general's aliases of the feature.**
+
+```sysml
+package V10d {
+    private import ScalarValues::*;
+    part def Vehicle { attribute mass : Real; alias weight for mass; }
+    part def CarViaName :> Vehicle { attribute :>> mass = 1500.0; }
+    part def CarViaAlias :> Vehicle { attribute :>> weight = 1500.0; }
+    part c1 : CarViaName { attribute w = weight; }
+    part c2 : CarViaAlias { attribute w = weight; }
+    part c3 : Vehicle {
+        attribute :>> weight = 1500.0;
+        attribute w = weight;
+    }
+}
+```
+
+- `removeRedefinedFeatures` (R12) removes every inheritable membership whose member element is a redefined feature.
+  It does not distinguish owning memberships from aliases, so the alias `weight` goes with `mass`. The pilot does the
+  same ([`TypeAdapter.removeRedefinedFeatures` L149-L168](https://github.com/Systems-Modeling/SysML-v2-Pilot-Implementation/blob/692170b71867353b8f90341e61556f49a5beb0e5/org.omg.sysml.logic/src/main/java/org/omg/sysml/adapter/TypeAdapter.java#L149-L168)) **[SRC]**.
+- `:>> weight` resolves through the alias and redefines `Vehicle::mass`. The redefining feature's effective name is
+  `mass`, the name of the redefined feature (KerML 7.3.4.5, p.37), not `weight` **[RUN]**.
+- In `c1`, in `c2`, and even in `c3`, where the name was written one line earlier, `weight` does not resolve:
+  `Couldn't resolve reference to Element 'weight'` **[RUN]**.
+  - The error appears at each use, not at the redefinition that caused it.
+  - Without a use there is no diagnostic at all.
+- The specification does not say whether this is intended. A modeler who declares an alias in a general definition
+  can reasonably expect it to name the feature in every specialization, redefined or not.
+- Work-around: declare the alias again after the redefinition
+  (`attribute :>> mass = 1500.0; alias weight for mass;`). It then names the redefining feature **[RUN]**. (In
+  further specializations, both names survive in the pilot; as formalized, they need K10.)
+
+**(e) Rename or alias: a named redefinition removes the old name.**
+
+```sysml
+package V10e {
+    private import ScalarValues::*;
+    part def Vehicle { attribute mass : Real; }
+    part def CarRenamed :> Vehicle { attribute weight :>> mass; }   // intended: a second name for mass
+    part def CarAliased :> Vehicle { alias weight for mass; }
+    part r : CarRenamed { attribute rm = mass; attribute rw = weight; }
+    part a : CarAliased { attribute am = mass; attribute aw = weight; }
+}
+```
+
+- `CarRenamed` *renames* the feature. `mass` no longer resolves in `CarRenamed` or its specializations
+  (`r::rm`: `Couldn't resolve reference to Element 'mass'`). In `CarAliased`, both names resolve to `Vehicle::mass`
+  **[RUN]**.
+- Renaming by redefinition is legitimate, and the libraries use it, so it cannot be reported in general. It is listed
+  because modelers reach for it when they mean an alias. To rename and keep the old name, add an alias:
+  `attribute weight :>> mass; alias mass for weight;` (no diagnostic).
+
+**(f) An alias and a different member with one name, from two generals.**
+
+```sysml
+package V10f {
+    private import ScalarValues::*;
+    part def Vehicle { attribute mass : Real; }
+    part def Metric :> Vehicle { alias weight for mass; }
+    part def Imperial :> Vehicle { alias weight for mass; }
+    part def Scale { attribute weight : Real; }
+    part def BothAliases :> Metric, Imperial { attribute p = weight; }
+    part def MetricFirst :> Metric, Scale { attribute q = weight; }
+    part def ScaleFirst :> Scale, Metric { attribute q = weight; }
+}
+```
+
+- `BothAliases` inherits two aliases of the same feature. There is no diagnostic **[RUN]**. This is valid by the prose,
+  and needs K2 and K10 to be valid as formalized (S12, S16).
+- `MetricFirst` and `ScaleFirst` each get the warning `Duplicate of inherited member name 'weight' from Metric, Scale`.
+  As in V4a, `weight` resolves to the member from the general listed first: `Vehicle::mass` in `MetricFirst`, and
+  `Scale::weight` in `ScaleFirst` **[RUN]**.
+
+**Fixed forms** (`pilot-repro/models/V10g.sysml`, no diagnostic **[RUN]**). `Vehicle` is as in (d):
+
+```sysml
+part def CarFixed :> Vehicle {
+    attribute :>> mass : Real;
+    alias weight for mass;              // declared again: names CarFixed::mass
+}
+part def CarAliasFixed :> Vehicle { alias isqMass for ISQ::mass; }
+```
+
 ### 2.10 Confirmation by execution (pilot 0.62.0 and 0.63.0)
 
 **Method.** Each model above was run through `org.omg.sysml.interactive.SysMLInteractive`, the engine behind the
 pilot's Jupyter kernel, from the official release artifacts `jupyter-sysml-kernel-0.62.0.zip` (tag `2026-08`) and
 `jupyter-sysml-kernel-0.63.0.zip` (tag `2026-09`), each with the standard library shipped in the same archive. A small
-harness printed every diagnostic, and what each redefinition, subsetting and feature reference resolved to,
-including computed implicit redefinitions (`FeatureUtil.getRedefinedFeaturesWithComputedOf`) and inherited memberships
-(`TypeUtil.getInheritedMembershipOf`). The harness, the models and the captured output are in
+harness printed every diagnostic, and what each redefinition, subsetting, typing by a feature and feature reference
+resolved to, including computed implicit redefinitions (`FeatureUtil.getRedefinedFeaturesWithComputedOf`) and inherited
+memberships, aliases included (`TypeUtil.getInheritedMembershipOf`). The harness, the models and the captured output are in
 `examples/name-collision/pilot-repro/`. **Both versions produced identical output.**
 
 | Variant | Diagnostics reported by the pilot | What the model actually means (observed) |
@@ -453,6 +647,14 @@ including computed implicit redefinitions (`FeatureUtil.getRedefinedFeaturesWith
 | V7b | none | `Refund::target` redefines **both** `Transfer::target` and `Transfer::source` |
 | V8 | `car1`: **error** `Cannot override a binding feature value`; `car2`: warning `… 'mass' from Vehicle` | `car2` has two masses |
 | V9 | warning `Duplicate of inherited member name 'cutoff' from TestRecord` | `TestWithCutoff` inherits `TestRecord::cutoff` and owns a second `cutoff` |
+| V6f | on each of the three `mass` pitfalls: **error** `An attribute must be typed by attribute definitions` and warning `… 'mass' from Vehicle`; on `Truck`'s and `EngineCheck`'s features: **errors** such as `An occurrence, item or part must be typed by occurrence definitions`, `A port must be typed by port definitions`, `A usage must be typed by definitions`; the fixed forms: none | `CarTypedByItself::mass` is typed by itself, `CarTypedByLibraryUsage::mass` by `ISQBase::mass`, `CarTypedByUnit::mass` by `SI::kilogram` |
+| V10a | none | `myCar` inherits `Vehicle::mass` as `mass` and as `weight`; both resolve to it |
+| V10b | warning `… 'mass' from Vehicle` on the alias and on `SportsCar::mass` | `mass` in `Car` is `ISQBase::mass`; `SportsCar::mass` redefines `ISQBase::mass` |
+| V10c | warning `… 'weight' from Vehicle` on both declarations | each type inherits `Vehicle::mass` twice (as `mass` and as `weight`), and owns a feature named `weight` (`Car`) or short-named `weight` (`CarShortName`) |
+| V10d | **error** `Couldn't resolve reference to Element 'weight'` at each use, with the follow-on warning `Bound features should have conforming types`; nothing at the redefinitions | `c1` and `c2` inherit only `CarViaName::mass` and `CarViaAlias::mass`; the alias is no longer inherited |
+| V10e | **error** `Couldn't resolve reference to Element 'mass'` in `r`, with the follow-on warning `Bound features should have conforming types`; nothing in `a` | `r` inherits only `CarRenamed::weight`; `a` inherits `Vehicle::mass` under both names |
+| V10f | warning `… 'weight' from Metric, Scale` on `MetricFirst` and on `ScaleFirst` | `weight` is `Vehicle::mass` in `MetricFirst` and `Scale::weight` in `ScaleFirst` |
+| V10g (fixed forms) | none | the re-declared alias names the redefining feature; `attribute weight :>> mass; alias mass for weight;` keeps both names; `attribute scaleWeight :>> Scale::weight;` resolves V10f |
 
 ### 2.11 Status on the current working branch
 
@@ -528,6 +730,13 @@ should show the qualified form.
 | V7b explicit and positional parameter redefinition | text vs OCL conflict | double redefinition, silent | SRC, RUN |
 | V8 correct form errors, wrong form warns | as specified | error vs. warning | SRC, RUN |
 | V9 spec example | invalid | warning | RUN |
+| V6f usage typed by itself, a library usage or a unit (`mass : mass`) | invalid | error, but the message names neither cause nor fix | RUN |
+| V10a alias of the inherited feature | **valid** by the prose (the remedy when only a name is wanted); the OCL needs K2, K10 | none | SRC, RUN |
+| V10b alias takes an inherited feature's name | invalid (distinguishability) | warning; the alias wins resolution | SRC, RUN |
+| V10c feature takes an inherited alias's name | invalid (distinguishability) | warning | RUN |
+| V10d redefinition drops the general's aliases | valid as formalized; intent unstated | none at the cause; linking error at each use | SRC, RUN |
+| V10e named redefinition used where an alias was meant | valid (renaming) | none at the cause; linking error at each use of the old name | RUN |
+| V10f alias and feature with one name from two generals | invalid | warning; first general wins | RUN |
 
 ---
 
@@ -558,6 +767,8 @@ The rules are paraphrased. The only direct quotation in this document is the Ker
 | R17 | SysML 7.6.3, pp.40–41; 7.6.5, pp.42–43 | Redefinitions are declared with `redefines`/`:>>`. Default `[1..1]` applies to attribute, item and port usages without explicit subsetting or redefinition. Effective names come from the first redefined feature. |
 | R18 | SysML 7.13.2, p.71; 7.21.2, p.134; 7.27.2, pp.158–159 | Connection ends and subject parameters redefine by position. Metadata-body features redefine by name, and `:>>` may be omitted. |
 | R19 | SysML BNF 8.2.2.6.2–8.2.2.6.5 (`SysML-textual-bnf.kebnf` L38, L314, L348-L349, L361, L488-L497); 8.2.2.27 (L1706-L1709) | `REDEFINES = ':>>' \| 'redefines'`. `UsageDeclaration = Identification FeatureSpecializationPart?`. A name alone declares a new usage. `DefaultReferenceUsage = RefPrefix Usage`. `MetadataBodyUsage` makes `:>>` optional. |
+| R20 | KerML 7.2.5.2, p.22; 7.3.2.6, p.30 | An alias is a non-owning membership that gives an element another name in a namespace. A feature aliased in a type is related to it by a plain membership, not a feature membership, and is not an owned feature of the type. |
+| R21 | SysML 8.3.6.4, p.270; 8.3.7.3, p.280 | `Usage::/definition : Classifier` and, for example, `AttributeUsage::/attributeDefinition : DataType`: a usage's types are classifiers (nominally definitions; kernel classifiers are also allowed), so a usage, which is a feature, cannot be one. |
 
 ### 3.2 Findings: where the specification is silent, ambiguous, inconsistent or allows the hazard
 
@@ -602,8 +813,47 @@ The rules are paraphrased. The only direct quotation in this document is the Ker
   - `isDistinguishableFrom` (p.127) uses non-existent `shortMemberName` (the property is `memberShortName`) and `oclKindOf` (should be `oclIsKindOf`), and has an unbalanced closing parenthesis.
   - 8.2.3.5.4 (p.85) also says `shortMemberName`.
   - `resolveLocal` (p.130) types the collection `memberships` as `Membership`.
+  - The prose of 7.2.5.2 (p.23) allows several names to identify the same element, but the `isDistinguishableFrom`
+    body has no same-element case. Read literally, an alias that
+    repeats a member's name for the same element (V10a `CarSameName`), or two inherited aliases of one feature (V10f
+    `BothAliases`), violate `validateNamespaceDistinguishibility`. The pilot follows the prose (`m.memberElement !=
+    memElement`). K2 adds the case.
   - The constraint name is spelled `validateNamespaceDistinguishibility` (p.132; prose "distinguishibility", p.23). The pilot's issue code is `validateNamespaceDistinguishablity` ([L131](https://github.com/Systems-Modeling/SysML-v2-Pilot-Implementation/blob/692170b71867353b8f90341e61556f49a5beb0e5/org.omg.kerml.xtext/src/org/omg/kerml/xtext/validation/KerMLValidator.xtend#L131)), a third spelling. That hampers matching diagnostics to constraints in conformance tests.
 - **S13. Interaction with value overriding.** R14 makes the correct form an error for bound values, while the hiding form escapes R14 entirely (V8, [SYSML21-646](https://issues.omg.org/issues/SYSML21-646)).
+- **S14. Aliases are names too, but the feature-oriented rules forget them** (R1, R20; V10b, V10c).
+  - Distinguishability (R1, R11) covers alias memberships, so V10b and V10c are invalid. But a rule phrased in terms
+    of feature memberships, as K1 was first drafted, misses both, because an inherited alias is a plain `Membership`.
+  - Nothing states which member wins when an owned alias and an inherited feature share a name. In the pilot the
+    alias wins, so one alias declaration silently redirects every use of the name in the type and its
+    specializations, including `:>>` targets.
+- **S15. Redefinition drops inherited aliases without saying so** (R12, V10d).
+  - `removeRedefinedFeatures` removes inheritable memberships by member element, so an alias that a general declares
+    for a feature disappears from every specialization that redefines that feature. This happens even when the
+    redefinition is written through the alias (`:>> weight`).
+  - Neither 7.2.5.2 nor 7.3.4.5 mentions this. The only symptom is a linking error wherever the alias name is used,
+    which points away from the cause.
+
+- **S16. Rule 1 of `removeRedefinedFeatures` removes every membership that shares an element with another** (R12).
+  - Rule 1 removes a membership whose element is among the redefined features of *another* membership, and the
+    redefined features of a membership include its own element (`allRedefinedFeatures()` prepends `self`, KerML
+    8.3.3.3.4, p.162; `removeRedefinedFeatures`, 8.3.3.1.10, p.147).
+  - Two memberships of the same element therefore remove each other. As formalized, `alias weight for mass;` in
+    `CarNewName` makes **both** `weight` and `mass` disappear from `myCar : CarNewName` (V10a). The same happens to an
+    alias declared again after a redefinition (V10d), and to the two aliases of V10f `BothAliases`.
+  - The pilot does not do this. It leaves each membership's own element out of the redefined features it collects
+    ([`TypeAdapter` L162-L168](https://github.com/Systems-Modeling/SysML-v2-Pilot-Implementation/blob/692170b71867353b8f90341e61556f49a5beb0e5/org.omg.sysml.logic/src/main/java/org/omg/sysml/adapter/TypeAdapter.java#L162-L168))
+    **[SRC]**, which is why every name in V10a resolves **[RUN]**. K10 aligns the OCL with it.
+
+**Can the name be aliased instead of redefined?** Yes, when the intent is only to give the inherited feature a name.
+An alias creates no feature, so it does not collide (V10a). That is what the prose says and what the reference
+implementation does; the formal rules need K2 and K10 to agree (S12, S16). It is not a substitute for redefinition,
+though:
+
+- it cannot change the feature's value, type or multiplicity;
+- an alias with an inherited member's name must stand for that member's element, or it redirects the name (V10b);
+- under the current rules it does not survive a redefinition of the feature in a specialization (V10d).
+
+K1, K2, K9 and K10 below make these rules explicit.
 
 ---
 
@@ -635,30 +885,51 @@ The rules are paraphrased. The only direct quotation in this document is the Ker
 
 ### 5.1 KerML specification changes (KerML 1.1 RTF)
 
-**K1. New validation constraint on `Type` (KerML 8.3.3.1.10), severity error.**
+**K1. New validation constraints on `Type` (KerML 8.3.3.1.10), severity error.**
+
+The inherited name may come from a feature membership or from an alias membership (R20), so the constraint is
+stated on member elements, not on `FeatureMembership`; a first draft that selected `FeatureMembership` missed
+V10b and V10c (S14).
 
 ```
 validateTypeOwnedFeatureRedefinesHomonym
 An ownedFeature of a Type that has the same memberName or memberShortName as an
-inheritedMembership of the Type that is a FeatureMembership must directly or
-indirectly redefine the memberFeature of that FeatureMembership. (A same-named
-owned Feature that does not redefine an inherited Feature declares a second,
-distinct Feature and is not allowed; to declare a distinct Feature, redefine the
-inherited Feature to give it a different name, see 7.3.4.5.)
+inheritedMembership of the Type whose memberElement is a Feature, whether that
+Membership is a FeatureMembership or an alias Membership, must directly or
+indirectly redefine that Feature. (A same-named owned Feature that does not
+redefine it declares a second, distinct Feature and is not allowed; to declare a
+distinct Feature, redefine the inherited Feature to give it a different name, see
+7.3.4.5.)
 
 ownedFeatureMembership->forAll(own |
-    inheritedMembership->selectByKind(FeatureMembership)->forAll(inh |
-        inh.memberFeature <> own.ownedMemberFeature and own.namesOverlap(inh) implies
-            own.ownedMemberFeature.allRedefinedFeatures()->includes(inh.memberFeature)))
+    inheritedMembership->select(memberElement.oclIsKindOf(Feature))->forAll(inh |
+        inh.memberElement <> own.ownedMemberFeature and own.namesOverlap(inh) implies
+            own.ownedMemberFeature.allRedefinedFeatures()->
+                includes(inh.memberElement.oclAsType(Feature))))
+
+validateTypeAliasNamesInheritedElement
+An alias Membership of a Type (an ownedMembership that is not an OwningMembership)
+that has the same memberName or memberShortName as an inheritedMembership of the
+Type must have the same memberElement. (An alias may repeat the name of an
+inherited member for the same element, or give it another name, but must not take
+the name of an inherited member for a different element.)
+
+ownedMembership->reject(oclIsKindOf(OwningMembership))->forAll(alias |
+    inheritedMembership->forAll(inh |
+        alias.namesOverlap(inh) implies alias.memberElement = inh.memberElement))
 ```
 
 - **Helper.** Add `Membership::namesOverlap(other : Membership) : Boolean`, true if a non-null `memberShortName` or `memberName` of either equals a `memberShortName` or `memberName` of the other. `Feature::allRedefinedFeatures()` already exists (KerML 8.3.3.3.4, p.162).
-- **Why a separate constraint, when `validateNamespaceDistinguishibility` already implies it?**
-  - It names the modeler's mistake.
-  - It gives tools a precise hook for the message and the `:>>` quick fix.
-  - It works regardless of the metaclass escape (K2).
-  - It is written, like all validation constraints, presuming that implied redefinitions have been added (KerML 8.3.1, p.109). So positional parameter and end redefinitions are automatically exempt.
-- **Prose.** Add matching notes to KerML 7.3.2.1 and 7.3.4.5 with a two-line example: wrong `feature mass;`, right `feature redefines mass;`.
+- **Aliasing is the sanctioned alternative when only a name is wanted.**
+  - Neither constraint forbids an alias of the inherited feature, under its own name (`alias mass for Vehicle::mass;`) or another (`alias weight for mass;`).
+  - Such an alias creates no feature, so it is not a second `mass`, and the pilot accepts it (V10a) **[RUN]**.
+  - It cannot give the feature a value, type or multiplicity, so K1's "must redefine" stays the rule whenever the modeler changes the feature.
+- **Why separate constraints, when `validateNamespaceDistinguishibility` already implies them?**
+  - They name the modeler's mistake.
+  - They give tools a precise hook for the message and the quick fix (`:>>` for a feature, rename for an alias).
+  - They work regardless of the metaclass escape (K2).
+  - They are written, like all validation constraints, presuming that implied redefinitions have been added (KerML 8.3.1, p.109). So positional parameter and end redefinitions are automatically exempt.
+- **Prose.** Add matching notes to KerML 7.3.2.1 and 7.3.4.5 with a two-line example: wrong `feature mass;`, right `feature redefines mass;`. Mention that `alias weight for mass;` adds a name without adding a feature.
 
 **K2. Remove the metaclass escape from `Membership::isDistinguishableFrom` (KerML 8.3.2.4.3, p.127)** and fix its OCL (S12).
 
@@ -668,6 +939,8 @@ body: memberElement = other.memberElement or not namesOverlap(other)
 ```
 
 - **Rationale.**
+  - Adds the same-element case that the 7.2.5.2 prose has and the OCL lacks (S12), so an alias of a member's own
+    element (V10a) is valid as formalized.
   - Makes the KerML 8.2.3.5.3 note true.
   - Makes local resolution unambiguous before metaclass checking (8.2.3.5.1).
   - Matches the reference implementation's behavior and tests.
@@ -681,7 +954,8 @@ body: memberElement = other.memberElement or not namesOverlap(other)
   - **A2 same-named owned feature vs. an inheritable feature hidden by another path's redefinition** (V4b). The OCL is K1 with `inheritableMemberships(Set{}, Set{}, false)` in place of `inheritedMembership`;
   - **A3 parameter or end paired by position with a differently named feature while a same-named one exists at another position** (V7a);
   - **A4 a redefinition target not inheritable from the owning type, resolved through an enclosing namespace or import** (V6b);
-  - **A5 an owned member hides an imported member of the same name** (V6a), informational.
+  - **A5 an owned member hides an imported member of the same name** (V6a), informational;
+  - **A6 a redefinition drops an alias that a general declares for the redefined feature** (V10d), until K9 is decided.
 
 **K4. Imports and resolution order (KerML 8.3.2.4.5).**
 
@@ -719,6 +993,44 @@ redefiningFeature.owningType.inheritableMemberships(Set{}, Set{}, false).
 **K7. Library and anomaly prerequisites.** Resolve KERML11-72 and KERML11-76 (and SysML SYSML21-311 and SYSML21-322) before or together with K1/K3, so that conformant tools can report K1 as an error without flagging the standard libraries.
 
 **K8. Errata.** Correct the S12 items. Spell the constraint `validateNamespaceDistinguishability`, and keep the old name as an alias for one revision.
+
+**K9. Inherited aliases of a redefined feature (KerML 7.2.5.2, 7.3.4.5 and `Type::removeRedefinedFeatures`, 8.3.3.1.10).**
+
+Today a general's alias of a feature disappears from every specialization that redefines the feature (S15, V10d).
+The RTF should decide this explicitly. Two options:
+
+- **(a) Recommended: the alias follows the redefinition.**
+  - When `removeRedefinedFeatures` removes an alias membership because its member element is redefined in the type,
+    the alias name denotes the redefining feature in that type and its specializations.
+  - Specify it in name resolution (8.2.3.5.3). An implied alias membership for the redefining feature, like the
+    implied relationships of KerML 8.4.2, would also do, but only together with K10: under the current rule 1 it
+    would share its element with the redefining feature's own membership, and the two would remove each other in
+    every specialization (S16).
+  - If two branches of a diamond redefine the feature, the alias denotes two features, and the multiple-inheritance
+    rule applies to it as to the feature (KERML11-72).
+  - This keeps the meaning a modeler expects from declaring the alias in the general. It is what the work-around,
+    declaring the alias again, does by hand.
+- **(b) Minimum: document the current behavior.**
+  - Add a note to 7.2.5.2 and 7.3.4.5: redefining a feature removes the aliases inherited for it; declare the alias
+    again in the redefining type if it is needed.
+  - Add advisory check A6.
+
+Either way, the name should not silently stop resolving in a model with no diagnostic at the redefinition.
+
+**K10. Rule 1 of `Type::removeRedefinedFeatures` (KerML 8.3.3.1.10, p.147): ignore memberships of the same element.**
+
+```
+body: let reducedMemberships : Sequence(Membership) =
+    memberships->reject(mem1 |
+        memberships->excluding(mem1)->
+            exists(mem2 | mem2.memberElement <> mem1.memberElement and
+                allRedefinedFeaturesOf(mem2)->includes(mem1.memberElement))) in
+...   -- rule 2 unchanged
+```
+
+- A membership is removed by rule 1 only when a membership of a *different* feature redefines its element. Two
+  names for one feature, an owning membership and an alias, then survive together (S16).
+- This is what the reference implementation does (TypeAdapter L162-L168) **[SRC]**.
 
 ### 5.2 SysML specification changes (SysML 2.1 RTF)
 
@@ -779,6 +1091,16 @@ Paths are relative to the repository at commit `692170b`.
   - Add Xpect tests for V1–V9: one `invalid/` file per variant asserting the new message, plus `valid/` counterparts using `:>>`.
   - Change `RedefinitionDiamond0.sysml.xt` to expect the A2 warning.
   - Fix the library collisions so that the library resources validate clean.
+- **P11. Aliases (K1, K9).**
+  - In `checkNamespace`, the check of owned memberships against inherited ones ([L443-L445](https://github.com/Systems-Modeling/SysML-v2-Pilot-Implementation/blob/692170b71867353b8f90341e61556f49a5beb0e5/org.omg.kerml.xtext/src/org/omg/kerml/xtext/validation/KerMLValidator.xtend#L441-L447)) already covers alias memberships on both sides.
+  - Report the two K1 cases as errors with specific messages.
+  - For an owned feature with the name of an inherited alias: `Feature 'weight' does not redefine 'Vehicle::mass', which is inherited under the alias name 'weight', so it declares a second, distinct feature. Use ':>> mass' to redefine it.`
+  - For an owned alias with the name of an inherited member: `Alias 'mass' stands for 'ISQ::mass', but 'Vehicle::mass' is inherited under the same name; owned members are found first, so 'mass' now means 'ISQ::mass' here and in specializations.` The quick fix is a rename.
+  - Until K9 is decided, give the linking error for a dropped alias its cause: `'weight' is an alias of 'Vehicle::mass', which 'myCar' redefines; a redefinition drops the inherited aliases of the feature it redefines. Declare 'alias weight for mass;' in 'myCar'.` Add the A6 warning at the redefinition.
+- **P12. Usage typed by a usage (V6f).** When the type of a usage is itself a usage, say so in the `validate…UsageType` errors.
+  - If the name resolved to the feature being declared, say that too.
+  - Offer the quick fixes `: <type of the usage>` and `:> <usage>`.
+  - For a unit, offer `: <quantity value type>`, for example `: MassValue` for `kg`.
 
 ### 5.5 Edge cases the rule must exempt or treat specially
 
@@ -790,7 +1112,9 @@ Paths are relative to the repository at commit `692170b`.
 | Anonymous features (no declared and no effective name) | Exempt (no name). Note KERML11-47: they cannot be specialized textually. | – |
 | Features whose name is an **effective** name (redefinition without a name; perform, exhibit and include usages referencing another action) | Compare effective names. The message should say the name was derived and from where. | KerML 7.3.4.5 (p.37); SysML 7.6.5 (pp.42–43), 7.17.6 (p.104); SYSML21-7 |
 | Short names (`<m>`) | Included: short and regular names are compared crosswise | R1, R10; the pilot already does this |
-| Alias memberships | Included, except when the alias denotes the *same* element as the inherited membership | R1; the pilot filters `memberElement !=` |
+| Alias memberships | Included on both sides. An owned feature must redefine a feature whose inherited alias shares its name (K1, first constraint). An owned alias must stand for the element of any inherited member that shares its name (K1, second constraint). An alias of the *same* element, under its own name or another, is not a collision. | R1, R20; the pilot filters `memberElement !=`; V10a–V10c, V10f |
+| Inherited aliases of a redefined feature | Dropped today; see K9 (and A6 until it is decided) | R12; V10d |
+| Usage typed by a usage (`: mass`, `: ISQ::mass`, `: kg`) | Not a name collision, but its `: mass` form is the V6a self-reference; report it with its cause | R21; V6f |
 | Same element inherited along several paths | Not a collision | Pilot `dups.map[memberElement].toSet.size > 1` (L506) |
 | Private members of general types | Exempt (not inherited). Exclude from A1 hints. | KerML 7.3.2.3 (p.28) |
 | Protected members | Included (inherited) | KerML 7.3.2.3 |
@@ -809,12 +1133,15 @@ Paths are relative to the repository at commit `692170b`.
 
 ### 6.1 Diagnostics a validator should emit
 
-The SysML v2 validator in this repository implements these checks, with the codes
-`INHERITED_NAME_REDECLARED`, `DUPLICATE_MEMBER_NAME`, `RENAMED_INHERITED_NAME_REUSED`,
-`NAME_SIMILAR_TO_INHERITED`, `REDEFINITION_NOT_INHERITED`, `FEATURE_REFERS_TO_ITSELF`,
-`PARAMETER_POSITION_MISMATCH`, `PARAMETER_REDEFINES_TWO` (warnings) and `SEMANTIC_BOUND_VALUE_OVERRIDDEN`
-(error); see `docs/USER_GUIDE.md`. Every hit it reports on the release's 252 SysML files is listed in §2.12
-and was confirmed with the pilot.
+The SysML v2 validator in this repository implements these checks.
+
+- **Warnings:** `INHERITED_NAME_REDECLARED`, `DUPLICATE_MEMBER_NAME`, `RENAMED_INHERITED_NAME_REUSED`,
+  `NAME_SIMILAR_TO_INHERITED`, `REDEFINITION_NOT_INHERITED`, `FEATURE_REFERS_TO_ITSELF`,
+  `PARAMETER_POSITION_MISMATCH`, `PARAMETER_REDEFINES_TWO`, `ALIAS_NAME_COLLISION` and `INHERITED_ALIAS_DROPPED`.
+- **Errors:** `SEMANTIC_BOUND_VALUE_OVERRIDDEN` and `SEMANTIC_TYPED_BY_USAGE`.
+
+See `docs/USER_GUIDE.md`. Every hit it reports on the release's 252 SysML files is listed in §2.12, and was
+confirmed with the pilot. The alias and typing checks add no hits there.
 
 | ID | Trigger | Severity | Message (template) | Quick fix |
 |---|---|---|---|---|
@@ -828,6 +1155,11 @@ and was confirmed with the pilot.
 | D8 (A4) | unqualified redefinition target resolves outside the inheritable features | warning | `'{n}' resolves to '{Q}', which is not inherited by '{T}'; qualify the name if this is intended.` | qualify; choose an inherited feature |
 | D9 (A5) | owned member hides an imported one | info | `'{n}' hides imported '{Q}'.` | qualify references |
 | D10 | a feature's subsetting or redefinition target resolves to the feature itself | warning | `'{n}' specializes itself; did you mean '{Q}'?` | qualify |
+| D11 (K1) | owned feature's name or short name equals an inherited **alias** of a feature, and it does not redefine that feature | **error** | `Feature '{n}' does not redefine '{Q}', which is inherited under the alias name '{n}', so it declares a second, distinct feature. Use ':>> {m}' to redefine it.` | insert `:>> {m}` and re-declare the alias; rename |
+| D12 (K1) | owned alias's name equals an inherited member's name, for a different element | **error** | `Alias '{n}' stands for '{A}', but '{Q}' is inherited under the same name; '{n}' now means '{A}' here and in specializations.` | rename the alias |
+| D13 (A6, K9) | a redefinition drops an inherited alias of the redefined feature | warning | `Redefining '{Q}' drops the alias '{n}' declared in '{T}'; '{n}' no longer resolves in '{U}'.` | insert `alias {n} for {m};` |
+| D14 (D3) | an inherited alias and a different inherited member with one name, from two generals | error (warning until KERML11-72) | `'{T}' inherits the alias '{n}' for '{Q1}' and '{Q2}' under the same name; '{n}' resolves to the one from the general listed first.` | rename; redefine under a distinct name |
+| D15 (R21) | a usage typed by a usage: itself (`: mass`), a library quantity (`: ISQ::mass`) or a unit (`: kg`) | **error** | `'{n}' is typed by itself / by '{Q}', which is a usage, not a definition.` | `: {type of Q}` or `:> {Q}`; for a unit, its quantity type |
 
 ### 6.2 Near-miss ("did you mean `:>> mass`") algorithm
 
@@ -869,7 +1201,12 @@ Run it for each owned, non-parameter, non-end feature `f` that has a declared na
   - qualify redefinition targets of important features (`attribute :>> Vehicle::mass = 1500.0;`). Qualified targets are resolved through `Vehicle`'s visible memberships, so a typo or a missing feature is an error rather than a fall-through (KerML 8.2.3.5.1, step 3);
   - qualify library subsetting targets (`attribute mass :> ISQ::mass;`), as the release examples do;
   - in specialized actions and calculations, keep the general parameter order, and use explicit `:>>` whenever a parameter's name differs from the general one;
-  - prefer `default` values in general definitions that are meant to be specialized (V8).
+  - prefer `default` values in general definitions that are meant to be specialized (V8);
+  - to give an inherited feature another name, use an alias (`alias weight for mass;`), not a named redefinition (`attribute weight :>> mass;` renames, and `mass` stops resolving; V10e);
+  - never give an alias the name of an inherited member (V10b);
+  - after redefining a feature that a general aliases, declare the alias again (V10d);
+  - type a quantity by its value definition (`attribute mass : MassValue;`) or subset the library quantity (`attribute mass :> ISQ::mass;`), never `: mass`, `: ISQ::mass` or `: kg` (V6f).
+- **Also not caught, or caught far from the cause:** V10d (a dropped alias fails only where its name is used) and V10e (a renamed feature's old name likewise).
 
 ### 6.4 How a modeler fixes each variant
 
@@ -888,6 +1225,13 @@ Run it for each owned, non-parameter, non-end feature `f` that has a declared na
 | V7b | `in target :>> target;` at position 1 | declare `in source;` first (positional), then `in target :>> target;` |
 | V8 | delete `:>>` to silence the overriding error | make the general value `default` (`attribute mass : Real default 1000.0;`), then `:>> mass = 1500.0` |
 | V9 | `attribute cutoff : Rational default = …` in `TestWithCutoff` | `attribute redefines cutoff : Rational default = …` |
+| V6f | `part def Car :> Vehicle { attribute mass : mass; }` (or `: ISQ::mass`, `: kg`) | `attribute :>> mass : MassValue;` or `attribute :>> mass :> ISQ::mass;`; values in a unit: `attribute :>> mass = 1500 [kg];` |
+| V10a | (a name for the inherited feature is wanted) | `alias weight for mass;` |
+| V10b | `alias mass for ISQ::mass;` in a specialization of `Vehicle` | `alias isqMass for ISQ::mass;` |
+| V10c | `attribute weight : Real;` where `weight` is an inherited alias | `attribute :>> mass : Real;` (and `alias weight for mass;` if the name is still used) |
+| V10d | `attribute :>> mass = 1500.0;` (or `:>> weight`), then a use of `weight` | `attribute :>> mass = 1500.0; alias weight for mass;` |
+| V10e | `attribute weight :>> mass;` meant as a second name | `alias weight for mass;` (or `attribute weight :>> mass; alias mass for weight;` to rename and keep the old name) |
+| V10f | `part def P :> Metric, Scale;` with alias `Metric::weight` and feature `Scale::weight` | `attribute scaleWeight :>> Scale::weight;` in `P`, or rename one in its general |
 
 ---
 
@@ -1054,6 +1398,9 @@ Claims were first derived from the source and test files, then the model-level c
 14. The issue code string is `validateNamespaceDistinguishablity` (L131).
 15. `SysMLValidator` extends `KerMLValidator` and does not override `checkNamespace`.
 16. The bundle version at the tag is 0.62.0.
+17. Alias memberships are checked like owning ones. Owned aliases are checked against owning members (L436-L437), against each other (L438), and, with all owned memberships, against inherited ones (L443-L445). Inherited memberships, aliases included, are checked against each other (L446). Members of the same element are never duplicates (L482, L493, L506).
+18. `removeRedefinedFeatures` removes inheritable memberships by member element, whatever the kind of membership, so a general's alias of a redefined feature is removed with it (TypeAdapter L149-L168).
+19. Unlike rule 1 of the specification, it leaves each membership's own element out of the redefined features it collects, so two memberships of one element do not remove each other (TypeAdapter L162-L168).
 
 **Confirmed by running pilot 0.62.0 and 0.63.0 ([RUN], §2.10)**
 
@@ -1069,6 +1416,14 @@ Claims were first derived from the source and test files, then the model-level c
 - V7b redefining two parameters at once, with no diagnostic.
 - V8 `car1` producing an error and `car2` only a warning.
 - V9 producing a warning.
+- V6f: each attribute typed by itself, by `ISQ::mass` or by `kg` producing an error plus the duplicate warning; part, item, port, action, occurrence and `ref` usages and a subject typed by a usage producing errors.
+- V10a: aliases of the inherited feature producing no diagnostic, and both names resolving to it.
+- V10b: the owned alias winning resolution in the type and redirecting `:>> mass` in a specialization, with warnings on both.
+- V10c: warnings on features named like an inherited alias, by name and by short name.
+- V10d: aliases dropped by redefinition, via the name and via the alias, with linking errors only at the uses.
+- V10e: the old name failing to resolve after a renaming redefinition, but not after an alias.
+- V10f: warnings for an alias and a feature with one name from two generals, the general listed first winning.
+- V10g: the fixed forms producing no diagnostic, including the rename that keeps the old name as an alias and the V10f fix.
 
 **Still inferred ([INF])**
 
@@ -1104,5 +1459,25 @@ part def Vehicle { attribute totalMass :> ISQ::mass; }
 part def Car :> Vehicle {
     // XPECT warnings --> "'mass' resolves to 'ISQ::mass', which is not inherited by 'Car'; qualify the name if this is intended." at "mass"
     attribute :>> mass;
+}
+
+// invalid/AliasNameCollision.sysml.xt
+part def Vehicle { attribute mass : ScalarValues::Real; alias weight for mass; }
+part def Car :> Vehicle {
+    // XPECT errors --> "Alias 'mass' stands for 'ISQ::mass', but 'Vehicle::mass' is inherited under the same name; owned members are found first, so 'mass' now means 'ISQ::mass' here and in specializations." at "mass"
+    alias mass for ISQ::mass;
+}
+part def Truck :> Vehicle {
+    // XPECT errors --> "Feature 'weight' does not redefine 'Vehicle::mass', which is inherited under the alias name 'weight', so it declares a second, distinct feature. Use ':>> mass' to redefine it." at "weight"
+    attribute weight : ScalarValues::Real;
+}
+
+// valid/AliasOfInheritedFeature.sysml.xt
+// XPECT noErrors ---> ""
+part def Vehicle { attribute mass : ScalarValues::Real; }
+part def Car :> Vehicle { alias weight for mass; alias mass for Vehicle::mass; }
+part def Truck :> Vehicle {
+    attribute :>> mass = 1500.0;
+    alias weight for mass;              // re-declared after the redefinition (K9)
 }
 ```
