@@ -1,5 +1,6 @@
 package com.validator.parser;
 
+import com.validator.testutil.ParseTrees;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,8 +42,49 @@ class OfficialExampleGrammarTest {
         return parserFacade.parseString(text, "official-gap.kerml");
     }
 
+    /**
+     * No syntax errors, and no construct cut short: a valid file can also parse "by accident" when a rule ends early
+     * and the rest of the construct is read as a separate expression statement ('subject v : V' plus a '{ ... }'
+     * expression), so the tree is checked for such stray statements too.
+     */
     private static void assertParses(SysMLv2ParserFacade.ParseResult result) {
         assertFalse(result.hasErrors(), "Should parse without errors: " + result.getSyntaxErrors());
+        List<String> stray = ParseTrees.strayStatements(result.getParseTree());
+        assertTrue(stray.isEmpty(), "A construct was cut short; its remainder was read as statements: " + stray);
+    }
+
+    /** The number of nodes of the given rule in the tree. */
+    private static int count(ParseTree tree, Class<? extends ParserRuleContext> rule) {
+        int n = rule.isInstance(tree) ? 1 : 0;
+        for (int i = 0; i < tree.getChildCount(); i++) {
+            n += count(tree.getChild(i), rule);
+        }
+        return n;
+    }
+
+    /** The last node of the given rule in the tree (in source order), or null. */
+    private static <T extends ParserRuleContext> T last(ParseTree tree, Class<T> rule) {
+        for (int i = tree.getChildCount() - 1; i >= 0; i--) {
+            T found = last(tree.getChild(i), rule);
+            if (found != null) {
+                return found;
+            }
+        }
+        return rule.isInstance(tree) ? rule.cast(tree) : null;
+    }
+
+    /** The first node of the given rule in the tree, or null. */
+    private static <T extends ParserRuleContext> T first(ParseTree tree, Class<T> rule) {
+        if (rule.isInstance(tree)) {
+            return rule.cast(tree);
+        }
+        for (int i = 0; i < tree.getChildCount(); i++) {
+            T found = first(tree.getChild(i), rule);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
     }
 
     /** True if the tree has a node of the given rule, i.e. the construct was read by that rule. */
@@ -326,9 +370,29 @@ class OfficialExampleGrammarTest {
     }
 
     @Test
+    @DisplayName("A target transition in a state body may be triggered by a qualified name or a feature chain")
+    void testTargetTransitionWithQualifiedTrigger() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                package Signals { attribute def Start; }
+                part remote { attribute pressed; }
+                state def S {
+                    entry; then off;
+                    state off;
+                    accept Signals::Start then on;
+                    state on;
+                    accept remote.pressed then off;
+                }
+            }
+            """);
+        assertParses(result);
+        assertEquals(2, count(result.getParseTree(), SysMLv2Parser.AcceptTransitionContext.class));
+    }
+
+    @Test
     @DisplayName("Guarded succession: 'succession S first A1 if x == 0 then A2;'")
     void testGuardedSuccession() {
-        assertParses(parse("""
+        SysMLv2ParserFacade.ParseResult result = parse("""
             action def DecisionTest {
                 attribute x = 1;
                 action A1;
@@ -336,7 +400,14 @@ class OfficialExampleGrammarTest {
                 public succession S first A1
                     if x == 0 then A2;
             }
-            """));
+            """);
+        assertParses(result);
+        // The grammar used to accept this by accident as 'succession S', 'first A1' and an 'if ... then' statement
+        SysMLv2Parser.SuccessionUsageContext succession = first(result.getParseTree(),
+            SysMLv2Parser.SuccessionUsageContext.class);
+        assertNotNull(succession);
+        assertTrue(contains(succession, SysMLv2Parser.GuardClauseContext.class), "The guard belongs to the succession");
+        assertFalse(contains(result.getParseTree(), SysMLv2Parser.IfStatementContext.class));
     }
 
     // ---------------------------------------------------------------- use cases (SysML 8.2.2.24)
@@ -416,7 +487,7 @@ class OfficialExampleGrammarTest {
                     part q;
                 }
             }
-            """).hasErrors(), "Before the fix a bare 'flow' ended the usage and the rest was read as statements");
+            """).hasErrors(), "A flow without ';' or a body must stay an error now that the body is required");
     }
 
     // ---------------------------------------------------------------- expressions (KerML 8.2.5.8)
@@ -474,7 +545,7 @@ class OfficialExampleGrammarTest {
     }
 
     @Test
-    @DisplayName("DefaultReferenceUsage with RefPrefix only: 'derived x : A;', 'constant c = 1;', 'protected in w : A;'")
+    @DisplayName("Usages with a RefPrefix only: 'derived x : A;', 'constant c = 1;', and 'protected in w : A;'")
     void testPrefixedReferenceUsages() {
         assertParses(parse("""
             package P {
@@ -542,6 +613,103 @@ class OfficialExampleGrammarTest {
                 feature h1 unions x, b.mass;
             }
             """));
+    }
+
+    // ---------------------------------------------------------------- forms official files parsed only by accident
+    // Each was cut short by an alternative that can end early, with the rest read as stray expression statements, so
+    // the file had no syntax errors although the construct was misread.
+
+    @Test
+    @DisplayName("Subject, binding, control node and 'first ... then' with a body (UsageBody / ActionBody)")
+    void testBodiesAfterShortForms() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                part def Vehicle;
+                requirement def R {
+                    subject vehicle : Vehicle {
+                        doc /* the subject has a body */
+                    }
+                    attribute m;
+                }
+                action def A {
+                    in x; out y;
+                    action a1 { out y; }
+                    action a2 { in x; }
+                    bind x = a2.x {
+                        doc /* a binding with a body */
+                    }
+                    first start then continue {
+                        doc /* a succession with a body */
+                    }
+                    merge continue {
+                        doc /* a merge node with a body */
+                    }
+                    then a1;
+                }
+            }
+            """);
+        assertParses(result);
+        assertNotNull(first(result.getParseTree(), SysMLv2Parser.SubjectDeclarationContext.class).usageBody());
+        assertNotNull(first(result.getParseTree(), SysMLv2Parser.BindingUsageContext.class).usageBody());
+        assertNotNull(first(result.getParseTree(), SysMLv2Parser.MergeNodeContext.class).usageBody());
+    }
+
+    @Test
+    @DisplayName("'verify' of a feature chain with a body, and an event referencing a feature chain")
+    void testVerifyAndEventReferences() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                requirement def MassReq { attribute massActual; }
+                part spec { requirement massReq : MassReq; }
+                verification def V {
+                    objective {
+                        verify spec.massReq {
+                            redefines massActual = 1;
+                        }
+                    }
+                }
+                occurrence def Behavior { event occurrence publish; }
+                part producer {
+                    part behavior : Behavior;
+                    event behavior.publish[1] :>> publishEvent;
+                    event occurrence publishEvent;
+                }
+            }
+            """);
+        assertParses(result);
+        SysMLv2Parser.VerifyRequirementContext verify = first(result.getParseTree(),
+            SysMLv2Parser.VerifyRequirementContext.class);
+        assertEquals("spec.massReq", verify.expression().getText());
+        assertNotNull(verify.requirementBody());
+    }
+
+    @Test
+    @DisplayName("A constraint body after 'assume' / 'require' does not swallow a following '@' annotation")
+    void testRequirementConstraintBodyBeforeAnnotation() {
+        SysMLv2ParserFacade.ParseResult result = parse("""
+            package P {
+                metadata def StatusInfo { attribute status; }
+                attribute def MassValue;
+                constraint c2;
+                requirement r {
+                    attribute cargoMass : MassValue;
+                    assume constraint { cargoMass <= 500 }
+                    @StatusInfo { status = 1; }
+                    require constraint { cargoMass >= 0 }
+                    @StatusInfo { status = 2; }
+                    require c2 [0..*];
+                }
+            }
+            """);
+        assertParses(result);
+        // Before, the body was an expression that continued with the classification operator: '{ ... } @ StatusInfo'
+        assertEquals(2, count(result.getParseTree(), SysMLv2Parser.MetadataAnnotationContext.class));
+        // Without 'constraint' or a user-defined keyword, 'require c2' references a constraint, as 'assume c1' does
+        SysMLv2Parser.RequireConstraintContext reference = last(result.getParseTree(),
+            SysMLv2Parser.RequireConstraintContext.class);
+        assertNotNull(reference);
+        assertNotNull(reference.featureChain(), "'require c2 [0..*];' is a reference, not a declaration of 'c2'");
+        assertNull(reference.usageName());
     }
 
     // ---------------------------------------------------------------- SLL prediction (parse speed)

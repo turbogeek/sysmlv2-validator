@@ -668,7 +668,7 @@ flowConnectionUsage
     ;
 
 successionUsage // Reference: SysMLv2.md, Section 7.17.4 / Line 3317
-    : FIRST expression (THEN expression)? SEMICOLON?
+    : FIRST expression (THEN expression)? (SEMICOLON | usageBody)? // SuccessionAsUsage UsageBody: 'first a then b {}'
     | THEN expression SEMICOLON?
     | SUCCESSION FLOW? ALL? usageName? featureRelationships? successionFlowOf? successionEndpoints? usageBody
     | SUCCESSION FLOW expression TO expression usageBody // SuccessionFlowUsage: 'succession flow a.x to b.y;'
@@ -773,6 +773,9 @@ occurrenceUsage
     | SNAPSHOT usageName? featureRelationships? valueInit? SEMICOLON
     | TIMESLICE usageName? featureRelationships? valueInit? usageBody?
     | TIMESLICE usageName? featureRelationships? valueInit? SEMICOLON
+      // EventOccurrenceUsage referencing a feature chain (SysML v2 8.2.2.9.2): 'event producer.publish[1] :>> source;'.
+      // Before the bare 'event' alternatives, which SLL prediction otherwise chose, leaving the chain as a statement.
+    | EVENT name (DOT name)+ featureRelationships? usageBody
     | EVENT OCCURRENCE? usageName? featureRelationships? usageBody?
     | EVENT OCCURRENCE? usageName? featureRelationships? SEMICOLON
     | EVENT expression SEMICOLON?
@@ -818,24 +821,26 @@ elseBranch
     : ELSE expression SEMICOLON?
     ;
 
+// Control nodes end with an ActionBody (SysML v2 8.2.2.17.3): 'merge continue { doc /* ... */ }'
 mergeNode
-    : MERGE usageName? SEMICOLON?
+    : MERGE usageName? (SEMICOLON | usageBody)?
     ;
 
 forkNode
-    : FORK usageName? SEMICOLON?
+    : FORK usageName? (SEMICOLON | usageBody)?
     ;
 
 joinNode
-    : JOIN usageName? SEMICOLON?
+    : JOIN usageName? (SEMICOLON | usageBody)?
     ;
 
 // ============================================================================
 // BINDING AND MESSAGING
 // ============================================================================
 
+// BindingConnectorAsUsage ends with a UsageBody (SysML v2 8.2.2.13.2): 'bind a.x = b.y { doc /* ... */ }'
 bindingUsage
-    : BIND expression (EQUALS expression)? SEMICOLON?
+    : BIND expression (EQUALS expression)? (SEMICOLON | usageBody)?
     ;
 
 acceptUsage
@@ -1235,6 +1240,8 @@ stateBodyElement // Reference: SysMLv2.md, Section 7.18.2 / Line 4035
 acceptTransition
     : ACCEPT usageName? (COLON qualifiedName)? acceptTiming? (VIA expression)? guardClause? doActionClause?
       THEN expression usageBody?
+      // payload typed by a qualified name or feature chain, as in acceptClause: 'accept Signals::Start then on;'
+    | ACCEPT featureChain (VIA expression)? guardClause? doActionClause? THEN expression usageBody?
     ;
 
 doActionClause
@@ -1360,10 +1367,10 @@ effectClause
 // REQUIREMENT ELEMENTS
 // ============================================================================
 
+// One alternative, with the body before the bare end: as separate alternatives, 'subject v : V { ... }' was read as
+// 'subject v : V' followed by a '{ ... }' expression statement (SLL prediction resolves a conflict to the lowest one)
 subjectDeclaration
-    : SUBJECT SEMICOLON
-    | SUBJECT usageName? featureRelationships? valueInit? SEMICOLON?
-    | SUBJECT usageName? featureRelationships? valueInit? usageBody
+    : SUBJECT usageName? featureRelationships? valueInit? (SEMICOLON | usageBody)?
     ;
 
 framedConcern
@@ -1373,14 +1380,17 @@ framedConcern
 
 // RequirementConstraintUsage (SysML v2 8.2.2.21.1) after 'assume' / 'require': a reference to an existing constraint
 // with optional multiplicity and body ('assume c1 [0..*];'), or a declaration introduced by 'constraint' and/or
-// user-defined keywords ('assume #goal constraint payloadMassLimit;', 'require #goal vehicleMassRequirement;')
+// user-defined keywords ('assume #goal constraint payloadMassLimit;', 'require #goal vehicleMassRequirement;').
+// The body comes before the expression: '{ ... }' is also a body expression, and as an expression it continued into a
+// following annotation ('assume constraint { m <= 500 } @StatusInfo { ... }' was read as '{ ... } @ StatusInfo').
 assumeConstraint
-    : ASSUME (hashAnnotation* CONSTRAINT | hashAnnotation+) usageName? featureRelationships? (expression | usageBody)? SEMICOLON?
+    : ASSUME (hashAnnotation* CONSTRAINT | hashAnnotation+) usageName? featureRelationships? (usageBody | expression)? SEMICOLON?
     | ASSUME featureChain featureRelationships? requirementBody
     ;
 
 requireConstraint
-    : REQUIRE (hashAnnotation* CONSTRAINT | hashAnnotation+)? usageName? featureRelationships? expression? (requirementBody | SEMICOLON?)
+    : REQUIRE (hashAnnotation* CONSTRAINT | hashAnnotation+) usageName? featureRelationships? (requirementBody | expression)? SEMICOLON?
+    | REQUIRE featureChain featureRelationships? requirementBody // reference, as for 'assume': 'require c2 [0..*];'
     | REQUIRE expression (requirementBody | SEMICOLON?)
     ;
 
@@ -1389,9 +1399,11 @@ objectiveRequirement
     | OBJECTIVE usageName? featureRelationships? (requirementBody | SEMICOLON?)
     ;
 
+// The reference form comes first: the declaration form can end right after 'verify', so for 'verify spec.req { ... }'
+// SLL prediction chose it and read 'spec.req' and the body as two expression statements
 verifyRequirement
-    : VERIFY REQUIREMENT? usageName? featureRelationships? (requirementBody | SEMICOLON?)
-    | VERIFY expression (requirementBody | SEMICOLON?)
+    : VERIFY expression (requirementBody | SEMICOLON?)
+    | VERIFY REQUIREMENT? usageName? featureRelationships? (requirementBody | SEMICOLON?)
     ;
 
 // ============================================================================
