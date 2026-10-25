@@ -54,6 +54,6 @@ part def Device {
     }
 }
 
-signal StartSignal;
-signal StopSignal;
-signal PowerButton;
+attribute def StartSignal;
+attribute def StopSignal;
+attribute def PowerButton;

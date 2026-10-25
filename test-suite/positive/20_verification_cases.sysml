@@ -1,10 +1,12 @@
 package VerificationTests;
 
+private import ScalarValues::*;
+
 // Test verification definitions and verify relationships
 
 requirement def SafetyRequirement {
-    subject system;
-    require constraint speed <= 100.0;
+    subject system : System;
+    require constraint { system.speed <= 100.0 }
 }
 
 part def System {
@@ -12,14 +14,14 @@ part def System {
 }
 
 verification def SpeedTest {
-    subject req : SafetyRequirement;
+    subject systemUnderTest : System;
 
     objective {
         doc /* Verify speed constraint is satisfied */
     }
 
     // Test method
-    method testSpeed {
+    action testSpeed {
         // Verification logic
     }
 }
@@ -33,8 +35,9 @@ part testSystem : System {
 }
 
 // Verification case
-verify safetyReq by SpeedTest;
-
 verification speedVerification : SpeedTest {
-    subject safetyReq;
+    subject testSystem;
+    objective {
+        verify safetyReq;
+    }
 }

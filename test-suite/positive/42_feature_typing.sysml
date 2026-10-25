@@ -1,16 +1,18 @@
 package FeatureTypingTests;
 
+private import ScalarValues::*;
+
 // Test feature typing, chains, and value expressions
 
 part def Component {
-    attribute config : Configuration;
+    part config : Configuration;
 
     // Feature chains
-    attribute :>> configName = config.name;
+    attribute configName = config.name;
     attribute configValue = config.settings.primaryValue;
 
     // Typed features
-    part sensor : Sensor typed by TemperatureSensor;
+    part sensor : Sensor, TemperatureSensor;
 
     // Feature value binding
     port dataPort : DataPort {

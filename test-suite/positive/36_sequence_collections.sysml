@@ -1,16 +1,17 @@
 package CollectionTests;
+private import ScalarValues::*;
 
 part def DataSet {
     attribute values : Real[*] ordered;
     
     // All elements
-    attribute allValues = values->all;
+    attribute allValues = values;
     
     // Any element
     attribute anyValue = values->any;
     
     // Sequence operations  
-    attribute firstValue = values->first;
+    attribute firstValue = values#(1);
     attribute lastValue = values->last;
     attribute size = values->size;
 }

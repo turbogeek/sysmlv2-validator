@@ -1,4 +1,5 @@
 package LibraryPackageTests;
+private import ScalarValues::*;
 
 // Test library package and standard library usage
 
@@ -32,13 +33,13 @@ library package GeometryLibrary {
 
     calc def circleArea {
         in radius : Real;
-        return 3.14159 * radius * radius;
+        return : Real = 3.14159 * radius * radius;
     }
 
     calc def pythagorean {
         in a : Real;
         in b : Real;
-        return sqrt(a * a + b * b);
+        return : Real = sqrt(a * a + b * b);
     }
 }
 

@@ -3,6 +3,7 @@ package RenderingTests;
 // Test rendering definitions for views
 
 private import Views::*;
+private import ScalarValues::*;
 
 rendering def CustomDiagram {
     attribute layout : String;
@@ -19,6 +20,8 @@ part def Component {
     part subComponent2;
 }
 
+view def SymbolicView;
+
 view 'Component Structure' : SymbolicView {
     expose Component::**;
     render customStyle;
@@ -27,10 +30,11 @@ view 'Component Structure' : SymbolicView {
 viewpoint def StructuralViewpoint {
     concern 'Show system decomposition';
 
-    rendering :>> defaultRendering = customStyle;
+    rendering defaultRendering = customStyle;
 }
 
-view 'Detailed View' : SymbolicView satisfies StructuralViewpoint {
+view 'Detailed View' : SymbolicView {
+    satisfy requirement sv : StructuralViewpoint;
     expose Component::*;
-    render asDefault;
+    render asTreeDiagram;
 }

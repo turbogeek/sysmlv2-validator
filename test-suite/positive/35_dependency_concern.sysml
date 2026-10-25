@@ -5,18 +5,21 @@ package LibraryPackage {
 }
 
 package ApplicationPackage {
-    dependency import LibraryPackage::*;
+    private import LibraryPackage::*;
     
     part def Application {
         part lib : LibraryComponent;
     }
 }
 
+dependency ApplicationPackage to LibraryPackage;
+
 concern 'Maintainability' {
     doc /* System must be easy to maintain and extend */
 }
 
-concern 'Testability' about Application {
+concern 'Testability' {
+    subject app : ApplicationPackage::Application;
     doc /* Application must be testable in isolation */
 }
 

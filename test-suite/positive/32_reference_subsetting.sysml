@@ -13,6 +13,6 @@ part def Reader {
 }
 
 part librarySystem {
-    part library : Library;
+    part lib : Library;
     part reader : Reader;
 }

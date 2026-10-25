@@ -1,15 +1,17 @@
 package ConstraintTests;
 
+private import ScalarValues::*;
+
 part def BoundedValue {
     attribute value : Real;
     
     // Constraint
     assert constraint {
-        value >= 0.0 && value <= 100.0
+        value >= 0.0 and value <= 100.0
     }
     
-    // Assume constraint
-    assume constraint {
+    // Second assertion ('assume' is only valid in a requirement body)
+    assert constraint {
         value != 50.0
     }
 }

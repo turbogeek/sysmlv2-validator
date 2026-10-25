@@ -1,4 +1,5 @@
 package LoopConditionalTests;
+private import ScalarValues::*;
 
 // Test loop and conditional action constructs
 
@@ -7,16 +8,15 @@ action def ProcessData {
     out results : Real[*];
 
     // Loop over collection
-    action loop processEach {
-        in value : Real;
+    action processEach for value : Real in values {
         out result : Real;
-    } over values;
+    }
 
     // While loop
     action whileLoop {
         attribute count : Integer = 0;
 
-        loop while (count < 10) {
+        while count < 10 {
             action increment {
                 // Increment count
             }

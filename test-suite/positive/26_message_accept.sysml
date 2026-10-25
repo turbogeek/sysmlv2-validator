@@ -1,4 +1,5 @@
 package MessageTests;
+private import ScalarValues::*;
 
 // Test message passing and accept clauses
 
@@ -15,8 +16,10 @@ part def Receiver {
 }
 
 action def CommunicationProtocol {
-    action send {
-        out message : Message;
+    in channel;
+
+    action sendMsg {
+        out outMsg : Message;
     }
 
     action receive {
@@ -27,7 +30,7 @@ action def CommunicationProtocol {
 
     action processMessage;
 
-    first send then receive;
+    first sendMsg then receive;
 }
 
 part system {

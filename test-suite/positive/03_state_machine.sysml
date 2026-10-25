@@ -5,6 +5,7 @@
  */
 package PositiveTests {
     private import ScalarValues::*;
+    private import SI::s;
 
     state def TrafficLightStates {
         entry; then red;
@@ -15,17 +16,17 @@ package PositiveTests {
 
         transition red_to_green
             first red
-            then green
-            when after(30);
+            accept after 30 [s]
+            then green;
 
         transition green_to_yellow
             first green
-            then yellow
-            when after(45);
+            accept after 45 [s]
+            then yellow;
 
         transition yellow_to_red
             first yellow
-            then red
-            when after(5);
+            accept after 5 [s]
+            then red;
     }
 }

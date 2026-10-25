@@ -1,4 +1,5 @@
 package ExpressionOperatorTests;
+private import ScalarValues::*;
 
 // Test various expression operators and calculations
 
@@ -39,7 +40,10 @@ part def VectorOperations {
     attribute vector2[3] = (4.0, 5.0, 6.0);
 
     // Collection operations
-    attribute dotProduct = vector1 dot vector2;
+    // SysML has no 'dot' operator; the inner product is a library function
+    attribute dotProduct = VectorFunctions::cartesianInner(
+        VectorFunctions::CartesianThreeVectorOf(vector1),
+        VectorFunctions::CartesianThreeVectorOf(vector2));
     attribute concatenated = vector1 + vector2;
 }
 
@@ -57,7 +61,7 @@ part def StringOperations {
 calc def computeArea {
     in width : Real;
     in height : Real;
-    return width * height;
+    return : Real = width * height;
 }
 
 part geometricShape {

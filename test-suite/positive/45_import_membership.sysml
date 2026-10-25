@@ -8,8 +8,9 @@ public import CommonTypes::*;
 // Private import
 private import UtilityFunctions::calculateHash;
 
-// Filtered import
-import SensorLibrary::{TemperatureSensor, PressureSensor};
+// Filtered import (selective membership imports; SysML has no brace-list import)
+private import SensorLibrary::TemperatureSensor;
+private import SensorLibrary::PressureSensor;
 
 package CommonTypes {
     attribute def Timestamp;
@@ -44,7 +45,7 @@ package SystemComponents {
 }
 
 // Alias import
-import ScalarValues::RealValue as Real;
+alias Real for ScalarValues::RealValue;
 
 package ScalarValues {
     attribute def RealValue;
