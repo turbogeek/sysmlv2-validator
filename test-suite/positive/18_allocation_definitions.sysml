@@ -1,5 +1,7 @@
 package AllocationTests;
 
+private import ScalarValues::*;
+
 // Test allocation definitions and allocate relationships
 
 part def Server {

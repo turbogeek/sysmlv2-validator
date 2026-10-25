@@ -1,5 +1,7 @@
 package VariantConfigurationTests;
 
+private import ScalarValues::*;
+
 // Test variant configurations and selections
 
 variation part def VehicleConfiguration {

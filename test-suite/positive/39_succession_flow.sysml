@@ -1,5 +1,7 @@
 package SuccessionFlowTests;
 
+private import ScalarValues::*;
+
 // Test succession and flow connections
 
 action def Workflow {

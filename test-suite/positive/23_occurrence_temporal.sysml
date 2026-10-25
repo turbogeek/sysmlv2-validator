@@ -1,5 +1,7 @@
 package OccurrenceTests;
 
+private import ScalarValues::*;
+
 // Test occurrence, individual, snapshot, and timeslice
 
 occurrence def Event {

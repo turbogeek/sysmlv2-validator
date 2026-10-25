@@ -1,5 +1,7 @@
 package TradeStudyTests;
 
+private import ScalarValues::*;
+
 // Test trade studies and concerns
 
 concern 'Performance vs Cost' {

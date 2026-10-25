@@ -1,5 +1,7 @@
 package ItemFlowTests;
 
+private import ScalarValues::*;
+
 // Test item definitions and flow
 
 item def DataPacket {

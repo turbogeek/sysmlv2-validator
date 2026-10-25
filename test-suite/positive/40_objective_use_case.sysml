@@ -1,5 +1,7 @@
 package ObjectiveUseCaseTests;
 
+private import ScalarValues::*;
+
 // Test objective and use case definitions
 
 requirement def MissionObjective {

@@ -1,5 +1,7 @@
 package MetadataTests;
 
+private import ScalarValues::*;
+
 // Test metadata definitions and annotations
 
 metadata def Author {

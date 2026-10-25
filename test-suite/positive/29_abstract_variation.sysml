@@ -1,5 +1,7 @@
 package AbstractVariationTests;
 
+private import ScalarValues::*;
+
 // Test abstract definitions and variation
 
 abstract part def AbstractComponent {

@@ -1,5 +1,7 @@
 package ModifierTests;
 
+private import ScalarValues::*;
+
 part def Measurement {
     attribute rawValue : Real;
     

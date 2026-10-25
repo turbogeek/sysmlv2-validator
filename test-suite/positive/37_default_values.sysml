@@ -1,5 +1,7 @@
 package DefaultValueTests;
 
+private import ScalarValues::*;
+
 part def Component {
     // Default value with =
     attribute count : Integer = 10;

@@ -1,5 +1,7 @@
 package RedefinitionTests;
 
+private import ScalarValues::*;
+
 // Test feature redefinition, chains, and inverses
 
 part def Vehicle {
