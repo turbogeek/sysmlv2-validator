@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Valid SysML v2 members must parse as the members they are. Grammar coverage (GrammarCoverageTest) found rule
+ * Valid SysML v2 and KerML members must parse as the members they are. Grammar coverage (GrammarCoverageTest) found rule
  * alternatives that no valid input reaches because an earlier alternative of the same rule accepts the keyword alone:
  * 'constraint c;' parses as an anonymous 'constraint' followed by a separate feature 'c;', without a syntax error.
  * The validator then sees two elements where the model has one, named differently. Each case below is one member,
@@ -36,67 +36,82 @@ class ShadowedAlternativeTest {
         parserFacade = new SysMLv2ParserFacade();
     }
 
+    /** A SysML v2 case: members inside open/close, which parse as the expected number of elements. */
+    private static Arguments sysml(String open, String members, String close, int expected) {
+        return Arguments.of("members.sysml", open, members, close, expected);
+    }
+
+    /** A KerML case, parsed as a .kerml file. */
+    private static Arguments kerml(String open, String members, String close, int expected) {
+        return Arguments.of("members.kerml", open, members, close, expected);
+    }
+
     /** Forms that parse as the expected elements today; they guard the cases below against a broken check. */
     static Stream<Arguments> parsedAsWritten() {
         return Stream.of(
-            Arguments.of("", "metadata def Tag { }", "", 1),
-            Arguments.of("part def V {", "constraint c { }", "}", 1),
-            Arguments.of("part def V {", "assert constraint c { }", "}", 1),
-            Arguments.of("part def V {", "concern c { }", "}", 1),
-            Arguments.of("part def V {", "metadata Tag { }", "}", 1),
-            Arguments.of("part def V {", "event occurrence e;", "}", 1),
-            Arguments.of("requirement def R {", "subject v : V;", "}", 1),
-            Arguments.of("requirement def R {", "verify requirement r : Q;", "}", 1),
-            Arguments.of("connection def C {", "end [0..1] item cart : Cart[1];", "}", 1),
-            Arguments.of("enum def E {", "enum red;", "}", 1),
-            Arguments.of("state def S {", "state off; transition t first off accept Sig then on;", "}", 2));
+            sysml("", "metadata def Tag { }", "", 1),
+            sysml("part def V {", "constraint c { }", "}", 1),
+            sysml("part def V {", "assert constraint c { }", "}", 1),
+            sysml("part def V {", "concern c { }", "}", 1),
+            sysml("part def V {", "metadata Tag { }", "}", 1),
+            sysml("part def V {", "event occurrence e;", "}", 1),
+            sysml("requirement def R {", "subject v : V;", "}", 1),
+            sysml("requirement def R {", "verify requirement r : Q;", "}", 1),
+            sysml("connection def C {", "end [0..1] item cart : Cart[1];", "}", 1),
+            sysml("enum def E {", "enum red;", "}", 1),
+            sysml("state def S {", "state off; transition t first off accept Sig then on;", "}", 2),
+            kerml("behavior B {", "succession s first a then b;", "}", 1));
     }
 
     /**
-     * Valid SysML v2 that the parser splits into more elements than it has. In each rule the first alternative ends
-     * with an optional body that cannot be ';' (or an optional name and nothing else), so it matches the keyword alone
-     * and the rest of the member parses as another element; the alternative written for the member is never chosen.
+     * Valid SysML v2 and KerML that the parser splits into more elements than it has. In each rule the first
+     * alternative ends with an optional body that cannot be ';' (or an optional name and nothing else), so it matches
+     * the keyword alone and the rest of the member parses as another element; the alternative written for the member
+     * is never chosen. KerML's 'succession a then b;' (SuccessionDeclaration, whose 'first' is optional) parses as
+     * 'succession a' with 'a' as its name and a separate 'then b;'.
      */
     static Stream<Arguments> splitByShadowedAlternative() {
         return Stream.of(
-            Arguments.of("", "metadata def Tag;", "", 1),
-            Arguments.of("part def V {", "constraint c;", "}", 1),
-            Arguments.of("part def V {", "assert constraint c;", "}", 1),
-            Arguments.of("part def V {", "concern c;", "}", 1),
-            Arguments.of("part def V {", "metadata Tag;", "}", 1),
-            Arguments.of("part def V {", "event a.b;", "}", 1),
-            Arguments.of("requirement def R {", "subject v : V { }", "}", 1),
-            Arguments.of("requirement def R {", "verify r.req;", "}", 1),
-            Arguments.of("connection def C {", "end inCart [0..1] item cart : Cart[1];", "}", 1),
-            Arguments.of("enum def E {", "enum red { }", "}", 1),
-            Arguments.of("state def S {", "state off; accept Sig then on;", "}", 2));
+            sysml("", "metadata def Tag;", "", 1),
+            sysml("part def V {", "constraint c;", "}", 1),
+            sysml("part def V {", "assert constraint c;", "}", 1),
+            sysml("part def V {", "concern c;", "}", 1),
+            sysml("part def V {", "metadata Tag;", "}", 1),
+            sysml("part def V {", "event a.b;", "}", 1),
+            sysml("requirement def R {", "subject v : V { }", "}", 1),
+            sysml("requirement def R {", "verify r.req;", "}", 1),
+            sysml("connection def C {", "end inCart [0..1] item cart : Cart[1];", "}", 1),
+            sysml("enum def E {", "enum red { }", "}", 1),
+            sysml("state def S {", "state off; accept Sig then on;", "}", 2),
+            kerml("behavior B {", "succession a then b;", "}", 1));
     }
 
-    @ParameterizedTest(name = "{1}")
+    @ParameterizedTest(name = "{2}")
     @MethodSource("parsedAsWritten")
     @DisplayName("Unambiguous forms parse as the elements written")
-    void testParsedAsWritten(String open, String members, String close, int expected) {
-        assertBodyElements(open, members, close, expected);
+    void testParsedAsWritten(String fileName, String open, String members, String close, int expected) {
+        assertBodyElements(fileName, open, members, close, expected);
     }
 
     @Disabled("bug: SysMLv2Parser.g4 shadows the ';' alternatives of metadataDefinition, constraintUsage, concernUsage, "
         + "metadataUsage, occurrenceUsage (event), subjectDeclaration, verifyRequirement, endUsage, enumMember and "
-        + "stateBodyElement (acceptTransition); found by grammar coverage, see GrammarCoverageTest")
-    @ParameterizedTest(name = "{1}")
+        + "stateBodyElement (acceptTransition), and successionUsage takes a KerML succession's first end as its name; "
+        + "found by grammar coverage, see GrammarCoverageTest")
+    @ParameterizedTest(name = "{2}")
     @MethodSource("splitByShadowedAlternative")
     @DisplayName("Members that need the shadowed alternatives parse as the elements written")
-    void testShadowedAlternativeForms(String open, String members, String close, int expected) {
-        assertBodyElements(open, members, close, expected);
+    void testShadowedAlternativeForms(String fileName, String open, String members, String close, int expected) {
+        assertBodyElements(fileName, open, members, close, expected);
     }
 
     /**
      * Parses the members inside open/close inside a package and checks that the innermost body around them, the
      * package body when open is empty, has the expected number of elements and that together they are the members'
-     * text.
+     * text. The file name's extension selects SysML v2 or KerML keywords.
      */
-    private void assertBodyElements(String open, String members, String close, int expected) {
+    private void assertBodyElements(String fileName, String open, String members, String close, int expected) {
         String source = "package P { " + open + " " + members + " " + close + " }";
-        SysMLv2ParserFacade.ParseResult result = parserFacade.parseString(source, "members.sysml");
+        SysMLv2ParserFacade.ParseResult result = parserFacade.parseString(source, fileName);
         assertFalse(result.hasErrors(), "Valid SysML v2 should parse: " + result.getSyntaxErrors());
 
         ParserRuleContext packageBody = findFirst(result.getParseTree(), "packageBody");
