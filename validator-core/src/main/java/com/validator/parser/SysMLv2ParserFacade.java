@@ -441,6 +441,10 @@ public class SysMLv2ParserFacade {
                     errors.add(misspelled);
                 }
             }
+            // Dropped ';' the grammar accepted, on a tree that error recovery did not build
+            if (errors.isEmpty()) {
+                errors.addAll(MissingTerminatorCheck.check(tree, tokens));
+            }
         }
         long parseTime = System.currentTimeMillis() - startTime;
 

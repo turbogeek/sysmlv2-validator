@@ -95,7 +95,14 @@ final class TypoMutator {
     /** Number of unclosed braces of DEEP_UNBALANCED_BRACES. */
     static final int DEEP_UNBALANCED = 1_500;
 
-    private static final String NON_ASCII_LETTERS = "\u00e9\u00fc\u00df\u03a9\u0436\u4e2d";
+    /** Keywords that start a declaration and never continue the one before (for DROP_SEMICOLON). */
+    private static final Set<Integer> DECLARATION_KEYWORDS = Set.of(
+        SysMLv2Lexer.PART, SysMLv2Lexer.PART_DEF, SysMLv2Lexer.ATTRIBUTE, SysMLv2Lexer.ATTRIBUTE_DEF, SysMLv2Lexer.PORT,
+        SysMLv2Lexer.PORT_DEF, SysMLv2Lexer.ITEM, SysMLv2Lexer.ITEM_DEF, SysMLv2Lexer.STATE, SysMLv2Lexer.STATE_DEF,
+        SysMLv2Lexer.ACTION, SysMLv2Lexer.ACTION_DEF, SysMLv2Lexer.ENUM, SysMLv2Lexer.ENUM_DEF, SysMLv2Lexer.PACKAGE,
+        SysMLv2Lexer.IMPORT, SysMLv2Lexer.REF, SysMLv2Lexer.IN, SysMLv2Lexer.OUT, SysMLv2Lexer.INOUT);
+
+    private static final String NON_ASCII_LETTERS ="\u00e9\u00fc\u00df\u03a9\u0436\u4e2d";
     private static final String SMART_OPEN = "\u201c";
     private static final String SMART_CLOSE = "\u201d";
 
@@ -185,9 +192,8 @@ final class TypoMutator {
             case DUPLICATE_TOKEN -> pick(rnd, code, t -> true, t -> replace(op, t.end, t.end, " " + t.text,
                 quote(t.text), Expectation.ANY));
             case MISSPELL_KEYWORD -> misspellKeyword(rnd);
-            // Not a guaranteed error: the grammar makes most terminating semicolons optional
             case DROP_SEMICOLON -> pick(rnd, code, t -> t.type == SysMLv2Lexer.SEMICOLON,
-                t -> replace(op, t.start, t.end, "", "", Expectation.ANY));
+                t -> replace(op, t.start, t.end, "", "", droppedSemicolon(code.indexOf(t))));
             case DROP_CLOSING_BRACE -> pick(rnd, code, t -> t.type == SysMLv2Lexer.RBRACE,
                 t -> replace(op, t.start, t.end, "", "", Expectation.ERROR));
             case EXTRA_CLOSING_BRACE -> {
@@ -298,6 +304,36 @@ final class TypoMutator {
         Mutant m = replace(Operator.MISSPELL_KEYWORD, t.start, t.start + word.length(), typo,
             word + "->" + typo, Expectation.ERROR);
         return new Mutant(m.seed, m.operator, m.offset, m.detail, m.source, m.expectation, false, word, typo);
+    }
+
+    /**
+     * What dropping the ';' at code token {@code index} must give. SysML v2 requires the ';' of every declaration
+     * without a body, but the next tokens may continue the declaration and make another valid one ('connection c'
+     * followed by 'connect a to b;'), and the ';' after documentation or an annotation is optional. So the mutant is a
+     * guaranteed error only when the ';' ends a declaration that starts with one of {@link #DECLARATION_KEYWORDS} and
+     * nothing can continue it: the '}' of its body or the end of the file follows, or another of those keywords on a
+     * later line.
+     */
+    private Expectation droppedSemicolon(int index) {
+        int start = index;
+        while (start > 0 && !Set.of(SysMLv2Lexer.SEMICOLON, SysMLv2Lexer.LBRACE, SysMLv2Lexer.RBRACE)
+                .contains(code.get(start - 1).type)) {
+            start--;
+        }
+        while (start < index && Set.of(SysMLv2Lexer.PUBLIC, SysMLv2Lexer.PRIVATE, SysMLv2Lexer.PROTECTED)
+                .contains(code.get(start).type)) {
+            start++;
+        }
+        if (!DECLARATION_KEYWORDS.contains(code.get(start).type)) {
+            return Expectation.ANY;
+        }
+        if (index + 1 == code.size() || code.get(index + 1).type == SysMLv2Lexer.RBRACE) {
+            return Expectation.ERROR;
+        }
+        Tok next = code.get(index + 1);
+        boolean laterLine = source.substring(code.get(index).end, next.start).chars()
+            .anyMatch(c -> c == '\n' || c == '\r');
+        return laterLine && DECLARATION_KEYWORDS.contains(next.type) ? Expectation.ERROR : Expectation.ANY;
     }
 
     /** A misspelling of a keyword at edit distance 1 that lexes as a name, or null. */

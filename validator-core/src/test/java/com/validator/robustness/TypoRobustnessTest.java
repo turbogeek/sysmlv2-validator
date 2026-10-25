@@ -47,8 +47,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *       end of the file), 0 &lt;= column &lt;= length of that line;</li>
  *   <li>{@code validate(File)} and {@code validate(String, String)} report the same syntax errors;</li>
  *   <li>a mutant that is invalid whatever its seed (an unbalanced brace, an unterminated string or comment, a
- *       misspelled keyword at the start of a declaration, a character SysML does not allow in code, nesting
- *       deeper than the parser can follow) gets at least one ERROR;</li>
+ *       misspelled keyword at the start of a declaration, a character SysML does not allow in code, a dropped ';'
+ *       that nothing can stand in for) gets at least one ERROR;</li>
  *   <li>a mutant that only changes layout (line endings, a byte order mark, a tab for a space, one long line, a
  *       long name) gets the seed's syntax errors, on the seed's lines where lines are kept;</li>
  *   <li>a misspelled keyword is offered back by the suggestion engine, and by an error the validator reports for
@@ -56,8 +56,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>no syntax error message is longer than {@value #MAX_SYNTAX_MESSAGE} characters.</li>
  * </ol>
  *
- * <p>A dropped ';' is not a guaranteed error here: the grammar makes the ';' after most usages optional
- * ({@code usageBody?}, {@code SEMICOLON?}), so the report only shows how many dropped semicolons got an error.</p>
+ * <p>A dropped ';' is a guaranteed error only where the next tokens cannot continue the declaration it ended (see
+ * {@code TypoMutator.droppedSemicolon}); elsewhere the report shows how many dropped semicolons got an error.</p>
  *
  * <p>The seeds are every file of test-suite/positive and an evenly spaced sample of the OMG release's sysml/src
  * examples when the release is available. The default run makes one mutant for one seed-operator pair in four
