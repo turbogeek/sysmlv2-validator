@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -54,6 +55,9 @@ public class SysMLv2ParserFacade {
      * nests brackets 10 deep.
      */
     private static final int DEEP_BRACKETS = 50;
+
+    /** Longest quotation of the input kept whole in an error message. */
+    private static final int MAX_QUOTED_INPUT = 60;
 
     /**
      * Represents a line comment found in the source.
@@ -172,11 +176,22 @@ public class SysMLv2ParserFacade {
             return !suggestions.isEmpty();
         }
 
+        /**
+         * The error with its offending token, whose text is abbreviated as a long quoted input is in
+         * the message: a 100,000-character name made a string of 100,000 characters.
+         */
         @Override
         public String toString() {
+            // ANTLR's token string: [@7,35:38='name',<248>,2:23]
+            String symbol = offendingSymbol;
+            int open = symbol.indexOf("='");
+            int close = symbol.lastIndexOf("',<");
+            if (open >= 0 && close > open) {
+                symbol = abbreviateQuotation(symbol, open + 2, close);
+            }
             StringBuilder sb = new StringBuilder();
             sb.append(String.format("Line %d:%d - %s (at '%s')",
-                line, charPositionInLine, message, offendingSymbol));
+                line, charPositionInLine, message, symbol));
             if (!suggestions.isEmpty()) {
                 sb.append(". Did you mean: ").append(String.join(", ", suggestions)).append("?");
             }
@@ -188,8 +203,6 @@ public class SysMLv2ParserFacade {
      * Custom error listener to collect syntax errors with spelling suggestions.
      */
     private static class CollectingErrorListener extends BaseErrorListener {
-        /** Longest quotation of the input kept whole in an error message. */
-        private static final int MAX_QUOTED_INPUT = 60;
         private static final Pattern QUOTED_INPUT_START = Pattern.compile("(input |at: |at )'");
         /** Tokens searched back from an error for the start of its declaration. */
         private static final int MAX_DECLARATION_LOOKBACK = 64;
@@ -252,18 +265,18 @@ public class SysMLv2ParserFacade {
             if (close < 0) {
                 close = msg.endsWith("'") ? msg.length() - 1 : -1;
             }
-            if (close - open <= MAX_QUOTED_INPUT) {
-                return msg;
-            }
-            return msg.substring(0, open + 40) + "..." + msg.substring(close - 17);
+            return abbreviateQuotation(msg, open, close);
         }
 
         /**
          * The first token of the declaration the error is in (the declaration starts after the
-         * nearest ';', '{' or '}'), when it is a name followed by another name: two names in a row
-         * never start a declaration, so the first is most likely a misspelled keyword. The search
-         * goes back a bounded number of tokens, so that errors in a long run of tokens without a
-         * declaration boundary stay cheap.
+         * nearest ';', '{' or '}'), when it is a name followed by a token that never follows a name
+         * there: another name (two names in a row never start a declaration) or a keyword that only
+         * follows another keyword ({@link SysMLv2ParserFacade#followsOnlyKeywords}). The first is
+         * then most likely a misspelled keyword. After prefix keywords ('abstract prat def V') only
+         * 'def' tells: a name there may be followed by a usage keyword ('if ready action a { }').
+         * The search goes back a bounded number of tokens, so that errors in a long run of tokens
+         * without a declaration boundary stay cheap.
          */
         private static Token misspelledKeyword(TokenStream tokens, Token offending) {
             if (offending.getTokenIndex() < 0) {
@@ -278,12 +291,25 @@ public class SysMLv2ParserFacade {
                 }
                 first = t;
             }
-            if (first.getType() != SysMLv2Lexer.ID) {
-                return null;
+            if (first.getType() == SysMLv2Lexer.ID) {
+                Token second = nextOnChannel(tokens, first.getTokenIndex());
+                return second != null && (second.getType() == SysMLv2Lexer.ID
+                    || second.getType() == SysMLv2Lexer.QUOTED_ID || followsOnlyKeywords(second.getType()))
+                    ? first : null;
             }
-            Token second = nextOnChannel(tokens, first.getTokenIndex());
-            return second != null && (second.getType() == SysMLv2Lexer.ID || second.getType() == SysMLv2Lexer.QUOTED_ID)
-                ? first : null;
+            Token name = first;
+            while (isWordKeyword(name.getType()) && name.getTokenIndex() < offending.getTokenIndex()) {
+                name = nextOnChannel(tokens, name.getTokenIndex());
+            }
+            Token next = name.getType() == SysMLv2Lexer.ID ? nextOnChannel(tokens, name.getTokenIndex()) : null;
+            return next != null && next.getType() == SysMLv2Lexer.DEF ? name : null;
+        }
+
+        /** True for a keyword that is a word ('abstract', 'private'), not punctuation or a name. */
+        private static boolean isWordKeyword(int type) {
+            String literal = SysMLv2Lexer.VOCABULARY.getLiteralName(type);
+            return literal != null && literal.length() > 2
+                && literal.substring(1, literal.length() - 1).chars().allMatch(Character::isLetter);
         }
 
         /**
@@ -330,6 +356,38 @@ public class SysMLv2ParserFacade {
         public List<SyntaxError> getErrors() {
             return errors;
         }
+    }
+
+    /**
+     * Keywords that follow another keyword at the start of a declaration but never a name: 'def'
+     * after a definition keyword (the lexer has 'part def' as one token, so a misspelled 'prat def'
+     * leaves 'def' on its own), the second word of a compound keyword ('case' of 'use case' and
+     * 'case def' of 'use case def', 'struct' of 'assoc struct'), and the definition and usage
+     * keywords, which follow prefix keywords ('abstract part def', 'private part'). A name at the
+     * start of a declaration followed by one of these is a misspelled keyword.
+     */
+    private static final Set<Integer> FOLLOW_ONLY_KEYWORDS = followOnlyKeywords();
+
+    private static Set<Integer> followOnlyKeywords() {
+        Set<Integer> types = new HashSet<>(Set.of(SysMLv2Lexer.DEF, SysMLv2Lexer.STRUCT, SysMLv2Lexer.USE_CASE,
+            SysMLv2Lexer.PART, SysMLv2Lexer.ACTION, SysMLv2Lexer.STATE, SysMLv2Lexer.REQUIREMENT, SysMLv2Lexer.VIEW,
+            SysMLv2Lexer.VIEWPOINT, SysMLv2Lexer.CONSTRAINT, SysMLv2Lexer.ATTRIBUTE, SysMLv2Lexer.ENUM,
+            SysMLv2Lexer.CONNECTION, SysMLv2Lexer.INTERFACE, SysMLv2Lexer.ALLOCATION, SysMLv2Lexer.PORT,
+            SysMLv2Lexer.ITEM, SysMLv2Lexer.CALC, SysMLv2Lexer.ANALYSIS, SysMLv2Lexer.CASE,
+            SysMLv2Lexer.VERIFICATION, SysMLv2Lexer.CONCERN, SysMLv2Lexer.RENDERING, SysMLv2Lexer.OCCURRENCE));
+        Vocabulary vocabulary = SysMLv2Lexer.VOCABULARY;
+        for (int type = 1; type <= vocabulary.getMaxTokenType(); type++) {
+            String name = vocabulary.getSymbolicName(type);
+            if (name != null && name.endsWith("_DEF")) {
+                types.add(type);
+            }
+        }
+        return Set.copyOf(types);
+    }
+
+    /** True when a token of this type follows a keyword at the start of a declaration, never a name. */
+    static boolean followsOnlyKeywords(int type) {
+        return FOLLOW_ONLY_KEYWORDS.contains(type);
     }
 
     /** True when a declaration can start after this token: ';', '{', '}' or the start of the file (null). */
@@ -572,6 +630,17 @@ public class SysMLv2ParserFacade {
 
     static String abbreviate(String text) {
         return text.length() > 40 ? text.substring(0, 40) + "..." : text;
+    }
+
+    /**
+     * The text with the quotation from {@code open} (inclusive) to {@code close} (exclusive) cut to
+     * its first 40 and last 17 characters when it is longer than {@link #MAX_QUOTED_INPUT}.
+     */
+    static String abbreviateQuotation(String text, int open, int close) {
+        if (close - open <= MAX_QUOTED_INPUT) {
+            return text;
+        }
+        return text.substring(0, open + 40) + "..." + text.substring(close - 17);
     }
 
     /**

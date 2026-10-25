@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -90,5 +91,29 @@ class MisspelledKeywordTest {
         assertTrue(allSuggestions("packagge P {\n}\n").contains("package"));
         assertTrue(allSuggestions("package P {\n    prat def V;\n}\n").contains("part"));
         assertTrue(allSuggestions("package P {\n    folw f from a.b to c.d;\n}\n").contains("flow"));
+    }
+
+    @Test
+    @DisplayName("A name followed by a keyword that only follows a keyword is a misspelled keyword")
+    void nameBeforeKeywordOnlyFollowerIsMisspelledKeyword() {
+        // 'def' is a reserved word the lexer has a token for: 'prat def V' is a name and 'def', not two names, and
+        // the error is reported at 'def'. Before, nothing was suggested for 'prat'.
+        List<SyntaxError> errors = errors("package P {\n    prat def V;\n}\n", "typo.sysml");
+        assertEquals(1, errors.size(), errors.toString());
+        assertEquals(9, errors.get(0).getCharPositionInLine(), "at 'def'");
+        assertEquals("part", errors.get(0).getSuggestions().get(0), errors.get(0).getSuggestions().toString());
+        // The second word of a compound keyword, left on its own by a misspelled first word
+        assertTrue(allSuggestions("package P {\n    uze case def U;\n}\n").contains("use"));
+        assertTrue(allSuggestions("package P {\n    uze case u;\n}\n").contains("use"));
+        assertTrue(allSuggestions("package P {\n    asoc struct S;\n}\n").contains("assoc"));
+        // A misspelled prefix keyword before a definition or usage keyword
+        assertTrue(allSuggestions("package P {\n    abstrct part def X;\n}\n").contains("abstract"));
+        assertTrue(allSuggestions("package P {\n    privte part x;\n}\n").contains("private"));
+        // A misspelled definition keyword after prefix keywords
+        assertTrue(allSuggestions("package P {\n    private abstract prat def X;\n}\n").contains("part"));
+        // After a keyword, a name followed by a usage keyword can be valid ('if ready action a { }'): no keywords
+        // are suggested for it ('ref' for 'rdy')
+        assertFalse(allSuggestions("action def A {\n    first start;\n    if rdy action a { }\n    action b :> ;\n}\n")
+            .contains("ref"));
     }
 }
