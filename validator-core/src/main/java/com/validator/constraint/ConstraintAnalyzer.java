@@ -273,31 +273,28 @@ public class ConstraintAnalyzer {
          * Adds members from a definition to the constraint scope.
          */
         private void addDefinitionMembers(ParserRuleContext defCtx, ConstraintScope scope) {
-            // Look up the definition in symbol table
-            String defName = getDefinitionName(defCtx);
-            if (defName != null) {
-                Symbol defSymbol = symbolTable.resolve(defName);
-                if (defSymbol != null) {
-                    // Add all symbols that start with this definition's qualified name
-                    String prefix = defSymbol.getQualifiedName() + "::";
-                    for (Symbol child : symbolTable.getAllSymbols()) {
-                        if (child.getQualifiedName().startsWith(prefix)) {
-                            scope.addVariable(child.getName(), inferType(child));
-                        }
+            Symbol defSymbol = findSymbol(defCtx);
+            if (defSymbol != null) {
+                // Add all symbols that start with this definition's qualified name
+                String prefix = defSymbol.getQualifiedName() + "::";
+                for (Symbol child : symbolTable.getAllSymbols()) {
+                    if (child.getQualifiedName().startsWith(prefix)) {
+                        scope.addVariable(child.getName(), inferType(child));
                     }
                 }
             }
         }
 
         /**
-         * Gets the name of a definition context.
+         * Finds the symbol that the symbol table built for a definition or usage: the one whose AST node it is.
+         * Looking the name up instead missed the definition, because the name sits in a declarationName or
+         * usageName below the definition, and a simple name resolved from the global scope does not find a
+         * definition nested in a package.
          */
-        private String getDefinitionName(ParserRuleContext ctx) {
-            // Look for name in definition
-            for (int i = 0; i < ctx.getChildCount(); i++) {
-                ParseTree child = ctx.getChild(i);
-                if (child instanceof SysMLv2Parser.NameContext) {
-                    return child.getText();
+        private Symbol findSymbol(ParserRuleContext ctx) {
+            for (Symbol symbol : symbolTable.getAllSymbols()) {
+                if (symbol.getAstNode() == ctx) {
+                    return symbol;
                 }
             }
             return null;
