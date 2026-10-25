@@ -433,17 +433,19 @@ public class SysMLv2ParserFacade {
             tree = null;
         }
         if (tree != null) {
-            // Misspelled keywords the grammar accepted; one error per position
+            // Misspelled keywords and dropped ';' the grammar accepted; one error per position. The
+            // dropped ';' only on a tree that error recovery did not build.
             List<SyntaxError> errors = errorListener.getErrors();
-            for (SyntaxError misspelled : MisspelledKeywordCheck.check(tree, tokens, errorListener.keywordEngine)) {
-                if (errors.stream().noneMatch(e -> e.getLine() == misspelled.getLine()
-                        && e.getCharPositionInLine() == misspelled.getCharPositionInLine())) {
-                    errors.add(misspelled);
-                }
-            }
-            // Dropped ';' the grammar accepted, on a tree that error recovery did not build
+            List<SyntaxError> accepted = new ArrayList<>(
+                MisspelledKeywordCheck.check(tree, tokens, errorListener.keywordEngine));
             if (errors.isEmpty()) {
-                errors.addAll(MissingTerminatorCheck.check(tree, tokens));
+                accepted.addAll(MissingTerminatorCheck.check(tree, tokens));
+            }
+            for (SyntaxError error : accepted) {
+                if (errors.stream().noneMatch(e -> e.getLine() == error.getLine()
+                        && e.getCharPositionInLine() == error.getCharPositionInLine())) {
+                    errors.add(error);
+                }
             }
         }
         long parseTime = System.currentTimeMillis() - startTime;

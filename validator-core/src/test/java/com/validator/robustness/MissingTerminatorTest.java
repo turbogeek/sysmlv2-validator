@@ -74,6 +74,16 @@ class MissingTerminatorTest {
     }
 
     @Test
+    @DisplayName("A dropped ';' is reported together with a misspelled keyword, which leaves the tree intact")
+    void reportedWithMisspelledKeyword() {
+        List<SyntaxError> errors = errors("part def S {\n    part sensor : Sensor\n    part processor : Processor;\n"
+            + "    attriubte mass : Real;\n}\n");
+        assertEquals(2, errors.size(), errors.toString());
+        assertEquals("missing ';' at 'part'", errors.get(1).getMessage());
+        assertEquals(3, errors.get(1).getLine());
+    }
+
+    @Test
     @DisplayName("Only a tree without syntax errors is checked")
     void recoveredTreesAreNotChecked() {
         // The error recovery of 'part def := ;' leaves members without ';' that are not the user's
