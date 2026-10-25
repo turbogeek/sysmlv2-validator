@@ -66,8 +66,8 @@ class InheritanceValidationTest {
         Files.writeString(base, """
             package Base {
                 part def A { attribute f; }
-                part def B :> A { attribute :>> f = 1; }
-                part def C :> A { attribute :>> f = 2; }
+                part def B :> A { attribute :>> f default 1; }
+                part def C :> A { attribute :>> f default 2; }
             }
             """);
         Path user = dir.resolve("User.sysml");
@@ -75,7 +75,7 @@ class InheritanceValidationTest {
             package User {
                 private import Base::*;
                 part def Unresolved :> B, C;
-                part def Resolved :> B, C { attribute :>> f = 3; }
+                part def Resolved :> B, C { attribute f :>> B::f, C::f = 3; }
             }
             """);
 

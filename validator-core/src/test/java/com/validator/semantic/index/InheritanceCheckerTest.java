@@ -60,23 +60,28 @@ class InheritanceCheckerTest {
         assertTrue(m.contains("'P::C::f' (via 'P::C'; = 6)"), m);
         assertTrue(m.contains("contradict (different value)"), m);
         assertTrue(m.contains("so it inherits both"), m);
-        assertTrue(m.contains("redefine 'f' in 'P::D' (for example 'attribute :>> f = ...;')"), m);
+        assertTrue(m.contains("redefine 'f' in 'P::D' (for example 'attribute f :>> B::f, C::f = ...;', after making"
+            + " the branches' values defaults"), m);
         assertTrue(m.contains("common supertype of 'P::B' and 'P::C'"), m);
     }
 
     @Test
-    @DisplayName("A diamond that D resolves by redefining f by name gives no warning")
-    void diamondResolvedByNameIsNotReported() {
+    @DisplayName("Redefining f by simple name does not resolve the diamond: it redefines only the first general's f")
+    void diamondByNameIsStillReported() {
+        // The reference implementation (0.63.0) resolves ':>> f' to B::f only and warns "Duplicate of inherited
+        // member name 'f' from C" on D, so C::f stays inherited (KERML11-72)
+        for (String d : List.of("attribute :>> f = 5;", "attribute redefines f = 5;", "attribute f :>> f = 5;")) {
+            List<ValidationWarning> warnings = check(DIAMOND + "part def D :> B, C { " + d + " } }");
+            assertEquals(1, warnings.size(), d + messages(warnings));
+            assertEquals(ErrorCodes.DIAMOND_INHERITANCE_CONFLICT, warnings.get(0).getErrorCode());
+        }
+    }
+
+    @Test
+    @DisplayName("Redefining every branch's f by qualified name resolves the diamond")
+    void diamondResolvedByRedefiningEveryBranch() {
         assertEquals(List.of(), check(DIAMOND + """
-                part def D :> B, C { attribute :>> f = 5; }
-            }
-            """));
-        assertEquals(List.of(), check(DIAMOND + """
-                part def D :> B, C { attribute redefines f = 5; }
-            }
-            """));
-        assertEquals(List.of(), check(DIAMOND + """
-                part def D :> B, C { attribute f :>> f = 5; }
+                part def D :> B, C { attribute f :>> B::f, C::f = 5; }
             }
             """));
     }
@@ -84,10 +89,14 @@ class InheritanceCheckerTest {
     @Test
     @DisplayName("Redefining a branch redefinition or the ancestor feature by qualified name resolves it")
     void diamondResolvedByQualifiedRedefinition() {
-        assertEquals(List.of(), check(DIAMOND + """
+        // Renaming one branch's f leaves no second feature named f, but C::f is still inherited, so both
+        // B's 4 and C's 6 still constrain A::f: the contradiction is not resolved
+        assertEquals(1, check(DIAMOND + """
                 part def D :> B, C { attribute value :>> B::f; }
             }
-            """));
+            """).size());
+        // Redefining the common ancestor's f replaces both branch redefinitions (KerML removeRedefinedFeatures;
+        // the reference implementation reports nothing)
         assertEquals(List.of(), check(DIAMOND + """
                 part def D :> B, C { attribute value :>> A::f = 1; }
             }
@@ -186,8 +195,13 @@ class InheritanceCheckerTest {
         assertEquals(1, warnings.size(), messages(warnings));
         assertTrue(warnings.get(0).getMessage().contains("'P::Holder::d'"), warnings.get(0).getMessage());
 
-        assertEquals(List.of(), check(DIAMOND + """
+        // ':>> f' redefines only B::f (reference implementation: "Duplicate of inherited member name 'f' from C")
+        assertEquals(1, check(DIAMOND + """
                 part def Holder { part d : B, C { attribute :>> f = 1; } }
+            }
+            """).size());
+        assertEquals(List.of(), check(DIAMOND + """
+                part def Holder { part d : B, C { attribute f :>> B::f, C::f = 1; } }
             }
             """));
     }
@@ -205,8 +219,10 @@ class InheritanceCheckerTest {
             }
             """;
         List<ValidationWarning> warnings = check(model);
-        assertEquals(1, warnings.size(), messages(warnings));
-        String m = warnings.get(0).getMessage();
+        // Truck's ':>> cylinders' redefines only the first general's cylinders (Vehicle::engine's), so V8's stays
+        // inherited too; the reference implementation warns on both Car::engine and Truck::engine
+        assertEquals(2, warnings.size(), messages(warnings));
+        String m = find(warnings, "'P::Car::engine'");
         assertTrue(m.contains("'P::Car::engine'"), m);
         assertTrue(m.contains("'P::Vehicle::engine::cylinders' (via 'P::Vehicle::engine'; = 4)"), m);
         assertTrue(m.contains("'P::V8::cylinders' (via 'P::V8'; = 8)"), m);
@@ -249,8 +265,8 @@ class InheritanceCheckerTest {
                 private import ISQBase::*;
                 attribute def Confused :> MassValue, LengthValue;
                 attribute def Settled :> MassValue, LengthValue {
-                    attribute :>> num;
-                    attribute :>> mRef;
+                    attribute num :>> MassValue::num, LengthValue::num;
+                    attribute mRef :>> MassValue::mRef, LengthValue::mRef;
                 }
             }
             """);
@@ -290,7 +306,8 @@ class InheritanceCheckerTest {
         assertTrue(m.contains("'P::B' and 'P::C' each contribute a different feature named 'mass'"), m);
         assertTrue(m.contains("'P::B::mass' (via 'P::B'; : Real)"), m);
         assertTrue(m.contains("'P::C::mass' (via 'P::C'; : Real = 2)"), m);
-        assertTrue(m.contains("(for example 'attribute :>> mass = ...;'), rename one of them"), m);
+        assertTrue(m.contains("(for example 'attribute mass :>> B::mass, C::mass = ...;', after making"), m);
+        assertTrue(m.contains("), rename one of them"), m);
     }
 
     @Test
@@ -302,7 +319,9 @@ class InheritanceCheckerTest {
                 part def C { attribute mass; }
             """;
         assertEquals(List.of(), check(base + "part def D :> B, C { attribute mass :>> B::mass, C::mass; } }"));
-        assertEquals(List.of(), check(base + "part def D :> B, C { attribute :>> mass; } }"));
+        // ':>> mass' redefines only B::mass; C::mass is still inherited (reference implementation: "Duplicate of
+        // inherited member name 'mass' from C")
+        assertEquals(1, check(base + "part def D :> B, C { attribute :>> mass; } }").size());
     }
 
     @Test
@@ -390,10 +409,19 @@ class InheritanceCheckerTest {
     @Test
     @DisplayName("A third general whose redefinition merges both branches resolves the diamond")
     void mergingRedefinitionResolvesTheDiamond() {
-        assertEquals(List.of(), check(DIAMOND + """
+        // Merged's ':>> f' redefines only B::f, so Merged itself is reported; D's conflict is the one Merged
+        // holds and is reported there only; E merges both branches by qualified name
+        List<ValidationWarning> warnings = check(DIAMOND + """
                 part def Merged :> B, C { attribute :>> f = 5; }
                 part def D :> B, C, Merged;
                 part def E :> B, C { ref self2 :>> B::f, C::f; }
+            }
+            """);
+        assertEquals(1, warnings.size(), messages(warnings));
+        assertTrue(warnings.get(0).getMessage().startsWith("Diamond inheritance in 'P::Merged'"), messages(warnings));
+        assertEquals(List.of(), check(DIAMOND + """
+                part def Merged :> B, C { attribute f :>> B::f, C::f = 5; }
+                part def D :> B, C, Merged;
             }
             """));
     }
@@ -441,11 +469,14 @@ class InheritanceCheckerTest {
     @Test
     @DisplayName("A general that another general already specializes adds nothing (D :> M, C with M :> C)")
     void redundantGeneralIsIgnored() {
-        assertEquals(List.of(), check(DIAMOND + """
+        // M keeps C::f beside its renamed g (see diamondResolvedByQualifiedRedefinition): reported on M only
+        List<ValidationWarning> warnings = check(DIAMOND + """
                 part def M :> B, C { attribute g :>> B::f = 3; }
                 part def D :> M, C;
             }
-            """));
+            """);
+        assertEquals(1, warnings.size(), messages(warnings));
+        assertTrue(warnings.get(0).getMessage().startsWith("Diamond inheritance in 'P::M'"), messages(warnings));
     }
 
     @Test
@@ -691,10 +722,12 @@ class InheritanceCheckerTest {
         assertEquals(1, warnings.size(), messages(warnings));
         assertTrue(warnings.get(0).getMessage().startsWith("Diamond inheritance in 'P::D'"), messages(warnings));
 
-        assertEquals(List.of(), check(DIAMOND + """
+        // Redefining one branch's redefinition leaves the other inherited (reference implementation: "Duplicate of
+        // inherited member name 'f' from B")
+        assertEquals(1, check(DIAMOND + """
                 part def D :> B, C { attribute :>> C::f = 3; }
             }
-            """), "redefining a branch's redefinition by qualified name resolves it");
+            """).size(), "redefining one branch's redefinition does not resolve the diamond");
     }
 
     @Test
@@ -710,7 +743,8 @@ class InheritanceCheckerTest {
             """);
         assertEquals(1, warnings.size(), messages(warnings));
         String m = warnings.get(0).getMessage();
-        assertTrue(m.contains("(for example 'attribute :>> 'max speed' = ...;')"), m);
+        assertTrue(m.contains("(for example 'attribute 'max speed' :>> Left::'max speed', Right::'max speed'"
+            + " = ...;'"), m);
         assertTrue(m.contains("'P::Base Type::max speed' of common ancestor 'P::Base Type'"), m);
     }
 
@@ -750,7 +784,7 @@ class InheritanceCheckerTest {
         String m = warnings.get(0).getMessage();
         assertTrue(m.contains("'P::Vehicle::engine' of common ancestor 'P::Vehicle'"), m);
         assertTrue(m.contains("contradict (conflicting nested feature 'cylinders')"), m);
-        assertTrue(m.contains("'part :>> engine;'"), m);
+        assertTrue(m.contains("'part engine :>> Sporty::engine, Frugal::engine;'"), m);
 
         assertEquals(List.of(), check(base + """
                 part def Sporty :> Vehicle { part :>> engine { attribute :>> cylinders = 8; } }

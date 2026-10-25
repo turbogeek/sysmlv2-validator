@@ -38,8 +38,10 @@ import java.util.regex.Pattern;
  * </ul>
  *
  * <p>A redefinition along a branch is the nearest one walking from the general up to the ancestor,
- * following redefinition chains. D resolves a conflict by owning a feature that redefines f, one of the
- * branch redefinitions, or a feature of that name ({@code attribute :>> f = 4;}).</p>
+ * following redefinition chains. D resolves a diamond by owning features that redefine every branch
+ * redefinition, or the ancestor's f ({@code attribute f :>> B::f, C::f = 4;}). A redefinition by simple name
+ * ({@code :>> f}) names only the first general's f, as in the reference implementation, so it leaves the other
+ * branches' f inherited (KERML11-72).</p>
  *
  * <p>Not reported: a feature inherited along two paths without being redefined (it is the same feature);
  * redundant specialization ({@code D :> B, A} where {@code B :> A}: B's redefinition is the more specific
@@ -60,7 +62,7 @@ public final class InheritanceChecker {
     private static final int MAX_NESTING = 3;
 
     /** Usage keyword by rule kind without "Usage", for the refactoring example in messages. */
-    private static final Map<String, String> KEYWORDS = Map.ofEntries(
+    static final Map<String, String> KEYWORDS = Map.ofEntries(
         Map.entry("Part", "part"), Map.entry("Attribute", "attribute"), Map.entry("Item", "item"),
         Map.entry("Port", "port"), Map.entry("Action", "action"), Map.entry("State", "state"),
         Map.entry("Ref", "ref"), Map.entry("Occurrence", "occurrence"), Map.entry("Requirement", "requirement"),
@@ -154,7 +156,7 @@ public final class InheritanceChecker {
             for (List<String> segs : owned.redefines) {
                 Set<String> targets = resolveReference(owned.qualifiedName, d, segs, true);
                 ownedTargets.computeIfAbsent(owned.qualifiedName, k -> new HashSet<>()).addAll(targets);
-                if (segs.size() == 1 || targets.isEmpty()) {
+                if (targets.isEmpty()) {
                     resolvedNames.add(segs.get(segs.size() - 1));
                 }
             }
@@ -671,7 +673,13 @@ public final class InheritanceChecker {
             return true;
         }
         if (c.ancestorFeature() != null) {
-            return intersects(chains, resolvedTargets);
+            // Each branch's redefinition stays inherited unless D redefines it or a feature it redefines
+            for (String f : c.features().keySet()) {
+                if (!intersects(closure(f), resolvedTargets)) {
+                    return false;
+                }
+            }
+            return true;
         }
         // D's own redefinitions that keep the name add a feature of that name
         for (Map.Entry<String, Set<String>> owned : ownedTargets.entrySet()) {
@@ -744,6 +752,8 @@ public final class InheritanceChecker {
     private String example(Conflict c) {
         String keyword = null;
         boolean valued = false;
+        boolean bound = false;
+        List<String> targets = new ArrayList<>();
         for (String f : c.features().keySet()) {
             IndexedElement r = first(f);
             if (r == null) {
@@ -753,13 +763,28 @@ public final class InheritanceChecker {
                 keyword = KEYWORDS.get(r.kind.substring(0, r.kind.length() - "Usage".length()));
             }
             valued |= r.valueText != null;
+            bound |= r.valueText != null && !r.valueText.startsWith("default");
+            targets.add(qualifiedReference(f));
         }
         String name = c.name() == null ? "?" : sysmlName(c.name());
-        return "'" + (keyword == null ? "" : keyword + " ") + ":>> " + name + (valued ? " = ...;'" : ";'");
+        // ':>> name' alone would redefine only the first general's feature (KERML11-72): name every one
+        String example = "'" + (keyword == null ? "" : keyword + " ") + name + " :>> " + String.join(", ", targets)
+            + (valued ? " = ...;'" : ";'");
+        return bound ? example + ", after making the branches' values defaults ('default' instead of '=', which a"
+            + " redefinition cannot override)" : example;
+    }
+
+    /** A feature's name as written to redefine it from elsewhere: its owner's name, '::', its name. */
+    private String qualifiedReference(String feature) {
+        String owner = parentOf(feature);
+        IndexedElement o = first(owner);
+        String ownerName = o == null || o.effectiveName() == null ? owner : sysmlName(o.effectiveName());
+        String own = effectiveName(feature);
+        return ownerName + "::" + sysmlName(own == null ? "?" : own);
     }
 
     /** A name as it is written in SysML: quoted unless it is a basic name ({@code 'max speed'}). */
-    private static String sysmlName(String name) {
+    static String sysmlName(String name) {
         return name.matches("[A-Za-z_]\\w*") ? name : "'" + name.replace("\\", "\\\\").replace("'", "\\'") + "'";
     }
 
@@ -812,7 +837,7 @@ public final class InheritanceChecker {
     }
 
     /** A qualified name for messages, anonymous segments replaced by the name they redefine. */
-    private String display(String qualifiedName) {
+    String display(String qualifiedName) {
         IndexedElement r = first(qualifiedName);
         if (r == null) {
             return qualifiedName;
@@ -826,7 +851,7 @@ public final class InheritanceChecker {
     // Inheritance
 
     /** The resolved general types of an element: typings, specializations, subsettings, redefinitions. */
-    private List<String> generals(String qualifiedName) {
+    List<String> generals(String qualifiedName) {
         List<String> cached = generalsMemo.get(qualifiedName);
         if (cached != null) {
             return cached;
@@ -890,7 +915,7 @@ public final class InheritanceChecker {
     }
 
     /** Every direct and indirect general of an element. */
-    private Set<String> ancestors(String qualifiedName) {
+    Set<String> ancestors(String qualifiedName) {
         Set<String> cached = ancestorsMemo.get(qualifiedName);
         if (cached != null) {
             return cached;
@@ -915,7 +940,7 @@ public final class InheritanceChecker {
      * The features that are members of a type: its owned features and the non-private features of its
      * generals that none of its owned features redefines (by target or by name).
      */
-    private List<String> members(String type) {
+    List<String> members(String type) {
         List<String> cached = membersMemo.get(type);
         if (cached != null) {
             return cached;
@@ -926,6 +951,7 @@ public final class InheritanceChecker {
         Set<String> result = new LinkedHashSet<>();
         try {
             Set<String> redefined = new HashSet<>();
+            Set<String> directlyRedefined = new HashSet<>();
             Set<String> redefinedNames = new HashSet<>();
             for (IndexedElement owned : index.ownedElements(type)) {
                 if (!owned.declaresFeature() || owned.effectiveName() == null) {
@@ -937,10 +963,12 @@ public final class InheritanceChecker {
                         redefined.add(r);
                     }
                 }
-                // ':>> f' hides every inherited f; ':>> B::f' only B's (unless it does not resolve)
-                boolean unresolved = unresolvedChains.contains(owned.qualifiedName);
                 for (List<String> segs : owned.redefines) {
-                    if (segs.size() == 1 || unresolved) {
+                    directlyRedefined.addAll(resolveReference(owned.qualifiedName, type, segs, true));
+                }
+                // A redefinition that does not resolve hides the inherited features of its name
+                if (unresolvedChains.contains(owned.qualifiedName)) {
+                    for (List<String> segs : owned.redefines) {
                         redefinedNames.add(segs.get(segs.size() - 1));
                     }
                 }
@@ -948,7 +976,10 @@ public final class InheritanceChecker {
             for (String general : generals(type)) {
                 for (String m : members(general)) {
                     IndexedElement record = first(m);
+                    // Dropped, as KerML removeRedefinedFeatures does, when the type redefines m or a feature m
+                    // redefines; ':>> f' by name redefines only the first general's f
                     if (record != null && !record.isPrivate && !redefined.contains(m)
+                            && !intersects(closure(m), directlyRedefined)
                             && !redefinedNames.contains(record.effectiveName())) {
                         result.add(m);
                     }
@@ -966,7 +997,7 @@ public final class InheritanceChecker {
      * A feature and every feature it redefines, directly or through a chain of redefinitions. A feature
      * whose chain has a redefinition that does not resolve is recorded in {@link #unresolvedChains}.
      */
-    private Set<String> closure(String feature) {
+    Set<String> closure(String feature) {
         Set<String> cached = closureMemo.get(feature);
         if (cached != null) {
             return cached;
@@ -1009,13 +1040,21 @@ public final class InheritanceChecker {
      * back to the generals when they name the element itself. Returns no targets when the name does not
      * resolve.
      */
-    private Set<String> resolveReference(String self, String owner, List<String> segs, boolean redefinition) {
+    Set<String> resolveReference(String self, String owner, List<String> segs, boolean redefinition) {
         if (segs.isEmpty()) {
             return Set.of();
         }
         String last = segs.get(segs.size() - 1);
         if (redefinition && segs.size() == 1) {
-            return dealias(inherited(owner, last, self), 0);
+            // Like the reference implementation's scope: the first general, in declaration order, that has a
+            // feature of that name; a same-named feature of a later general stays inherited
+            for (String general : generals(owner)) {
+                Set<String> found = memberNamed(general, last, self);
+                if (!found.isEmpty()) {
+                    return dealias(found, 0);
+                }
+            }
+            return Set.of();
         }
         if (redefinition) {
             ModelIndex.Resolution qualifier = index.resolve(segs.subList(0, segs.size() - 1), owner);
@@ -1041,7 +1080,7 @@ public final class InheritanceChecker {
      * each general (unnamed redefinitions such as {@code :>> f = 1;} included), else whatever the index
      * finds as a member of the general.
      */
-    private Set<String> inherited(String owner, String name, String self) {
+    Set<String> inherited(String owner, String name, String self) {
         Set<String> result = new LinkedHashSet<>();
         for (String general : generals(owner)) {
             result.addAll(memberNamed(general, name, self));
@@ -1092,17 +1131,17 @@ public final class InheritanceChecker {
 
     // ------------------------------------------------------------------------------------------
 
-    private IndexedElement first(String qualifiedName) {
+    IndexedElement first(String qualifiedName) {
         List<IndexedElement> records = index.recordsOf(qualifiedName);
         return records.isEmpty() ? null : records.get(0);
     }
 
-    private String effectiveName(String qualifiedName) {
+    String effectiveName(String qualifiedName) {
         IndexedElement r = first(qualifiedName);
         return r == null ? null : r.effectiveName();
     }
 
-    private String parentOf(String qualifiedName) {
+    String parentOf(String qualifiedName) {
         IndexedElement r = first(qualifiedName);
         return r == null || r.parentName == null ? "" : r.parentName;
     }
