@@ -5,6 +5,7 @@ import com.validator.parser.SysMLv2Parser;
 import com.validator.parser.SysMLv2ParserFacade;
 import com.validator.semantic.SymbolTable;
 import com.validator.semantic.SymbolTableBuilder;
+import com.validator.testutil.ParseTrees;
 import com.validator.testutil.TestPaths;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
@@ -43,8 +44,10 @@ class OfficialExamplesTest {
         .orElse("SysML-v2-Release/sysml/src");
 
     /*
-     * Ratchets: the number of official files that parse without syntax errors. They may only go up. When a grammar
-     * change makes more files parse, raise them to the new count; never lower them to make a change pass.
+     * Ratchets: the number of official files that parse cleanly. They may only go up. When a grammar change makes more
+     * files parse, raise them to the new count; never lower them to make a change pass. A file is clean when it has no
+     * syntax errors and no stray statements (ParseTrees.strayStatements): a construct the grammar cut short, with the
+     * rest read as expression statements, is a misparse even when no error is reported.
      */
 
     /** sysml/src: all 252 files of the 2026-10 release checkout. */
@@ -54,12 +57,13 @@ class OfficialExamplesTest {
     private static final int MIN_SLL_CLEAN_SYSML_FILES = 252;
 
     /**
-     * kerml/src/examples: 54 of 58. The four that fail need KerML relationship members the grammar does not have yet
-     * ('featuring F of y by C;', 'inverse B::g of A::f;', 'conjugation c conjugate X conjugates Y;' and the 'chains'
-     * feature part). Note that the three ProductSelection_*.kerml files count as clean only because the unsupported
-     * 'member' keyword is read as an expression statement.
+     * kerml/src/examples: 46 of 58. Four have syntax errors: they need KerML relationship members the grammar does not
+     * have yet ('featuring F of y by C;', 'inverse B::g of A::f;', 'conjugation c conjugate X conjugates Y;' and the
+     * 'chains' feature part). Eight more parse without errors but misread an unsupported keyword as an expression
+     * statement: 'member' (the three ProductSelection_*.kerml and the three TimeVarying*.kerml files), 'chains'
+     * (A-3-8-ChangingFeatureValues.kerml) and 'const' (Associations.kerml).
      */
-    private static final int MIN_CLEAN_KERML_FILES = 54;
+    private static final int MIN_CLEAN_KERML_FILES = 46;
 
     private static SysMLv2ParserFacade parserFacade;
 
@@ -90,9 +94,9 @@ class OfficialExamplesTest {
         }
 
         assertTrue(results.totalFiles > 0, "Should find KerML files");
-        assertTrue(results.filesSuccessful >= MIN_CLEAN_KERML_FILES,
-            "KerML examples parsing without syntax errors dropped to " + results.filesSuccessful + " (minimum "
-                + MIN_CLEAN_KERML_FILES + "); failing: " + failingFiles(results));
+        assertTrue(results.cleanFiles() >= MIN_CLEAN_KERML_FILES,
+            "KerML examples parsing cleanly dropped to " + results.cleanFiles() + " (minimum " + MIN_CLEAN_KERML_FILES
+                + "); failing: " + failingFiles(results) + "; misread: " + results.strayFiles);
     }
 
     @Test
@@ -107,6 +111,7 @@ class OfficialExamplesTest {
         TestResults results = parseFilesInDirectory(sysmlPath, ".sysml");
         printResults("SysML Sources", results);
         System.out.printf("SLL-only parses:     %d%n", results.filesSllClean);
+        System.out.printf("Misread (stray):     %s%n", results.strayFiles);
 
         // Store detailed errors for analysis
         if (!results.errors.isEmpty()) {
@@ -118,9 +123,9 @@ class OfficialExamplesTest {
         }
 
         assertTrue(results.totalFiles > 0, "Should find SysML files");
-        assertTrue(results.filesSuccessful >= MIN_CLEAN_SYSML_FILES,
-            "SysML sources parsing without syntax errors dropped to " + results.filesSuccessful + " (minimum "
-                + MIN_CLEAN_SYSML_FILES + "); failing: " + failingFiles(results));
+        assertTrue(results.cleanFiles() >= MIN_CLEAN_SYSML_FILES,
+            "SysML sources parsing cleanly dropped to " + results.cleanFiles() + " (minimum " + MIN_CLEAN_SYSML_FILES
+                + "); failing: " + failingFiles(results) + "; misread: " + results.strayFiles);
         assertTrue(results.filesSllClean >= MIN_SLL_CLEAN_SYSML_FILES,
             "SysML sources parsing with SLL prediction alone dropped to " + results.filesSllClean + " (minimum "
                 + MIN_SLL_CLEAN_SYSML_FILES + "): a grammar ambiguity now forces a full LL re-parse of "
@@ -206,6 +211,10 @@ class OfficialExamplesTest {
                         results.errors.add(fileError);
                     } else {
                         results.filesSuccessful++;
+                        List<String> stray = ParseTrees.strayStatements(parseResult.getParseTree());
+                        if (!stray.isEmpty()) {
+                            results.strayFiles.add(file.getFileName() + " " + stray.get(0));
+                        }
                         // The SLL check needs the facade's KerML keyword handling, so it covers .sysml files only
                         if (extension.equals(".sysml")) {
                             if (parsesWithSllAlone(content)) {
@@ -319,11 +328,18 @@ class OfficialExamplesTest {
         int filesSuccessful = 0;
         int filesSllClean = 0;
         List<String> sllFallbackFiles = new ArrayList<>();
+        /** Files without syntax errors that still have stray statements, with the first one. */
+        List<String> strayFiles = new ArrayList<>();
         int filesWithErrors = 0;
         int readErrors = 0;
         int symbolTableErrors = 0;
         int totalSymbols = 0;
         List<FileError> errors = new ArrayList<>();
+
+        /** Files with neither syntax errors nor stray statements. */
+        int cleanFiles() {
+            return filesSuccessful - strayFiles.size();
+        }
     }
 
     static class FileError {
