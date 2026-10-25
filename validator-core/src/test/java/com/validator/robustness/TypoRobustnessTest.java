@@ -60,8 +60,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * ({@code usageBody?}, {@code SEMICOLON?}), so the report only shows how many dropped semicolons got an error.</p>
  *
  * <p>The seeds are every file of test-suite/positive and an evenly spaced sample of the OMG release's sysml/src
- * examples when the release is available. The default run makes one mutant for every third seed-operator pair
- * (rotating from seed to seed, so each operator runs on a third of the seeds), leaves out the seeds that are slow
+ * examples when the release is available. The default run makes one mutant for one seed-operator pair in four
+ * (rotating from seed to seed, so each operator runs on a quarter of the seeds), leaves out the seeds that are slow
  * to parse with a syntax error, and runs the entry points of {@link #observe}. {@code -Dtypo.mutants=N} makes N
  * mutants for every pair, includes the slow seeds and runs every entry point. {@code -Dtypo.seed=S} changes the
  * random seed, and {@code -Dtypo.only=text} runs only the mutants whose id contains the text, to reproduce one
@@ -73,10 +73,10 @@ class TypoRobustnessTest {
 
     private static final long DEFAULT_RANDOM_SEED = 20_261_025L;
     /**
-     * The default run takes one seed-operator pair in this many: all pairs took 100 s on a loaded machine, a third
-     * of them stays under a minute with the coverage agent attached.
+     * The default run takes one seed-operator pair in this many. All pairs took 100 s on a loaded machine; a third
+     * of them took 53 s with the coverage agent attached, plus about 20 s to warm up the parser on the seeds.
      */
-    private static final int DEFAULT_SAMPLING = 3;
+    private static final int DEFAULT_SAMPLING = 4;
     private static final int OFFICIAL_SAMPLE = 30;
     /** Per-mutant budget at full machine speed for all entry points together; scaled by the machine's slowdown. */
     private static final long MUTANT_BUDGET_NOMINAL_MS = 20_000;
@@ -137,6 +137,7 @@ class TypoRobustnessTest {
         String only = System.getProperty("typo.only", "");
         boolean trace = Boolean.getBoolean("typo.trace");
 
+        long prepStart = System.nanoTime();
         Map<String, String> seeds = seeds(deep || !only.isEmpty());
         List<Mutant> mutants = new ArrayList<>();
         Map<String, List<Integer>> seedSyntaxLines = new LinkedHashMap<>();
@@ -144,7 +145,7 @@ class TypoRobustnessTest {
         for (Map.Entry<String, String> seed : seeds.entrySet()) {
             TypoMutator mutator = new TypoMutator(seed.getKey(), seed.getValue(), randomSeed);
             for (Operator op : Operator.values()) {
-                // The default run takes every third seed-operator pair, rotating from seed to seed
+                // The default run takes one seed-operator pair in four, rotating from seed to seed
                 boolean sampled = deep || !only.isEmpty() || (seedIndex + op.ordinal()) % DEFAULT_SAMPLING == 0;
                 if (!op.isWholeFile() && sampled) {
                     mutants.addAll(mutator.mutate(op, perOperator));
@@ -163,6 +164,7 @@ class TypoRobustnessTest {
             mutants.removeIf(m -> !m.id().contains(only));
         }
 
+        long prepMs = (System.nanoTime() - prepStart) / 1_000_000;
         SpellingSuggestionEngine engine = new SpellingSuggestionEngine();
         List<String> failures = new ArrayList<>();
         Map<Operator, Tally> tallies = new TreeMap<>();
@@ -217,6 +219,7 @@ class TypoRobustnessTest {
         report.put("mutants", mutants.size());
         report.put("mutantsPerSeedAndOperator", perOperator);
         report.put("randomSeed", randomSeed);
+        report.put("preparationMs", prepMs);
         report.put("elapsedMs", elapsedMs);
         report.put("mutantBudgetMs", mutantBudget.toMillis());
         report.put("keywords", KeywordProvider.getKeywordCount());
