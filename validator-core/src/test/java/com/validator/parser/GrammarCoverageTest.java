@@ -37,7 +37,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * src/test/resources/grammar-snippets, each the smallest valid SysML v2 or KerML for something the other files do
  * not exercise; with the OMG SysML-v2-Release checkout ({@link TestPaths#sysmlReleaseRoot()}) a second figure adds
  * its sysml/src models and kerml/src examples. What valid input cannot reach is explained in
- * grammar-coverage-notes.properties. The minimums in grammar-coverage.properties may only go up.
+ * grammar-coverage-notes.properties. The minimums in grammar-coverage.properties may only go up. The figures are of
+ * SysMLv2Parser.g4's own rules; valid SysML v2 that the grammar has no rule for is in GrammarGapTest.
  */
 @DisplayName("Grammar coverage")
 class GrammarCoverageTest {

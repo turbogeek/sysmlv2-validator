@@ -261,7 +261,9 @@ public final class GrammarCoverageReport {
                 .append(" |\n");
         }
         md.append("\nCovered of what valid input can reach: the totals without the uncovered elements that a note ")
-            .append("explains. Below 100% means a gap that needs a snippet or a note.\n\n");
+            .append("explains. Below 100% means a gap that needs a snippet or a note. Both tables measure ")
+            .append("SysMLv2Parser.g4 itself: valid SysML v2 that no rule of it accepts is not counted anywhere here ")
+            .append("(GrammarGapTest lists the forms found so far).\n\n");
         md.append("| Corpus | Rules | Alternatives | Tokens |\n|---|---|---|---|\n");
         for (Map.Entry<String, GrammarCoverage> e : corpora.entrySet()) {
             GrammarCoverage.Summary s = e.getValue().summary();
