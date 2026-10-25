@@ -39,6 +39,18 @@ class ErrorCodesTest {
     }
 
     @Test
+    @DisplayName("Should categorize inheritance warnings, which are not fatal")
+    void testInheritanceWarningCategory() {
+        assertEquals("Inheritance Warning", ErrorCodes.getCategoryDescription(ErrorCodes.DIAMOND_INHERITANCE_CONFLICT));
+        assertEquals("Inheritance Warning",
+            ErrorCodes.getCategoryDescription(ErrorCodes.MULTIPLE_INHERITANCE_NAME_CONFLICT));
+        assertFalse(ErrorCodes.isFatal(ErrorCodes.DIAMOND_INHERITANCE_CONFLICT));
+        assertFalse(ErrorCodes.isFatal(ErrorCodes.MULTIPLE_INHERITANCE_NAME_CONFLICT));
+        assertTrue(ErrorCodes.DIAMOND_INHERITANCE_CONFLICT.matches("[A-Z_]+"));
+        assertTrue(ErrorCodes.MULTIPLE_INHERITANCE_NAME_CONFLICT.matches("[A-Z_]+"));
+    }
+
+    @Test
     @DisplayName("Should categorize type errors correctly")
     void testTypeErrorCategory() {
         assertEquals("Type Error", ErrorCodes.getCategoryDescription(ErrorCodes.TYPE_MISMATCH));
