@@ -41,6 +41,21 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Runs perf/cameo/CameoPerfRunner.groovy (a Cameo macro; Cameo 2026x ships Groovy 5) with a stand-in
+             for Cameo -->
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>5.1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Cameo's macro engine runs Groovy through JSR-223; the test does the same -->
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-jsr223</artifactId>
+            <version>5.1.3</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

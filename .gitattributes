@@ -1,0 +1,5 @@
+# The performance corpus is timed byte for byte on two machines and checked against the SHA-256 in its manifest:
+# keep LF line endings on every checkout (Git for Windows converts to CRLF by default).
+*.sysml text eol=lf
+*.kerml text eol=lf
+perf/cameo/**/*.csv text eol=lf

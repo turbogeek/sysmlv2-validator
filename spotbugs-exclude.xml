@@ -15,6 +15,13 @@
         <Class name="~.*\.SysMLv2ParserBase.*"/>
     </Match>
 
+    <!-- The performance corpus is written with LF line endings on every platform, so that its SHA-256 in
+         perf/cameo/corpus/manifest.csv is the same everywhere: '\n', not '%n', in its format strings -->
+    <Match>
+        <Class name="com.validator.cli.perf.PerfCorpusGenerator"/>
+        <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
+    </Match>
+
     <!-- Exclude test files from certain checks -->
     <Match>
         <Class name="~.*Test"/>
