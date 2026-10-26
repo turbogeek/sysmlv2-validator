@@ -40,15 +40,14 @@ the models' LF line endings on every checkout, so that both machines time the sa
 Requirements: Cameo / CATIA Magic 2026x with the SysML v2 plugin. The macro was written against
 2026x Refresh1, build 2026.1.0-597.
 
-1. Get the branch `jdk25-grammar-and-test-fixes` of `https://github.com/turbogeek/sysmlv2-validator.git`:
+1. Get `main` of `https://github.com/turbogeek/sysmlv2-validator.git`:
 
    ```bash
    git clone https://github.com/turbogeek/sysmlv2-validator.git
    cd sysmlv2-validator
-   git switch jdk25-grammar-and-test-fixes
    ```
 
-   In an existing clone, run `git fetch origin`, then `git switch jdk25-grammar-and-test-fixes`, then `git pull`.
+   In an existing clone, run `git switch main`, then `git pull`.
 2. In Cameo, choose **Tools > Macros > Organize Macros** and click **Add**. In the macro information:
    - set **Name** (for example `CameoPerfRunner`) and **Macro Language** to **Groovy**;
    - set **File** to `perf/cameo/CameoPerfRunner.groovy` in the checkout;
