@@ -1,0 +1,544 @@
+SysML v2 Semantic Validator v0.1.0-SNAPSHOT
+===========================================
+
+Validating: 43_enumeration_definitions.sysml
+========================================
+[WARNING] 43_enumeration_definitions.sysml:3:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 46_loop_conditional.sysml
+========================================
+[WARNING] 46_loop_conditional.sysml:4:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 46_loop_conditional.sysml:10:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 46_loop_conditional.sysml:15:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 46_loop_conditional.sysml:21:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 46_loop_conditional.sysml:26:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 46_loop_conditional.sysml:33:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 46_loop_conditional.sysml:37:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 46_loop_conditional.sysml:41:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 46_loop_conditional.sysml:48:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 11_breakfast_example_corrected.sysml
+========================================
+[WARNING] 11_breakfast_example_corrected.sysml:32:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:38:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:41:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:48:54
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:70:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:92:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:109:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:117:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:118:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:119:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:141:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:148:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:180:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:187:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:193:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:234:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:250:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:259:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:268:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 11_breakfast_example_corrected.sysml:277:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 48_library_package.sysml
+========================================
+[WARNING] 48_library_package.sysml:4:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 48_library_package.sysml:7:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 48_library_package.sysml:46:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 30_exhibit_perform.sysml
+========================================
+[WARNING] 30_exhibit_perform.sysml:3:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 30_exhibit_perform.sysml:11:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 30_exhibit_perform.sysml:18:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 19_analysis_calculations.sysml
+========================================
+[WARNING] 19_analysis_calculations.sysml:3:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 19_analysis_calculations.sysml:11:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 19_analysis_calculations.sysml:29:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 42_feature_typing.sysml
+========================================
+[WARNING] 42_feature_typing.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 42_feature_typing.sysml:10:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 42_feature_typing.sysml:14:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 42_feature_typing.sysml:17:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 42_feature_typing.sysml:42:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 39_succession_flow.sysml
+========================================
+[WARNING] 39_succession_flow.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 39_succession_flow.sysml:21:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 39_succession_flow.sysml:26:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 38_readonly_derived.sysml
+========================================
+[WARNING] 38_readonly_derived.sysml:8:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 38_readonly_derived.sysml:11:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 38_readonly_derived.sysml:14:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 38_readonly_derived.sysml:19:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 38_readonly_derived.sysml:22:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 04_compact_flow_notation.sysml
+========================================
+[WARNING] 04_compact_flow_notation.sysml:17:41
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 04_compact_flow_notation.sysml:22:44
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 05_multiple_successions.sysml
+========================================
+[WARNING] 05_multiple_successions.sysml:24:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 05_multiple_successions.sysml:25:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 05_multiple_successions.sysml:34:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 18_allocation_definitions.sysml
+========================================
+[WARNING] 18_allocation_definitions.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 18_allocation_definitions.sysml:30:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 40_objective_use_case.sysml
+========================================
+[WARNING] 40_objective_use_case.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 37_default_values.sysml
+========================================
+[WARNING] 37_default_values.sysml:6:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 37_default_values.sysml:9:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 37_default_values.sysml:12:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 37_default_values.sysml:18:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 26_message_accept.sysml
+========================================
+[WARNING] 26_message_accept.sysml:4:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 22_item_flow_definitions.sysml
+========================================
+[WARNING] 22_item_flow_definitions.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 22_item_flow_definitions.sysml:35:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 27_complex_multiplicities.sysml
+========================================
+[WARNING] 27_complex_multiplicities.sysml:3:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 27_complex_multiplicities.sysml:6:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 27_complex_multiplicities.sysml:9:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 27_complex_multiplicities.sysml:12:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 27_complex_multiplicities.sysml:15:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 27_complex_multiplicities.sysml:18:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 27_complex_multiplicities.sysml:21:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 27_complex_multiplicities.sysml:24:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 27_complex_multiplicities.sysml:27:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 34_constraint_assertions.sysml
+========================================
+[WARNING] 34_constraint_assertions.sysml:8:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 34_constraint_assertions.sysml:13:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 20_verification_cases.sysml
+========================================
+[WARNING] 20_verification_cases.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 20_verification_cases.sysml:23:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 20_verification_cases.sysml:25:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 20_verification_cases.sysml:37:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 09_ports_and_connections.sysml
+========================================
+[WARNING] 09_ports_and_connections.sysml:13:25
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 41_state_entry_exit.sysml
+========================================
+[WARNING] 41_state_entry_exit.sysml:3:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 36_sequence_collections.sysml
+========================================
+[WARNING] 36_sequence_collections.sysml:7:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 36_sequence_collections.sysml:10:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 36_sequence_collections.sysml:13:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 36_sequence_collections.sysml:20:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 36_sequence_collections.sysml:23:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 25_trade_studies.sysml
+========================================
+[WARNING] 25_trade_studies.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 32_reference_subsetting.sysml
+========================================
+[WARNING] 32_reference_subsetting.sysml:8:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 32_reference_subsetting.sysml:11:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 49_actor_stakeholder.sysml
+========================================
+[WARNING] 49_actor_stakeholder.sysml:3:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 49_actor_stakeholder.sysml:47:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 33_conjugate_interface.sysml
+========================================
+[WARNING] 33_conjugate_interface.sysml:8:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 50_accept_via.sysml
+========================================
+[WARNING] 50_accept_via.sysml:3:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 50_accept_via.sysml:13:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 50_accept_via.sysml:14:16
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 50_accept_via.sysml:20:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 50_accept_via.sysml:41:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 28_feature_redefinition.sysml
+========================================
+[WARNING] 28_feature_redefinition.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 28_feature_redefinition.sysml:14:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 28_feature_redefinition.sysml:17:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 28_feature_redefinition.sysml:20:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 28_feature_redefinition.sysml:28:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 28_feature_redefinition.sysml:39:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 23_occurrence_temporal.sysml
+========================================
+[WARNING] 23_occurrence_temporal.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 23_occurrence_temporal.sysml:26:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 23_occurrence_temporal.sysml:31:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 23_occurrence_temporal.sysml:37:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 47_expression_operators.sysml
+========================================
+[WARNING] 47_expression_operators.sysml:4:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 47_expression_operators.sysml:7:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 47_expression_operators.sysml:15:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 47_expression_operators.sysml:23:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 47_expression_operators.sysml:29:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 47_expression_operators.sysml:32:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 47_expression_operators.sysml:42:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 47_expression_operators.sysml:43:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 47_expression_operators.sysml:54:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 47_expression_operators.sysml:57:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 21_metadata_annotations.sysml
+========================================
+[WARNING] 21_metadata_annotations.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 21_metadata_annotations.sysml:33:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 02_action_with_succession.sysml
+========================================
+[WARNING] 02_action_with_succession.sysml:19:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 31_binding_connections.sysml
+========================================
+[WARNING] 31_binding_connections.sysml:16:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 31_binding_connections.sysml:19:4
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 06_state_with_conditions.sysml
+========================================
+[WARNING] 06_state_with_conditions.sysml:17:32
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 29_abstract_variation.sysml
+========================================
+[WARNING] 29_abstract_variation.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 29_abstract_variation.sysml:36:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 29_abstract_variation.sysml:40:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 24_rendering_definitions.sysml
+========================================
+[WARNING] 24_rendering_definitions.sysml:3:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 45_import_membership.sysml
+========================================
+[WARNING] 45_import_membership.sysml:3:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 45_import_membership.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 45_import_membership.sysml:8:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 45_import_membership.sysml:11:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 45_import_membership.sysml:30:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 45_import_membership.sysml:41:8
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 45_import_membership.sysml:47:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+Validating: 44_variant_configuration.sysml
+========================================
+[WARNING] 44_variant_configuration.sysml:5:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+[WARNING] 44_variant_configuration.sysml:41:0
+  LINE_COMMENT_NOT_PERSISTED: Single-line comment '//' is not persisted to the model. Use block comment /* */ or doc keyword for persistent documentation.
+
+
+
+========================================
+VALIDATION SUMMARY
+========================================
+Files validated: 51
+Files with errors: 0
+Total errors: 0
+Total warnings: 139
+
+✓ VALIDATION PASSED
