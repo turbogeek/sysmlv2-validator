@@ -1,5 +1,9 @@
-# The performance corpus is timed byte for byte on two machines and checked against the SHA-256 in its manifest:
-# keep LF line endings on every checkout (Git for Windows converts to CRLF by default).
+# The test models are checked against the SHA-256 in the conformance and performance manifests, and the
+# performance models are timed byte for byte on two machines: keep LF line endings on every checkout (Git for
+# Windows converts to CRLF by default).
 *.sysml text eol=lf
 *.kerml text eol=lf
-perf/cameo/**/*.csv text eol=lf
+conformance/**/*.csv text eol=lf
+perf/**/*.csv text eol=lf
+# KPARs are zip archives, checked byte for byte against their generator
+*.kpar binary

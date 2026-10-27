@@ -1,0 +1,14 @@
+id,path,family,scale,expect,lines,bytes,sha256,description
+system-xs,perf/corpus/system-xs.sysml,system,xs,clean,105,3732,0952d7fc2cffb4d9c8b4b339e41027dfa90d24446b330dfe64c6178305e124bd,2 subsystems of parts; ports; actions; states and requirements wired into one system
+system-s,perf/corpus/system-s.sysml,system,s,clean,573,23196,b55bff802c8f1aa00e52226ec812c7a2bb84a987a36b52e8ffe3252ab6454966,20 subsystems of parts; ports; actions; states and requirements wired into one system
+system-m,perf/corpus/system-m.sysml,system,m,clean,5253,216517,59fc1477db2ba89ad35bdbbfb37954c7a671e0eb67cf4c94e146903ef2d0f519,200 subsystems of parts; ports; actions; states and requirements wired into one system
+system-l,perf/corpus/system-l.sysml,system,l,clean,26053,1075718,638f0c54c2094775d60006c68dd86330dff1a196082c25ddcaf74ccf8abaf077,1000 subsystems of parts; ports; actions; states and requirements wired into one system
+system-xl,perf/corpus/system-xl.sysml,system,xl,clean,65053,2686719,0db30814bab4bd552a22e4085e68187d947c5f2ee5c5adfeaf32609848919491,2500 subsystems of parts; ports; actions; states and requirements wired into one system
+inheritance-200,perf/corpus/inheritance-200.sysml,inheritance,200,clean,809,28726,d81ba95561ef3041a81eb51523840685f1f2fac82840fbbd21c878795e4285ab,A chain of 200 part definitions each redefining the first one's attribute
+imports-100,perf/corpus/imports-100.sysml,imports,100,clean,1892,84971,2d1e2c0db8b665c322c44f76200054ffae8d01d0c6d3e49be59bbbef0eaa341d,100 packages each publicly importing the previous one
+errors-m,perf/corpus/errors-m.sysml,errors,m,errors,5253,216465,97131b7ec7cc019a6cb1b5493a883ac799518e15bbbfee6a58a0c46eefe61f41,The 200-subsystem system with three errors in every tenth subsystem
+real-cameo-constructs,test-suite/positive/60_cameo_26xR2_constructs.sysml,real,-,clean,89,4174,d8dcc835dd0b071a933f9b46472f47a71537791a8bffec9ab669f8aa8711354f,Constructs used by the CATIA Magic 26xR2 libraries and Cameo-exported models
+real-name-collisions,examples/name-collision/NameCollisionExamples.sysml,real,-,warnings,323,14503,23c7d772e29b14269e13742275afe78763a42787eb34854c5be6df54d550b646,Name-collision pitfalls next to their fixes (warnings only)
+real-mass-typed-by-mass,examples/name-collision/MassTypedByMass.sysml,real,-,errors,47,1953,eabf309f5dcd3f876ca83c132a3a069ad2b942b439f78be710c12af85f092c97,A car mass typed by a usage: three typing errors
+real-vehicle-legacy,test-suite/positive/12_simple_vehicle_model.sysml,real,-,errors,1493,74278,b6e413cd5d912366a72bb32f30c62f9c4acf228461acae83c918120e6142d512,An older copy of the specification's vehicle model; the pilot reports 88 errors
+release-annex-a-vehicle,release:sysml/src/examples/Vehicle Example/SysML v2 Spec Annex A SimpleVehicleModel.sysml,real,-,clean,1581,73568,77d7ee54951e01c885d69d19d7359242baf22c69dcfe2d4088b0b59d56ea578d,The specification's Annex A vehicle model (needs a SysML-v2-Release checkout)

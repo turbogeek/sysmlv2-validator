@@ -41,8 +41,8 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Runs perf/cameo/CameoPerfRunner.groovy (a Cameo macro; Cameo 2026x ships Groovy 5) with a stand-in
-             for Cameo -->
+        <!-- Runs conformance/cameo/CameoConformanceRunner.groovy (a Cameo macro; Cameo 2026x ships Groovy 5) with
+             a stand-in for Cameo -->
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
@@ -53,6 +53,13 @@
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-jsr223</artifactId>
+            <version>5.1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- The macro parses a KPAR's .project.json with groovy-json, which Cameo's macro engine has -->
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-json</artifactId>
             <version>5.1.3</version>
             <scope>test</scope>
         </dependency>

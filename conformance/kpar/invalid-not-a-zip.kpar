@@ -1,0 +1,7 @@
+package VehicleDefinitions {
+    private import ScalarValues::*;
+    part def Vehicle {
+        attribute mass :> ISQ::mass;
+        attribute wheels : Integer;
+    }
+}

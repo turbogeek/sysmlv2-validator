@@ -21,3 +21,9 @@ To develop and use this project within Visual Studio Code, it is recommended to 
 
 ## Usage
 The validator can be run from the CLI or integrated as a library in other tools, such as the `SysMLv2-Editor-for-VSCode`.
+
+## Comparing with the pilot implementation and Cameo
+- [conformance/](conformance/README.md) checks that this validator, the OMG SysML v2 Pilot Implementation and
+  Cameo / CATIA Magic give the same verdict on the test files of `test-suite` and `examples` and on KPARs, so that
+  a file this validator accepts can be used in Cameo.
+- [perf/](perf/README.md) times this validator and the pilot implementation on models of up to 65,000 lines.
