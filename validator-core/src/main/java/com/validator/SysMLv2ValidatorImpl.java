@@ -1,5 +1,6 @@
 package com.validator;
 
+import com.validator.kpar.KparArchive;
 import com.validator.library.LibraryConfig;
 import com.validator.library.LibraryLoader;
 import com.validator.library.LibraryCache;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Main implementation of the SysML v2 validator.
@@ -77,6 +79,10 @@ public class SysMLv2ValidatorImpl implements Validator {
             throw new IOException("Not a file: " + file.getAbsolutePath());
         }
 
+        if (SysMLv2ParserFacade.isKparFile(file)) {
+            return validateArchive(file);
+        }
+
         if (!SysMLv2ParserFacade.isSysMLFile(file) && !SysMLv2ParserFacade.isKerMLFile(file)) {
             LOGGER.warn("File does not have .sysml or .kerml extension: {}", file.getName());
         }
@@ -84,33 +90,50 @@ public class SysMLv2ValidatorImpl implements Validator {
         long startTime = System.currentTimeMillis();
         ParseResult parseResult = parserFacade.parseFile(file);
         ModelIndex index = new ModelIndex(libraryIndex);
-        ModelIndexBuilder.Result built = indexFile(file, parseResult, index);
-        return validateParsed(file, parseResult, index, built, startTime);
+        ModelIndexBuilder.Result built = indexFile(file.getAbsolutePath(), parseResult, index);
+        return validateParsed(file.getAbsolutePath(), parseResult, index, built, startTime);
+    }
+
+    /**
+     * Validate the members of a KPAR together, as {@link #validateAll(List)} validates several files, into one
+     * result for the archive. An invalid archive gives one {@link ErrorCodes#IO_INVALID_KPAR} error.
+     */
+    private ValidationResult validateArchive(File file) throws IOException {
+        Batch batch = new Batch();
+        Supplier<ValidationResult> result;
+        try {
+            result = batch.addArchive(file);
+        } catch (KparArchive.InvalidKparException e) {
+            return invalidKpar(file, e);
+        }
+        batch.check();
+        return result.get();
     }
 
     /**
      * Add a parsed file to an index and return its elements and the names in it that must resolve
      * (null if the file has no parse tree).
+     *
+     * @param path the file's path, or {@code <archive>!<member>} for a member of a KPAR
      */
-    private ModelIndexBuilder.Result indexFile(File file, ParseResult parseResult, ModelIndex index) {
+    private ModelIndexBuilder.Result indexFile(String path, ParseResult parseResult, ModelIndex index) {
         if (parseResult.getParseTree() == null) {
             return null;
         }
-        ModelIndexBuilder.Result built =
-            ModelIndexBuilder.build(parseResult.getParseTree(), file.getAbsolutePath(), true);
+        ModelIndexBuilder.Result built = ModelIndexBuilder.build(parseResult.getParseTree(), path, true);
         index.addAll(built.getElements());
         return built;
     }
 
-    private ValidationResult validateParsed(File file, ParseResult parseResult, ModelIndex index,
+    private ValidationResult validateParsed(String path, ParseResult parseResult, ModelIndex index,
             ModelIndexBuilder.Result built, long startTime) {
-        LOGGER.info("Validating file: {}", file.getAbsolutePath());
+        LOGGER.info("Validating file: {}", path);
 
         // Convert syntax errors to validation errors using streams (with suggestions)
         List<ValidationError> errors = new ArrayList<>(parseResult.getSyntaxErrors().stream()
             .map(syntaxError -> {
                 ValidationError.Builder builder = new ValidationError.Builder()
-                    .filePath(file.getAbsolutePath())
+                    .filePath(path)
                     .line(syntaxError.getLine())
                     .column(syntaxError.getCharPositionInLine())
                     .message(syntaxError.getMessage())
@@ -131,7 +154,7 @@ public class SysMLv2ValidatorImpl implements Validator {
         if (parseResult.hasLineComments()) {
             for (SysMLv2ParserFacade.LineComment comment : parseResult.getLineComments()) {
                 warnings.add((ValidationWarning) new ValidationWarning.Builder()
-                    .filePath(file.getAbsolutePath())
+                    .filePath(path)
                     .line(comment.getLine())
                     .column(comment.getColumn())
                     .message("Single-line comment '//' is not persisted to the model. "
@@ -145,7 +168,7 @@ public class SysMLv2ValidatorImpl implements Validator {
         if (semanticValidationEnabled && errors.isEmpty() && parseResult.getParseTree() != null) {
             LOGGER.debug("Performing semantic validation");
             SemanticValidator semanticValidator =
-                new SemanticValidator(file.getAbsolutePath(), standardLibraryManager);
+                new SemanticValidator(path, standardLibraryManager);
             List<ValidationError> semanticErrors =
                 semanticValidator.validate(parseResult.getParseTree());
             errors.addAll(semanticErrors);
@@ -154,11 +177,11 @@ public class SysMLv2ValidatorImpl implements Validator {
             // multiple inheritance that leaves conflicting features; names that make a new element where an
             // existing one was likely meant
             if (index != null && built != null) {
-                errors.addAll(ReferenceChecker.check(built.getSites(), index, file.getAbsolutePath()));
+                errors.addAll(ReferenceChecker.check(built.getSites(), index, path));
                 InheritanceChecker inheritance = new InheritanceChecker(index);
-                warnings.addAll(inheritance.check(built.getElements(), file.getAbsolutePath()));
+                warnings.addAll(inheritance.check(built.getElements(), path));
                 NameCollisionChecker collisions = new NameCollisionChecker(index, inheritance);
-                addSplit(collisions.check(built.getElements(), file.getAbsolutePath()), errors, warnings);
+                addSplit(collisions.check(built.getElements(), path), errors, warnings);
             }
 
             // Add semantic warnings
@@ -185,7 +208,7 @@ public class SysMLv2ValidatorImpl implements Validator {
         long validationTime = System.currentTimeMillis() - startTime;
 
         ValidationResult result = new ValidationResult(
-            file.getAbsolutePath(),
+            path,
             errors,
             warnings,
             validationTime
@@ -264,27 +287,27 @@ public class SysMLv2ValidatorImpl implements Validator {
      * Validate several files together. Every file is parsed and indexed first, so a name in one file
      * resolves against the others as well as against the libraries; names are checked once all files
      * are indexed. Parse trees are not kept between the two passes.
+     *
+     * <p>A KPAR ({@code .kpar}) gives one result, for the archive. Its members are validated together with
+     * each other and with the other files, and their diagnostics carry the file path
+     * {@code <archive>!<member>}. An invalid archive gives one {@link ErrorCodes#IO_INVALID_KPAR} error.</p>
      */
     @Override
     public List<ValidationResult> validateAll(List<File> files) throws IOException {
         LOGGER.info("Validating {} files", files.size());
 
-        ModelIndex index = new ModelIndex(libraryIndex);
-        List<ValidationResult> results = new ArrayList<>();
-        Map<Integer, ModelIndexBuilder.Result> pending = new LinkedHashMap<>();
+        Batch batch = new Batch();
+        List<Supplier<ValidationResult>> pending = new ArrayList<>();
         for (File file : files) {
-            ValidationResult result;
+            Supplier<ValidationResult> result;
             try {
                 if (!file.exists()) {
                     throw new IOException("File not found: " + file.getAbsolutePath());
                 }
-                long start = System.currentTimeMillis();
-                ParseResult parsed = parserFacade.parseFile(file);
-                ModelIndexBuilder.Result built = indexFile(file, parsed, index);
-                result = validateParsed(file, parsed, null, null, start);
-                if (semanticValidationEnabled && parsed.getSyntaxErrors().isEmpty() && built != null) {
-                    pending.put(results.size(), built);
-                }
+                result = SysMLv2ParserFacade.isKparFile(file) ? batch.addArchive(file) : batch.addFile(file);
+            } catch (KparArchive.InvalidKparException e) {
+                ValidationResult invalid = invalidKpar(file, e);
+                result = () -> invalid;
             } catch (IOException e) {
                 LOGGER.error("Error validating file: {}", file.getAbsolutePath(), e);
                 ValidationError error = new ValidationError.Builder()
@@ -295,32 +318,140 @@ public class SysMLv2ValidatorImpl implements Validator {
                     .errorCode("IO_ERROR")
                     .severity(ValidationError.Severity.ERROR)
                     .build();
-                result = new ValidationResult(file.getAbsolutePath(), List.of(error), List.of(), 0);
+                ValidationResult failed = new ValidationResult(file.getAbsolutePath(), List.of(error), List.of(), 0);
+                result = () -> failed;
             }
-            results.add(result);
+            pending.add(result);
         }
+        batch.check();
 
-        InheritanceChecker inheritance = new InheritanceChecker(index);
-        NameCollisionChecker collisions = new NameCollisionChecker(index, inheritance);
-        for (Map.Entry<Integer, ModelIndexBuilder.Result> entry : pending.entrySet()) {
-            ValidationResult result = results.get(entry.getKey());
-            List<ValidationError> unresolved =
-                ReferenceChecker.check(entry.getValue().getSites(), index, result.getFilePath());
-            List<ValidationWarning> conflicts = inheritance.check(entry.getValue().getElements(), result.getFilePath());
-            List<ValidationError> names = collisions.check(entry.getValue().getElements(), result.getFilePath());
-            if (!unresolved.isEmpty() || !conflicts.isEmpty() || !names.isEmpty()) {
-                List<ValidationError> errors = new ArrayList<>(result.getErrors());
-                errors.addAll(unresolved);
-                List<ValidationWarning> warnings = new ArrayList<>(result.getWarnings());
-                warnings.addAll(conflicts);
-                addSplit(names, errors, warnings);
-                results.set(entry.getKey(), new ValidationResult(result.getFilePath(), errors,
-                    warnings, result.getValidationTimeMs()));
-            }
+        List<ValidationResult> results = new ArrayList<>();
+        for (Supplier<ValidationResult> result : pending) {
+            results.add(result.get());
         }
-
         LOGGER.info("Validation complete: {} files processed", results.size());
         return results;
+    }
+
+    /**
+     * Files and KPAR members validated together. Each is parsed, indexed and validated as it is added;
+     * {@link #check()} then checks the names in each against the index of all of them, which completes
+     * their results.
+     */
+    private final class Batch {
+        private final ModelIndex index = new ModelIndex(libraryIndex);
+        /** One result per file or member, in the order added. */
+        private final List<ValidationResult> units = new ArrayList<>();
+        /** The units whose names are checked, by their position in {@link #units}. */
+        private final Map<Integer, ModelIndexBuilder.Result> checked = new LinkedHashMap<>();
+
+        /** Add a file; the result it supplies is complete once the batch is checked. */
+        Supplier<ValidationResult> addFile(File file) throws IOException {
+            long start = System.currentTimeMillis();
+            int unit = add(file.getAbsolutePath(), parserFacade.parseFile(file), start);
+            return () -> units.get(unit);
+        }
+
+        /** Add the members of a KPAR; the one result it supplies is complete once the batch is checked. */
+        Supplier<ValidationResult> addArchive(File file) throws IOException {
+            long start = System.currentTimeMillis();
+            KparArchive archive = KparArchive.read(file.toPath());
+            String archivePath = file.getAbsolutePath();
+            LOGGER.info("Validating KPAR {} ({} model files)", archivePath, archive.getMembers().size());
+            int first = units.size();
+            for (KparArchive.Member member : archive.getMembers()) {
+                long memberStart = System.currentTimeMillis();
+                ParseResult parsed = parserFacade.parseString(member.text(), member.fileName());
+                add(KparArchive.memberPath(archivePath, member.path()), parsed, memberStart);
+            }
+            int end = units.size();
+            long validationTime = System.currentTimeMillis() - start;
+            return () -> archiveResult(archivePath, units.subList(first, end), validationTime);
+        }
+
+        private int add(String path, ParseResult parsed, long start) {
+            ModelIndexBuilder.Result built = indexFile(path, parsed, index);
+            units.add(validateParsed(path, parsed, null, null, start));
+            if (semanticValidationEnabled && parsed.getSyntaxErrors().isEmpty() && built != null) {
+                checked.put(units.size() - 1, built);
+            }
+            return units.size() - 1;
+        }
+
+        void check() {
+            InheritanceChecker inheritance = new InheritanceChecker(index);
+            NameCollisionChecker collisions = new NameCollisionChecker(index, inheritance);
+            for (Map.Entry<Integer, ModelIndexBuilder.Result> entry : checked.entrySet()) {
+                ValidationResult result = units.get(entry.getKey());
+                List<ValidationError> unresolved =
+                    ReferenceChecker.check(entry.getValue().getSites(), index, result.getFilePath());
+                List<ValidationWarning> conflicts =
+                    inheritance.check(entry.getValue().getElements(), result.getFilePath());
+                List<ValidationError> names = collisions.check(entry.getValue().getElements(), result.getFilePath());
+                if (!unresolved.isEmpty() || !conflicts.isEmpty() || !names.isEmpty()) {
+                    List<ValidationError> errors = new ArrayList<>(result.getErrors());
+                    errors.addAll(unresolved);
+                    List<ValidationWarning> warnings = new ArrayList<>(result.getWarnings());
+                    warnings.addAll(conflicts);
+                    addSplit(names, errors, warnings);
+                    units.set(entry.getKey(), new ValidationResult(result.getFilePath(), errors,
+                        warnings, result.getValidationTimeMs()));
+                }
+            }
+        }
+    }
+
+    /**
+     * The result of a KPAR: the diagnostics of its members in archive order. A diagnostic without a file path
+     * gets its member's, so that every diagnostic names the member it is in.
+     */
+    private static ValidationResult archiveResult(String archivePath, List<ValidationResult> members,
+            long validationTime) {
+        List<ValidationError> errors = new ArrayList<>();
+        List<ValidationWarning> warnings = new ArrayList<>();
+        for (ValidationResult member : members) {
+            for (ValidationError error : member.getErrors()) {
+                errors.add(locate(error, member.getFilePath()));
+            }
+            for (ValidationWarning warning : member.getWarnings()) {
+                warnings.add((ValidationWarning) locate(warning, member.getFilePath()));
+            }
+        }
+        LOGGER.info("KPAR validation completed: {} errors, {} warnings in {}ms",
+            errors.size(), warnings.size(), validationTime);
+        return new ValidationResult(archivePath, errors, warnings, validationTime);
+    }
+
+    /** The diagnostic itself if it has a file path, else a copy of it with the given one. */
+    static ValidationError locate(ValidationError diagnostic, String path) {
+        if (diagnostic.getFilePath() != null) {
+            return diagnostic;
+        }
+        ValidationError.Builder builder = diagnostic instanceof ValidationWarning
+            ? new ValidationWarning.Builder() : new ValidationError.Builder();
+        return builder.filePath(path)
+            .line(diagnostic.getLine())
+            .column(diagnostic.getColumn())
+            .message(diagnostic.getMessage())
+            .errorCode(diagnostic.getErrorCode())
+            .severity(diagnostic.getSeverity())
+            .suggestions(diagnostic.getSuggestions())
+            .context(diagnostic.getContext())
+            .specReference(diagnostic.getSpecReference())
+            .build();
+    }
+
+    private static ValidationResult invalidKpar(File file, KparArchive.InvalidKparException e) {
+        LOGGER.error("Invalid KPAR {}: {}", file.getAbsolutePath(), e.getMessage());
+        ValidationError error = new ValidationError.Builder()
+            .filePath(file.getAbsolutePath())
+            .line(0)
+            .column(0)
+            .message("Invalid KPAR (KerML Project Archive): " + e.getMessage())
+            .errorCode(ErrorCodes.IO_INVALID_KPAR)
+            .severity(ValidationError.Severity.ERROR)
+            .build();
+        return new ValidationResult(file.getAbsolutePath(), List.of(error), List.of(), 0);
     }
 
     /**

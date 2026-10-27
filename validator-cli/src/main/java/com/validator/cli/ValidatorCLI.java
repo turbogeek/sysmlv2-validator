@@ -3,6 +3,7 @@ package com.validator.cli;
 import com.validator.SysMLv2ValidatorImpl;
 import com.validator.ValidationError;
 import com.validator.ValidationResult;
+import com.validator.kpar.KparArchive;
 import com.validator.library.LibraryCache;
 import com.validator.library.LibraryLoader;
 import com.validator.refactor.RefactoringEngine;
@@ -33,13 +34,13 @@ public class ValidatorCLI implements Callable<Integer> {
 
     @Parameters(
         index = "0..*",
-        description = "Files to validate (*.sysml, *.kerml)"
+        description = "Files to validate (*.sysml, *.kerml, *.kpar)"
     )
     private List<File> files;
 
     @Option(
         names = {"-r", "--recursive"},
-        description = "Recursively validate all files in directories"
+        description = "Recursively validate all files (*.sysml, *.kerml, *.kpar) in directories"
     )
     private boolean recursive = false;
 
@@ -320,9 +321,15 @@ public class ValidatorCLI implements Callable<Integer> {
         System.out.println();
     }
 
-    private static String fileName(ValidationError issue) {
+    /** The file name of a diagnostic's file; for a member of a KPAR, {@code <archive name>!<member path>}. */
+    static String fileName(ValidationError issue) {
         String path = issue.getFilePath();
-        return path == null ? "<unknown>" : new File(path).getName();
+        if (path == null) {
+            return "<unknown>";
+        }
+        String member = KparArchive.memberOf(path);
+        String file = new File(KparArchive.archiveOf(path)).getName();
+        return member == null ? file : file + KparArchive.MEMBER_SEPARATOR + member;
     }
 
     private List<File> expandFileList(List<File> fileList, boolean recurse) {
@@ -345,7 +352,8 @@ public class ValidatorCLI implements Callable<Integer> {
             for (File file : dirFiles) {
                 if (file.isDirectory()) {
                     expandDirectory(file, result);
-                } else if (file.getName().endsWith(".sysml") || file.getName().endsWith(".kerml")) {
+                } else if (file.getName().endsWith(".sysml") || file.getName().endsWith(".kerml")
+                        || file.getName().endsWith(".kpar")) {
                     result.add(file);
                 }
             }

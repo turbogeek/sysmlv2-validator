@@ -1,5 +1,33 @@
 # User Guide
 
+## KPAR models
+
+A KPAR (KerML Project Archive, `.kpar`) is a zip file with the project description `.project.json` at its
+root, usually a `.meta.json` (index and checksums), and the model files (`.sysml`, `.kerml`) at any path
+inside it. Cameo 26xR2 and the SysML v2 reference implementation load models packaged this way, and so does
+the validator:
+
+```
+java -jar validator-cli/target/sysml-validator.jar StockTicker.kpar
+java -jar validator-cli/target/sysml-validator.jar -r models/      # finds .sysml, .kerml and .kpar files
+```
+
+- The model files of an archive are validated together, so a name in one resolves against the others, just
+  as when the files are given together on the command line. The archive gives one result, and the CLI counts
+  it as one file.
+- Each error and warning names the model file it is in and keeps the line and column within that file. The
+  CLI prints `StockTicker.kpar!StockTickerLogical.sysml:154:16`. Through the API
+  (`ValidationError.getFilePath()`) the path is `<archive path>!<member path>`, and
+  `KparArchive.memberOf` and `KparArchive.archiveOf` split it.
+- Archives given together, or with plain files, are validated together (`validateAll`): names resolve
+  across all of them.
+- The `usage` list of `.project.json` (the projects this one depends on) is not followed: the standard
+  libraries come from the library path, and other projects must be given on the same command line.
+  `.meta.json` is not checked.
+- An archive that is not a KPAR gives one `IO_INVALID_KPAR` error at line 0: a file that is not a zip, a zip
+  without `.project.json` at its root or whose `.project.json` is not a JSON object, a zip without any
+  `.sysml` or `.kerml` file, a model file that is not UTF-8 text, or corrupted zip data.
+
 ## Inheritance warnings
 
 When a definition or usage has two or more general types, it inherits every feature of each of them,

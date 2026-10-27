@@ -396,7 +396,9 @@ public final class ErrorCodes {
     /**
      * KPAR archive is corrupted or invalid.
      *
-     * <p>Cause: The KPAR file is not a valid ZIP archive or is corrupted.
+     * <p>Cause: The KPAR file is not a valid ZIP archive or is corrupted, has no {@code .project.json} at its
+     * root (or one that is not a JSON object), has no {@code .sysml} or {@code .kerml} file, or has a model file
+     * that is not UTF-8 text.
      *
      * <p>Resolution: Verify the KPAR file integrity, re-export if necessary.
      */
