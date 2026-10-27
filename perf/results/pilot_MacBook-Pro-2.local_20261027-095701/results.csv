@@ -1,0 +1,37 @@
+tool,tool_version,host,run_id,file_id,rep,phase,ms,elements,errors,warnings,status,detail
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,*,1,startup,7536.508,108004,-1,-1,ok,94 library resources; heap 332 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-xs,1,process,2439.171,537,0,0,ok,heap 228 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-xs,2,process,914.213,537,0,0,ok,heap 312 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-xs,3,process,856.505,537,0,0,ok,heap 311 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-s,1,process,2412.254,3303,0,0,ok,heap 357 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-s,2,process,2364.875,3303,0,0,ok,heap 227 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-s,3,process,2036.523,3303,0,0,ok,heap 234 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-m,1,process,11531.030,29763,0,0,ok,heap 285 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-m,2,process,11001.787,29763,0,0,ok,heap 541 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-m,3,process,10497.708,29763,0,0,ok,heap 293 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-l,1,process,115525.582,147363,0,0,ok,heap 483 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,system-xl,1,process,686070.251,367863,0,0,ok,heap 936 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,inheritance-200,1,process,6530.253,3013,0,0,ok,heap 751 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,inheritance-200,2,process,6978.632,3013,0,0,ok,heap 346 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,inheritance-200,3,process,6842.215,3013,0,0,ok,heap 395 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,imports-100,1,process,825.521,4950,0,0,ok,heap 167 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,imports-100,2,process,775.203,4950,0,0,ok,heap 169 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,imports-100,3,process,788.658,4950,0,0,ok,heap 169 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,errors-m,1,process,10085.150,29783,60,60,ok,heap 743 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,errors-m,2,process,10305.952,29783,60,60,ok,heap 485 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,errors-m,3,process,10664.988,29783,60,60,ok,heap 487 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-cameo-constructs,1,process,1396.484,1057,2,3,ok,heap 513 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-cameo-constructs,2,process,979.608,1057,2,3,ok,heap 453 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-cameo-constructs,3,process,912.731,1057,2,3,ok,heap 452 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-name-collisions,1,process,774.534,817,0,14,ok,heap 288 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-name-collisions,2,process,645.575,817,0,14,ok,heap 286 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-name-collisions,3,process,649.891,817,0,14,ok,heap 286 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-mass-typed-by-mass,1,process,528.250,85,3,3,ok,heap 171 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-mass-typed-by-mass,2,process,445.409,85,3,3,ok,heap 170 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-mass-typed-by-mass,3,process,449.336,85,3,3,ok,heap 170 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-vehicle-legacy,1,process,7468.901,8226,88,0,ok,heap 288 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-vehicle-legacy,2,process,5308.769,8226,88,0,ok,heap 489 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,real-vehicle-legacy,3,process,5149.309,8226,88,0,ok,heap 489 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,release-annex-a-vehicle,1,process,5016.438,8095,0,0,ok,heap 284 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,release-annex-a-vehicle,2,process,4722.341,8095,0,0,ok,heap 285 MB
+pilot,0.63.0,MacBook-Pro-2.local,20261027-145705,release-annex-a-vehicle,3,process,4760.601,8095,0,0,ok,heap 282 MB

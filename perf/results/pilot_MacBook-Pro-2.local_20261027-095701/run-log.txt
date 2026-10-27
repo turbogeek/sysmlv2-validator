@@ -1,0 +1,74 @@
+09:57:05 pilot 0.63.0 (/private/tmp/claude-502/-Users-turbogeek-Google-Drive-git/a83dabe3-77d1-4c0b-abcd-d157856e492d/scratchpad/pilot/kernel63/sysml/jupyter-sysml-kernel-0.63.0-all.jar) on MacBook-Pro-2.local, run 20261027-145705
+09:57:05 manifest perf/corpus/manifest.csv: 13 entries
+09:57:13 startup 7536.508 ms: 94 library resources, 108004 elements
+09:57:13 system-xs repetition 1 of 3
+09:57:15 system-xs repetition 1: 2439.171 ms, 0 errors, 0 warnings
+09:57:16 system-xs repetition 2 of 3
+09:57:17 system-xs repetition 2: 914.213 ms, 0 errors, 0 warnings
+09:57:17 system-xs repetition 3 of 3
+09:57:18 system-xs repetition 3: 856.505 ms, 0 errors, 0 warnings
+09:57:18 system-s repetition 1 of 3
+09:57:20 system-s repetition 1: 2412.254 ms, 0 errors, 0 warnings
+09:57:20 system-s repetition 2 of 3
+09:57:23 system-s repetition 2: 2364.875 ms, 0 errors, 0 warnings
+09:57:23 system-s repetition 3 of 3
+09:57:25 system-s repetition 3: 2036.523 ms, 0 errors, 0 warnings
+09:57:25 system-m repetition 1 of 3
+09:57:37 system-m repetition 1: 11531.030 ms, 0 errors, 0 warnings
+09:57:37 system-m repetition 2 of 3
+09:57:48 system-m repetition 2: 11001.787 ms, 0 errors, 0 warnings
+09:57:49 system-m repetition 3 of 3
+09:57:59 system-m repetition 3: 10497.708 ms, 0 errors, 0 warnings
+09:58:00 system-l repetition 1 of 1
+09:59:56 system-l repetition 1: 115525.582 ms, 0 errors, 0 warnings
+09:59:58 system-xl repetition 1 of 1
+10:11:24 system-xl repetition 1: 686070.251 ms, 0 errors, 0 warnings
+10:11:30 inheritance-200 repetition 1 of 3
+10:11:37 inheritance-200 repetition 1: 6530.253 ms, 0 errors, 0 warnings
+10:11:37 inheritance-200 repetition 2 of 3
+10:11:44 inheritance-200 repetition 2: 6978.632 ms, 0 errors, 0 warnings
+10:11:44 inheritance-200 repetition 3 of 3
+10:11:51 inheritance-200 repetition 3: 6842.215 ms, 0 errors, 0 warnings
+10:11:51 imports-100 repetition 1 of 3
+10:11:52 imports-100 repetition 1: 825.521 ms, 0 errors, 0 warnings
+10:11:52 imports-100 repetition 2 of 3
+10:11:53 imports-100 repetition 2: 775.203 ms, 0 errors, 0 warnings
+10:11:53 imports-100 repetition 3 of 3
+10:11:54 imports-100 repetition 3: 788.658 ms, 0 errors, 0 warnings
+10:11:54 errors-m repetition 1 of 3
+10:12:04 errors-m repetition 1: 10085.150 ms, 60 errors, 60 warnings
+10:12:04 errors-m repetition 2 of 3
+10:12:15 errors-m repetition 2: 10305.952 ms, 60 errors, 60 warnings
+10:12:15 errors-m repetition 3 of 3
+10:12:26 errors-m repetition 3: 10664.988 ms, 60 errors, 60 warnings
+10:12:27 real-cameo-constructs repetition 1 of 3
+10:12:28 real-cameo-constructs repetition 1: 1396.484 ms, 2 errors, 3 warnings
+10:12:28 real-cameo-constructs repetition 2 of 3
+10:12:29 real-cameo-constructs repetition 2: 979.608 ms, 2 errors, 3 warnings
+10:12:29 real-cameo-constructs repetition 3 of 3
+10:12:30 real-cameo-constructs repetition 3: 912.731 ms, 2 errors, 3 warnings
+10:12:30 real-name-collisions repetition 1 of 3
+10:12:31 real-name-collisions repetition 1: 774.534 ms, 0 errors, 14 warnings
+10:12:31 real-name-collisions repetition 2 of 3
+10:12:32 real-name-collisions repetition 2: 645.575 ms, 0 errors, 14 warnings
+10:12:32 real-name-collisions repetition 3 of 3
+10:12:33 real-name-collisions repetition 3: 649.891 ms, 0 errors, 14 warnings
+10:12:33 real-mass-typed-by-mass repetition 1 of 3
+10:12:33 real-mass-typed-by-mass repetition 1: 528.250 ms, 3 errors, 3 warnings
+10:12:34 real-mass-typed-by-mass repetition 2 of 3
+10:12:34 real-mass-typed-by-mass repetition 2: 445.409 ms, 3 errors, 3 warnings
+10:12:34 real-mass-typed-by-mass repetition 3 of 3
+10:12:35 real-mass-typed-by-mass repetition 3: 449.336 ms, 3 errors, 3 warnings
+10:12:35 real-vehicle-legacy repetition 1 of 3
+10:12:42 real-vehicle-legacy repetition 1: 7468.901 ms, 88 errors, 0 warnings
+10:12:43 real-vehicle-legacy repetition 2 of 3
+10:12:48 real-vehicle-legacy repetition 2: 5308.769 ms, 88 errors, 0 warnings
+10:12:48 real-vehicle-legacy repetition 3 of 3
+10:12:53 real-vehicle-legacy repetition 3: 5149.309 ms, 88 errors, 0 warnings
+10:12:54 release-annex-a-vehicle repetition 1 of 3
+10:12:59 release-annex-a-vehicle repetition 1: 5016.438 ms, 0 errors, 0 warnings
+10:12:59 release-annex-a-vehicle repetition 2 of 3
+10:13:04 release-annex-a-vehicle repetition 2: 4722.341 ms, 0 errors, 0 warnings
+10:13:04 release-annex-a-vehicle repetition 3 of 3
+10:13:09 release-annex-a-vehicle repetition 3: 4760.601 ms, 0 errors, 0 warnings
+10:13:09 wrote perf/results/pilot_MacBook-Pro-2.local_20261027-095701 (36 rows, 233 diagnostics)

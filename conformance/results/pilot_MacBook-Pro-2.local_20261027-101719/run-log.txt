@@ -1,0 +1,556 @@
+10:17:23 pilot 0.63.0 (/private/tmp/claude-502/-Users-turbogeek-Google-Drive-git/a83dabe3-77d1-4c0b-abcd-d157856e492d/scratchpad/pilot/kernel63/sysml/jupyter-sysml-kernel-0.63.0-all.jar) on MacBook-Pro-2.local, run 20261027-151723
+10:17:23 manifest conformance/manifest.csv: 277 entries
+10:17:31 startup 7753.546 ms: 101 library resources, 119920 elements
+10:17:31 positive/01_simple_part_def repetition 1 of 1
+10:17:32 positive/01_simple_part_def repetition 1: 885.255 ms, 0 errors, 0 warnings
+10:17:32 positive/02_action_with_succession repetition 1 of 1
+10:17:33 positive/02_action_with_succession repetition 1: 737.668 ms, 0 errors, 1 warnings
+10:17:33 positive/03_state_machine repetition 1 of 1
+10:17:34 positive/03_state_machine repetition 1: 1017.523 ms, 0 errors, 0 warnings
+10:17:34 positive/04_compact_flow_notation repetition 1 of 1
+10:17:35 positive/04_compact_flow_notation repetition 1: 596.578 ms, 0 errors, 0 warnings
+10:17:35 positive/05_multiple_successions repetition 1 of 1
+10:17:35 positive/05_multiple_successions repetition 1: 504.379 ms, 0 errors, 0 warnings
+10:17:35 positive/06_state_with_conditions repetition 1 of 1
+10:17:36 positive/06_state_with_conditions repetition 1: 470.280 ms, 0 errors, 1 warnings
+10:17:36 positive/07_requirement_with_constraint repetition 1 of 1
+10:17:37 positive/07_requirement_with_constraint repetition 1: 687.312 ms, 3 errors, 0 warnings
+10:17:37 positive/08_part_specialization repetition 1 of 1
+10:17:37 positive/08_part_specialization repetition 1: 382.135 ms, 0 errors, 0 warnings
+10:17:37 positive/09_ports_and_connections repetition 1 of 1
+10:17:38 positive/09_ports_and_connections repetition 1: 601.104 ms, 1 errors, 2 warnings
+10:17:38 positive/10_enum_definition repetition 1 of 1
+10:17:39 positive/10_enum_definition repetition 1: 451.495 ms, 0 errors, 0 warnings
+10:17:39 positive/11_breakfast_example_corrected repetition 1 of 1
+10:17:40 positive/11_breakfast_example_corrected repetition 1: 1349.886 ms, 44 errors, 0 warnings
+10:17:40 positive/12_simple_vehicle_model repetition 1 of 1
+10:17:49 positive/12_simple_vehicle_model repetition 1: 8679.073 ms, 88 errors, 0 warnings
+10:17:49 positive/13_actions_drone_delivery repetition 1 of 1
+10:17:51 positive/13_actions_drone_delivery repetition 1: 1290.868 ms, 24 errors, 0 warnings
+10:17:51 positive/14_flows repetition 1 of 1
+10:17:51 positive/14_flows repetition 1: 476.805 ms, 9 errors, 0 warnings
+10:17:51 positive/15_states repetition 1 of 1
+10:17:52 positive/15_states repetition 1: 873.265 ms, 3 errors, 0 warnings
+10:17:53 positive/16_interfaces repetition 1 of 1
+10:17:53 positive/16_interfaces repetition 1: 667.535 ms, 9 errors, 0 warnings
+10:17:53 positive/17_use_case repetition 1 of 1
+10:17:54 positive/17_use_case repetition 1: 953.253 ms, 12 errors, 0 warnings
+10:17:55 positive/18_allocation_definitions repetition 1 of 1
+10:17:55 positive/18_allocation_definitions repetition 1: 528.342 ms, 1 errors, 12 warnings
+10:17:55 positive/19_analysis_calculations repetition 1 of 1
+10:17:56 positive/19_analysis_calculations repetition 1: 512.787 ms, 3 errors, 2 warnings
+10:17:56 positive/20_verification_cases repetition 1 of 1
+10:17:56 positive/20_verification_cases repetition 1: 564.202 ms, 0 errors, 1 warnings
+10:17:57 positive/21_metadata_annotations repetition 1 of 1
+10:17:57 positive/21_metadata_annotations repetition 1: 439.218 ms, 2 errors, 0 warnings
+10:17:57 positive/22_item_flow_definitions repetition 1 of 1
+10:17:58 positive/22_item_flow_definitions repetition 1: 409.344 ms, 0 errors, 0 warnings
+10:17:58 positive/23_occurrence_temporal repetition 1 of 1
+10:17:58 positive/23_occurrence_temporal repetition 1: 445.318 ms, 2 errors, 6 warnings
+10:17:58 positive/24_rendering_definitions repetition 1 of 1
+10:17:59 positive/24_rendering_definitions repetition 1: 535.836 ms, 0 errors, 8 warnings
+10:17:59 positive/25_trade_studies repetition 1 of 1
+10:18:00 positive/25_trade_studies repetition 1: 450.386 ms, 3 errors, 9 warnings
+10:18:00 positive/26_message_accept repetition 1 of 1
+10:18:00 positive/26_message_accept repetition 1: 482.119 ms, 1 errors, 0 warnings
+10:18:00 positive/27_complex_multiplicities repetition 1 of 1
+10:18:01 positive/27_complex_multiplicities repetition 1: 387.362 ms, 3 errors, 2 warnings
+10:18:01 positive/28_feature_redefinition repetition 1 of 1
+10:18:01 positive/28_feature_redefinition repetition 1: 429.217 ms, 9 errors, 2 warnings
+10:18:01 positive/29_abstract_variation repetition 1 of 1
+10:18:02 positive/29_abstract_variation repetition 1: 431.641 ms, 2 errors, 0 warnings
+10:18:02 positive/30_exhibit_perform repetition 1 of 1
+10:18:03 positive/30_exhibit_perform repetition 1: 454.724 ms, 6 errors, 0 warnings
+10:18:03 positive/31_binding_connections repetition 1 of 1
+10:18:03 positive/31_binding_connections repetition 1: 427.905 ms, 0 errors, 0 warnings
+10:18:03 positive/32_reference_subsetting repetition 1 of 1
+10:18:04 positive/32_reference_subsetting repetition 1: 344.498 ms, 1 errors, 0 warnings
+10:18:04 positive/33_conjugate_interface repetition 1 of 1
+10:18:04 positive/33_conjugate_interface repetition 1: 414.964 ms, 5 errors, 5 warnings
+10:18:04 positive/34_constraint_assertions repetition 1 of 1
+10:18:05 positive/34_constraint_assertions repetition 1: 475.951 ms, 0 errors, 0 warnings
+10:18:05 positive/35_dependency_concern repetition 1 of 1
+10:18:05 positive/35_dependency_concern repetition 1: 392.806 ms, 0 errors, 0 warnings
+10:18:06 positive/36_sequence_collections repetition 1 of 1
+10:18:06 positive/36_sequence_collections repetition 1: 549.197 ms, 17 errors, 5 warnings
+10:18:06 positive/37_default_values repetition 1 of 1
+10:18:07 positive/37_default_values repetition 1: 377.316 ms, 0 errors, 0 warnings
+10:18:07 positive/38_readonly_derived repetition 1 of 1
+10:18:07 positive/38_readonly_derived repetition 1: 458.952 ms, 3 errors, 0 warnings
+10:18:07 positive/39_succession_flow repetition 1 of 1
+10:18:08 positive/39_succession_flow repetition 1: 430.932 ms, 8 errors, 0 warnings
+10:18:08 positive/40_objective_use_case repetition 1 of 1
+10:18:08 positive/40_objective_use_case repetition 1: 495.538 ms, 1 errors, 0 warnings
+10:18:09 positive/41_state_entry_exit repetition 1 of 1
+10:18:09 positive/41_state_entry_exit repetition 1: 530.144 ms, 0 errors, 0 warnings
+10:18:09 positive/42_feature_typing repetition 1 of 1
+10:18:10 positive/42_feature_typing repetition 1: 480.970 ms, 0 errors, 0 warnings
+10:18:10 positive/43_enumeration_definitions repetition 1 of 1
+10:18:10 positive/43_enumeration_definitions repetition 1: 470.972 ms, 0 errors, 0 warnings
+10:18:11 positive/44_variant_configuration repetition 1 of 1
+10:18:11 positive/44_variant_configuration repetition 1: 453.060 ms, 8 errors, 5 warnings
+10:18:11 positive/45_import_membership repetition 1 of 1
+10:18:12 positive/45_import_membership repetition 1: 375.135 ms, 2 errors, 0 warnings
+10:18:12 positive/46_loop_conditional repetition 1 of 1
+10:18:12 positive/46_loop_conditional repetition 1: 625.470 ms, 0 errors, 0 warnings
+10:18:13 positive/47_expression_operators repetition 1 of 1
+10:18:13 positive/47_expression_operators repetition 1: 660.316 ms, 5 errors, 0 warnings
+10:18:13 positive/48_library_package repetition 1 of 1
+10:18:14 positive/48_library_package repetition 1: 458.536 ms, 5 errors, 2 warnings
+10:18:14 positive/49_actor_stakeholder repetition 1 of 1
+10:18:14 positive/49_actor_stakeholder repetition 1: 419.920 ms, 6 errors, 2 warnings
+10:18:15 positive/50_accept_via repetition 1 of 1
+10:18:15 positive/50_accept_via repetition 1: 503.299 ms, 0 errors, 0 warnings
+10:18:15 positive/60_cameo_26xR2_constructs repetition 1 of 1
+10:18:16 positive/60_cameo_26xR2_constructs repetition 1: 1036.367 ms, 2 errors, 3 warnings
+10:18:16 positive/61_diamond_resolved repetition 1 of 1
+10:18:17 positive/61_diamond_resolved repetition 1: 420.805 ms, 0 errors, 0 warnings
+10:18:17 positive/62_diamond_unresolved_warnings repetition 1 of 1
+10:18:17 positive/62_diamond_unresolved_warnings repetition 1: 417.108 ms, 0 errors, 8 warnings
+10:18:18 negative/01_action_parallel_invalid repetition 1 of 1
+10:18:18 negative/01_action_parallel_invalid repetition 1: 239.610 ms, 2 errors, 0 warnings
+10:18:18 negative/02_action_then_invalid repetition 1 of 1
+10:18:18 negative/02_action_then_invalid repetition 1: 271.896 ms, 2 errors, 0 warnings
+10:18:18 negative/03_action_decide_invalid repetition 1 of 1
+10:18:19 negative/03_action_decide_invalid repetition 1: 372.842 ms, 5 errors, 1 warnings
+10:18:19 negative/04_action_if_invalid repetition 1 of 1
+10:18:19 negative/04_action_if_invalid repetition 1: 304.316 ms, 5 errors, 0 warnings
+10:18:19 negative/05_multiple_action_parallel repetition 1 of 1
+10:18:20 negative/05_multiple_action_parallel repetition 1: 240.322 ms, 4 errors, 0 warnings
+10:18:20 negative/06_action_parallel_then_combined repetition 1 of 1
+10:18:20 negative/06_action_parallel_then_combined repetition 1: 241.206 ms, 3 errors, 0 warnings
+10:18:20 negative/07_nested_action_if repetition 1 of 1
+10:18:21 negative/07_nested_action_if repetition 1: 341.462 ms, 7 errors, 0 warnings
+10:18:21 negative/08_action_decide_with_if repetition 1 of 1
+10:18:21 negative/08_action_decide_with_if repetition 1: 298.657 ms, 8 errors, 2 warnings
+10:18:21 negative/09_all_invalid_modifiers repetition 1 of 1
+10:18:21 negative/09_all_invalid_modifiers repetition 1: 239.456 ms, 5 errors, 0 warnings
+10:18:22 negative/10_action_parallel_with_params repetition 1 of 1
+10:18:22 negative/10_action_parallel_with_params repetition 1: 432.426 ms, 7 errors, 1 warnings
+10:18:22 negative/11_action_then_succession repetition 1 of 1
+10:18:22 negative/11_action_then_succession repetition 1: 265.608 ms, 2 errors, 0 warnings
+10:18:23 negative/12_action_decide_boolean repetition 1 of 1
+10:18:23 negative/12_action_decide_boolean repetition 1: 368.812 ms, 5 errors, 1 warnings
+10:18:23 negative/13_undefined_type repetition 1 of 1
+10:18:23 negative/13_undefined_type repetition 1: 290.473 ms, 2 errors, 0 warnings
+10:18:24 negative/14_missing_scalar_import repetition 1 of 1
+10:18:24 negative/14_missing_scalar_import repetition 1: 279.380 ms, 2 errors, 0 warnings
+10:18:24 negative/15_wrong_import_path repetition 1 of 1
+10:18:24 negative/15_wrong_import_path repetition 1: 220.747 ms, 1 errors, 0 warnings
+10:18:24 negative/16_undefined_attribute_type repetition 1 of 1
+10:18:25 negative/16_undefined_attribute_type repetition 1: 303.683 ms, 4 errors, 0 warnings
+10:18:25 negative/17_undefined_part_reference repetition 1 of 1
+10:18:25 negative/17_undefined_part_reference repetition 1: 349.156 ms, 4 errors, 0 warnings
+10:18:25 negative/18_circular_import repetition 1 of 1
+10:18:26 negative/18_circular_import repetition 1: 302.087 ms, 3 errors, 0 warnings
+10:18:26 negative/19_missing_semicolon repetition 1 of 1
+10:18:26 negative/19_missing_semicolon repetition 1: 305.023 ms, 5 errors, 0 warnings
+10:18:26 negative/20_missing_brace repetition 1 of 1
+10:18:27 negative/20_missing_brace repetition 1: 291.303 ms, 3 errors, 0 warnings
+10:18:27 negative/21_invalid_identifier repetition 1 of 1
+10:18:27 negative/21_invalid_identifier repetition 1: 289.497 ms, 3 errors, 0 warnings
+10:18:27 negative/22_reserved_keyword_as_name repetition 1 of 1
+10:18:28 negative/22_reserved_keyword_as_name repetition 1: 307.657 ms, 3 errors, 0 warnings
+10:18:28 negative/23_malformed_package repetition 1 of 1
+10:18:28 negative/23_malformed_package repetition 1: 178.361 ms, 0 errors, 0 warnings
+10:18:28 negative/24_invalid_assignment_operator repetition 1 of 1
+10:18:28 negative/24_invalid_assignment_operator repetition 1: 309.813 ms, 8 errors, 0 warnings
+10:18:29 negative/25_missing_colon_type repetition 1 of 1
+10:18:29 negative/25_missing_colon_type repetition 1: 257.936 ms, 1 errors, 0 warnings
+10:18:29 negative/26_unclosed_comment repetition 1 of 1
+10:18:29 negative/26_unclosed_comment repetition 1: 149.087 ms, 1 errors, 0 warnings
+10:18:29 negative/27_invalid_multiplicity_syntax repetition 1 of 1
+10:18:30 negative/27_invalid_multiplicity_syntax repetition 1: 320.662 ms, 3 errors, 0 warnings
+10:18:30 negative/28_double_def_keyword repetition 1 of 1
+10:18:30 negative/28_double_def_keyword repetition 1: 302.699 ms, 3 errors, 0 warnings
+10:18:30 negative/29_missing_package_brace repetition 1 of 1
+10:18:31 negative/29_missing_package_brace repetition 1: 296.763 ms, 4 errors, 0 warnings
+10:18:31 negative/30_invalid_attribute_syntax repetition 1 of 1
+10:18:31 negative/30_invalid_attribute_syntax repetition 1: 272.722 ms, 4 errors, 0 warnings
+10:18:31 negative/31_type_mismatch_assignment repetition 1 of 1
+10:18:31 negative/31_type_mismatch_assignment repetition 1: 340.709 ms, 0 errors, 1 warnings
+10:18:32 negative/32_undefined_action_output repetition 1 of 1
+10:18:32 negative/32_undefined_action_output repetition 1: 416.992 ms, 1 errors, 0 warnings
+10:18:32 negative/33_undefined_state_reference repetition 1 of 1
+10:18:33 negative/33_undefined_state_reference repetition 1: 405.407 ms, 2 errors, 0 warnings
+10:18:33 negative/34_undefined_port_reference repetition 1 of 1
+10:18:33 negative/34_undefined_port_reference repetition 1: 360.158 ms, 1 errors, 0 warnings
+10:18:33 negative/35_wrong_scope_access repetition 1 of 1
+10:18:34 negative/35_wrong_scope_access repetition 1: 329.750 ms, 4 errors, 0 warnings
+10:18:34 negative/36_incompatible_connection repetition 1 of 1
+10:18:34 negative/36_incompatible_connection repetition 1: 427.443 ms, 4 errors, 0 warnings
+10:18:34 negative/37_array_index_out_of_bounds repetition 1 of 1
+10:18:35 negative/37_array_index_out_of_bounds repetition 1: 437.187 ms, 0 errors, 1 warnings
+10:18:35 negative/38_wrong_parameter_type repetition 1 of 1
+10:18:35 negative/38_wrong_parameter_type repetition 1: 368.285 ms, 0 errors, 1 warnings
+10:18:36 negative/39_undefined_constraint_variable repetition 1 of 1
+10:18:36 negative/39_undefined_constraint_variable repetition 1: 322.934 ms, 4 errors, 0 warnings
+10:18:36 negative/40_missing_required_parameter repetition 1 of 1
+10:18:36 negative/40_missing_required_parameter repetition 1: 334.112 ms, 6 errors, 1 warnings
+10:18:36 negative/41_duplicate_attribute_name repetition 1 of 1
+10:18:37 negative/41_duplicate_attribute_name repetition 1: 320.454 ms, 0 errors, 2 warnings
+10:18:37 negative/42_wrong_succession_target repetition 1 of 1
+10:18:37 negative/42_wrong_succession_target repetition 1: 365.580 ms, 1 errors, 0 warnings
+10:18:38 negative/43_circular_specialization repetition 1 of 1
+10:18:38 negative/43_circular_specialization repetition 1: 227.787 ms, 0 errors, 0 warnings
+10:18:38 negative/44_invalid_multiplicity_range repetition 1 of 1
+10:18:38 negative/44_invalid_multiplicity_range repetition 1: 312.853 ms, 0 errors, 0 warnings
+10:18:38 negative/45_constraint_not_boolean repetition 1 of 1
+10:18:39 negative/45_constraint_not_boolean repetition 1: 362.444 ms, 4 errors, 0 warnings
+10:18:39 negative/46_abstract_part_instantiation repetition 1 of 1
+10:18:39 negative/46_abstract_part_instantiation repetition 1: 323.461 ms, 2 errors, 0 warnings
+10:18:39 negative/47_redefines_nonexistent repetition 1 of 1
+10:18:40 negative/47_redefines_nonexistent repetition 1: 334.956 ms, 3 errors, 0 warnings
+10:18:40 negative/48_invalid_flow_direction repetition 1 of 1
+10:18:40 negative/48_invalid_flow_direction repetition 1: 373.012 ms, 0 errors, 0 warnings
+10:18:40 negative/49_state_transition_missing_source repetition 1 of 1
+10:18:41 negative/49_state_transition_missing_source repetition 1: 377.895 ms, 0 errors, 0 warnings
+10:18:41 negative/50_requirement_without_subject repetition 1 of 1
+10:18:41 negative/50_requirement_without_subject repetition 1: 438.080 ms, 7 errors, 1 warnings
+10:18:42 negative/51_port_without_definition repetition 1 of 1
+10:18:42 negative/51_port_without_definition repetition 1: 308.873 ms, 2 errors, 0 warnings
+10:18:42 negative/52_invalid_enum_value repetition 1 of 1
+10:18:43 negative/52_invalid_enum_value repetition 1: 393.884 ms, 1 errors, 1 warnings
+10:18:43 negative/53_incompatible_redefinition_type repetition 1 of 1
+10:18:43 negative/53_incompatible_redefinition_type repetition 1: 370.381 ms, 0 errors, 0 warnings
+10:18:43 negative/54_succession_creates_deadlock repetition 1 of 1
+10:18:44 negative/54_succession_creates_deadlock repetition 1: 358.364 ms, 0 errors, 0 warnings
+10:18:44 negative/55_breakfast_example_original repetition 1 of 1
+10:18:44 negative/55_breakfast_example_original repetition 1: 678.828 ms, 40 errors, 15 warnings
+10:18:45 negative/56_unresolved_library_type repetition 1 of 1
+10:18:45 negative/56_unresolved_library_type repetition 1: 385.937 ms, 4 errors, 0 warnings
+10:18:45 negative/MissingDefinitions_Actions_8Trigger repetition 1 of 1
+10:18:46 negative/MissingDefinitions_Actions_8Trigger repetition 1: 467.239 ms, 4 errors, 2 warnings
+10:18:46 lint/good_practices repetition 1 of 1
+10:18:46 lint/good_practices repetition 1: 228.595 ms, 3 errors, 0 warnings
+10:18:46 lint/naming_conventions repetition 1 of 1
+10:18:47 lint/naming_conventions repetition 1: 364.783 ms, 22 errors, 0 warnings
+10:18:47 lint/public_imports repetition 1 of 1
+10:18:47 lint/public_imports repetition 1: 355.593 ms, 11 errors, 0 warnings
+10:18:47 lint/refactoring_example repetition 1 of 1
+10:18:48 lint/refactoring_example repetition 1: 244.276 ms, 3 errors, 0 warnings
+10:18:48 lint/unit_mismatches repetition 1 of 1
+10:18:48 lint/unit_mismatches repetition 1: 423.706 ms, 25 errors, 12 warnings
+10:18:48 lint/unused_elements repetition 1 of 1
+10:18:49 lint/unused_elements repetition 1: 225.010 ms, 3 errors, 0 warnings
+10:18:49 lint/wildcard_imports repetition 1 of 1
+10:18:49 lint/wildcard_imports repetition 1: 214.996 ms, 3 errors, 0 warnings
+10:18:49 cheatsheet/cheatsheet_validation repetition 1 of 1
+10:18:50 cheatsheet/cheatsheet_validation repetition 1: 958.090 ms, 23 errors, 6 warnings
+10:18:50 cheatsheet/pastableExamples/ActionPatterns_1WhileLoop repetition 1 of 1
+10:18:51 cheatsheet/pastableExamples/ActionPatterns_1WhileLoop repetition 1: 451.479 ms, 0 errors, 0 warnings
+10:18:51 cheatsheet/pastableExamples/ActionPatterns_2ForLoop repetition 1 of 1
+10:18:51 cheatsheet/pastableExamples/ActionPatterns_2ForLoop repetition 1: 448.739 ms, 0 errors, 0 warnings
+10:18:51 cheatsheet/pastableExamples/ActionPatterns_2bLoopVariations repetition 1 of 1
+10:18:52 cheatsheet/pastableExamples/ActionPatterns_2bLoopVariations repetition 1: 550.058 ms, 0 errors, 2 warnings
+10:18:52 cheatsheet/pastableExamples/ActionPatterns_3IfElse repetition 1 of 1
+10:18:53 cheatsheet/pastableExamples/ActionPatterns_3IfElse repetition 1: 449.367 ms, 0 errors, 0 warnings
+10:18:53 cheatsheet/pastableExamples/ActionPatterns_4AcceptVariations repetition 1 of 1
+10:18:53 cheatsheet/pastableExamples/ActionPatterns_4AcceptVariations repetition 1: 536.303 ms, 2 errors, 2 warnings
+10:18:54 cheatsheet/pastableExamples/ActionPatterns_5SendVariations repetition 1 of 1
+10:18:54 cheatsheet/pastableExamples/ActionPatterns_5SendVariations repetition 1: 449.543 ms, 1 errors, 2 warnings
+10:18:54 cheatsheet/pastableExamples/ActionPatterns_6ControlNodes repetition 1 of 1
+10:18:54 cheatsheet/pastableExamples/ActionPatterns_6ControlNodes repetition 1: 316.993 ms, 0 errors, 0 warnings
+10:18:55 cheatsheet/pastableExamples/ActionPatterns_7AdvancedSend repetition 1 of 1
+10:18:55 cheatsheet/pastableExamples/ActionPatterns_7AdvancedSend repetition 1: 482.095 ms, 2 errors, 0 warnings
+10:18:55 cheatsheet/pastableExamples/Actions_1ActionDefinition repetition 1 of 1
+10:18:56 cheatsheet/pastableExamples/Actions_1ActionDefinition repetition 1: 375.190 ms, 0 errors, 0 warnings
+10:18:56 cheatsheet/pastableExamples/Actions_2ActionUsage repetition 1 of 1
+10:18:56 cheatsheet/pastableExamples/Actions_2ActionUsage repetition 1: 397.829 ms, 0 errors, 4 warnings
+10:18:56 cheatsheet/pastableExamples/Actions_4Parameters repetition 1 of 1
+10:18:57 cheatsheet/pastableExamples/Actions_4Parameters repetition 1: 293.152 ms, 0 errors, 0 warnings
+10:18:57 cheatsheet/pastableExamples/Actions_5SendAcceptSignal repetition 1 of 1
+10:18:57 cheatsheet/pastableExamples/Actions_5SendAcceptSignal repetition 1: 458.794 ms, 1 errors, 1 warnings
+10:18:58 cheatsheet/pastableExamples/Actions_6Successionfirstthen repetition 1 of 1
+10:18:58 cheatsheet/pastableExamples/Actions_6Successionfirstthen repetition 1: 388.036 ms, 0 errors, 1 warnings
+10:18:58 cheatsheet/pastableExamples/Actions_7Assignmentassign repetition 1 of 1
+10:18:59 cheatsheet/pastableExamples/Actions_7Assignmentassign repetition 1: 451.317 ms, 0 errors, 0 warnings
+10:18:59 cheatsheet/pastableExamples/Actions_8Trigger repetition 1 of 1
+10:18:59 cheatsheet/pastableExamples/Actions_8Trigger repetition 1: 346.700 ms, 5 errors, 1 warnings
+10:18:59 cheatsheet/pastableExamples/Actions_Tutorial repetition 1 of 1
+10:19:00 cheatsheet/pastableExamples/Actions_Tutorial repetition 1: 462.946 ms, 15 errors, 0 warnings
+10:19:00 cheatsheet/pastableExamples/Allocation_Tutorial repetition 1 of 1
+10:19:00 cheatsheet/pastableExamples/Allocation_Tutorial repetition 1: 347.733 ms, 0 errors, 0 warnings
+10:19:00 cheatsheet/pastableExamples/Analysis_Tutorial repetition 1 of 1
+10:19:01 cheatsheet/pastableExamples/Analysis_Tutorial repetition 1: 486.578 ms, 0 errors, 0 warnings
+10:19:01 cheatsheet/pastableExamples/Behavior_1StateDefinition repetition 1 of 1
+10:19:01 cheatsheet/pastableExamples/Behavior_1StateDefinition repetition 1: 308.038 ms, 0 errors, 0 warnings
+10:19:01 cheatsheet/pastableExamples/Behavior_2Transitions repetition 1 of 1
+10:19:02 cheatsheet/pastableExamples/Behavior_2Transitions repetition 1: 512.616 ms, 2 errors, 2 warnings
+10:19:02 cheatsheet/pastableExamples/Behavior_3GuardsEffects repetition 1 of 1
+10:19:03 cheatsheet/pastableExamples/Behavior_3GuardsEffects repetition 1: 475.525 ms, 0 errors, 0 warnings
+10:19:03 cheatsheet/pastableExamples/Behavior_3bInternalTransition repetition 1 of 1
+10:19:03 cheatsheet/pastableExamples/Behavior_3bInternalTransition repetition 1: 428.151 ms, 0 errors, 0 warnings
+10:19:03 cheatsheet/pastableExamples/Behavior_4ActionDefinition repetition 1 of 1
+10:19:04 cheatsheet/pastableExamples/Behavior_4ActionDefinition repetition 1: 376.760 ms, 0 errors, 0 warnings
+10:19:04 cheatsheet/pastableExamples/Behavior_5ActionUsage repetition 1 of 1
+10:19:04 cheatsheet/pastableExamples/Behavior_5ActionUsage repetition 1: 407.330 ms, 0 errors, 2 warnings
+10:19:04 cheatsheet/pastableExamples/Behavior_6UseCases repetition 1 of 1
+10:19:05 cheatsheet/pastableExamples/Behavior_6UseCases repetition 1: 402.892 ms, 0 errors, 0 warnings
+10:19:05 cheatsheet/pastableExamples/Calculations_1CalculationDefinition repetition 1 of 1
+10:19:05 cheatsheet/pastableExamples/Calculations_1CalculationDefinition repetition 1: 401.017 ms, 0 errors, 0 warnings
+10:19:06 cheatsheet/pastableExamples/Calculations_2CalculationUsage repetition 1 of 1
+10:19:06 cheatsheet/pastableExamples/Calculations_2CalculationUsage repetition 1: 415.256 ms, 0 errors, 2 warnings
+10:19:06 cheatsheet/pastableExamples/Calculations_4ConstraintUsage repetition 1 of 1
+10:19:07 cheatsheet/pastableExamples/Calculations_4ConstraintUsage repetition 1: 444.279 ms, 0 errors, 1 warnings
+10:19:07 cheatsheet/pastableExamples/Calculations_5Assertions repetition 1 of 1
+10:19:07 cheatsheet/pastableExamples/Calculations_5Assertions repetition 1: 445.625 ms, 0 errors, 0 warnings
+10:19:07 cheatsheet/pastableExamples/Calculations_6Requirements repetition 1 of 1
+10:19:08 cheatsheet/pastableExamples/Calculations_6Requirements repetition 1: 434.131 ms, 0 errors, 0 warnings
+10:19:08 cheatsheet/pastableExamples/Cases_1UseCaseDefinition repetition 1 of 1
+10:19:08 cheatsheet/pastableExamples/Cases_1UseCaseDefinition repetition 1: 385.126 ms, 1 errors, 1 warnings
+10:19:08 cheatsheet/pastableExamples/Cases_2TestCaseVerification repetition 1 of 1
+10:19:09 cheatsheet/pastableExamples/Cases_2TestCaseVerification repetition 1: 421.495 ms, 0 errors, 0 warnings
+10:19:09 cheatsheet/pastableExamples/Cases_3AnalysisCase repetition 1 of 1
+10:19:09 cheatsheet/pastableExamples/Cases_3AnalysisCase repetition 1: 358.841 ms, 0 errors, 0 warnings
+10:19:10 cheatsheet/pastableExamples/Cases_4CaseUsage repetition 1 of 1
+10:19:10 cheatsheet/pastableExamples/Cases_4CaseUsage repetition 1: 439.616 ms, 4 errors, 5 warnings
+10:19:10 cheatsheet/pastableExamples/Connections_1ConnectionDefinition repetition 1 of 1
+10:19:11 cheatsheet/pastableExamples/Connections_1ConnectionDefinition repetition 1: 333.038 ms, 0 errors, 0 warnings
+10:19:11 cheatsheet/pastableExamples/Connections_1bConnectionUsage repetition 1 of 1
+10:19:11 cheatsheet/pastableExamples/Connections_1bConnectionUsage repetition 1: 379.900 ms, 0 errors, 0 warnings
+10:19:11 cheatsheet/pastableExamples/Connections_2BindingConnector repetition 1 of 1
+10:19:12 cheatsheet/pastableExamples/Connections_2BindingConnector repetition 1: 402.255 ms, 0 errors, 0 warnings
+10:19:12 cheatsheet/pastableExamples/Connections_3InterfaceConnection repetition 1 of 1
+10:19:12 cheatsheet/pastableExamples/Connections_3InterfaceConnection repetition 1: 404.700 ms, 1 errors, 2 warnings
+10:19:12 cheatsheet/pastableExamples/Connections_4SuccessionFlow repetition 1 of 1
+10:19:13 cheatsheet/pastableExamples/Connections_4SuccessionFlow repetition 1: 406.107 ms, 1 errors, 2 warnings
+10:19:13 cheatsheet/pastableExamples/Connections_Tutorial repetition 1 of 1
+10:19:13 cheatsheet/pastableExamples/Connections_Tutorial repetition 1: 497.815 ms, 2 errors, 2 warnings
+10:19:14 cheatsheet/pastableExamples/Constraints_1ConstraintDefinition repetition 1 of 1
+10:19:14 cheatsheet/pastableExamples/Constraints_1ConstraintDefinition repetition 1: 416.126 ms, 0 errors, 2 warnings
+10:19:14 cheatsheet/pastableExamples/Constraints_2ConstraintUsageAssert repetition 1 of 1
+10:19:15 cheatsheet/pastableExamples/Constraints_2ConstraintUsageAssert repetition 1: 475.247 ms, 0 errors, 0 warnings
+10:19:15 cheatsheet/pastableExamples/Constraints_2bInlineAssertion repetition 1 of 1
+10:19:15 cheatsheet/pastableExamples/Constraints_2bInlineAssertion repetition 1: 439.300 ms, 0 errors, 0 warnings
+10:19:15 cheatsheet/pastableExamples/Constraints_3CalculationDefinition repetition 1 of 1
+10:19:16 cheatsheet/pastableExamples/Constraints_3CalculationDefinition repetition 1: 422.232 ms, 0 errors, 0 warnings
+10:19:16 cheatsheet/pastableExamples/Constraints_4CalculationUsage repetition 1 of 1
+10:19:16 cheatsheet/pastableExamples/Constraints_4CalculationUsage repetition 1: 480.051 ms, 0 errors, 2 warnings
+10:19:17 cheatsheet/pastableExamples/CoreTypes_Tutorial repetition 1 of 1
+10:19:17 cheatsheet/pastableExamples/CoreTypes_Tutorial repetition 1: 457.725 ms, 0 errors, 0 warnings
+10:19:17 cheatsheet/pastableExamples/DataTypes_Tutorial repetition 1 of 1
+10:19:18 cheatsheet/pastableExamples/DataTypes_Tutorial repetition 1: 548.388 ms, 0 errors, 2 warnings
+10:19:18 cheatsheet/pastableExamples/DomainLibs_Tutorial repetition 1 of 1
+10:19:18 cheatsheet/pastableExamples/DomainLibs_Tutorial repetition 1: 477.589 ms, 0 errors, 1 warnings
+10:19:19 cheatsheet/pastableExamples/Evaluation_Tutorial repetition 1 of 1
+10:19:19 cheatsheet/pastableExamples/Evaluation_Tutorial repetition 1: 623.492 ms, 4 errors, 5 warnings
+10:19:19 cheatsheet/pastableExamples/Features_Tutorial repetition 1 of 1
+10:19:20 cheatsheet/pastableExamples/Features_Tutorial repetition 1: 478.664 ms, 0 errors, 0 warnings
+10:19:20 cheatsheet/pastableExamples/Filters_Tutorial repetition 1 of 1
+10:19:21 cheatsheet/pastableExamples/Filters_Tutorial repetition 1: 511.778 ms, 10 errors, 0 warnings
+10:19:21 cheatsheet/pastableExamples/Flows_Tutorial repetition 1 of 1
+10:19:21 cheatsheet/pastableExamples/Flows_Tutorial repetition 1: 503.862 ms, 6 errors, 0 warnings
+10:19:21 cheatsheet/pastableExamples/MergedExamples repetition 1 of 1
+10:19:23 cheatsheet/pastableExamples/MergedExamples repetition 1: 1699.874 ms, 22 errors, 37 warnings
+10:19:23 cheatsheet/pastableExamples/Metadata_1MetadataDefinition repetition 1 of 1
+10:19:24 cheatsheet/pastableExamples/Metadata_1MetadataDefinition repetition 1: 321.228 ms, 0 errors, 0 warnings
+10:19:24 cheatsheet/pastableExamples/Metadata_2ElementAnnotation repetition 1 of 1
+10:19:24 cheatsheet/pastableExamples/Metadata_2ElementAnnotation repetition 1: 455.974 ms, 1 errors, 0 warnings
+10:19:24 cheatsheet/pastableExamples/Metadata_3RelationshipAnnotation repetition 1 of 1
+10:19:25 cheatsheet/pastableExamples/Metadata_3RelationshipAnnotation repetition 1: 425.125 ms, 0 errors, 0 warnings
+10:19:25 cheatsheet/pastableExamples/Metadata_4StandardMetadata repetition 1 of 1
+10:19:25 cheatsheet/pastableExamples/Metadata_4StandardMetadata repetition 1: 351.099 ms, 0 errors, 0 warnings
+10:19:26 cheatsheet/pastableExamples/Metadata_5MetadataExtension repetition 1 of 1
+10:19:26 cheatsheet/pastableExamples/Metadata_5MetadataExtension repetition 1: 489.862 ms, 0 errors, 0 warnings
+10:19:26 cheatsheet/pastableExamples/Metadata_6ShortAnnotation repetition 1 of 1
+10:19:27 cheatsheet/pastableExamples/Metadata_6ShortAnnotation repetition 1: 384.805 ms, 0 errors, 0 warnings
+10:19:27 cheatsheet/pastableExamples/Multiplicity_Tutorial repetition 1 of 1
+10:19:27 cheatsheet/pastableExamples/Multiplicity_Tutorial repetition 1: 425.324 ms, 0 errors, 0 warnings
+10:19:27 cheatsheet/pastableExamples/Naming_Tutorial repetition 1 of 1
+10:19:28 cheatsheet/pastableExamples/Naming_Tutorial repetition 1: 463.466 ms, 0 errors, 0 warnings
+10:19:28 cheatsheet/pastableExamples/PartsAndAttributes_Tutorial repetition 1 of 1
+10:19:28 cheatsheet/pastableExamples/PartsAndAttributes_Tutorial repetition 1: 495.482 ms, 0 errors, 2 warnings
+10:19:29 cheatsheet/pastableExamples/Patterns_1MetadataAnnotations repetition 1 of 1
+10:19:29 cheatsheet/pastableExamples/Patterns_1MetadataAnnotations repetition 1: 419.355 ms, 0 errors, 0 warnings
+10:19:29 cheatsheet/pastableExamples/Patterns_2Views repetition 1 of 1
+10:19:30 cheatsheet/pastableExamples/Patterns_2Views repetition 1: 307.558 ms, 1 errors, 0 warnings
+10:19:30 cheatsheet/pastableExamples/Patterns_3CustomUnitsNanoBanana repetition 1 of 1
+10:19:30 cheatsheet/pastableExamples/Patterns_3CustomUnitsNanoBanana repetition 1: 428.589 ms, 0 errors, 0 warnings
+10:19:30 cheatsheet/pastableExamples/Patterns_4AbstractvsIndividual repetition 1 of 1
+10:19:31 cheatsheet/pastableExamples/Patterns_4AbstractvsIndividual repetition 1: 379.356 ms, 1 errors, 0 warnings
+10:19:31 cheatsheet/pastableExamples/PortsInterfaces_Tutorial repetition 1 of 1
+10:19:31 cheatsheet/pastableExamples/PortsInterfaces_Tutorial repetition 1: 423.356 ms, 2 errors, 2 warnings
+10:19:31 cheatsheet/pastableExamples/Reference_1CommonKeywords repetition 1 of 1
+10:19:32 cheatsheet/pastableExamples/Reference_1CommonKeywords repetition 1: 149.856 ms, 0 errors, 0 warnings
+10:19:32 cheatsheet/pastableExamples/Reference_2PrimitiveTypes repetition 1 of 1
+10:19:32 cheatsheet/pastableExamples/Reference_2PrimitiveTypes repetition 1: 284.475 ms, 0 errors, 0 warnings
+10:19:32 cheatsheet/pastableExamples/Reference_3Relationships repetition 1 of 1
+10:19:32 cheatsheet/pastableExamples/Reference_3Relationships repetition 1: 150.228 ms, 0 errors, 0 warnings
+10:19:32 cheatsheet/pastableExamples/Reference_4Comments repetition 1 of 1
+10:19:33 cheatsheet/pastableExamples/Reference_4Comments repetition 1: 253.790 ms, 0 errors, 0 warnings
+10:19:33 cheatsheet/pastableExamples/Reference_5Multiplicity repetition 1 of 1
+10:19:33 cheatsheet/pastableExamples/Reference_5Multiplicity repetition 1: 150.671 ms, 0 errors, 0 warnings
+10:19:33 cheatsheet/pastableExamples/Reference_6Visibility repetition 1 of 1
+10:19:33 cheatsheet/pastableExamples/Reference_6Visibility repetition 1: 152.389 ms, 0 errors, 0 warnings
+10:19:34 cheatsheet/pastableExamples/Requirements_1RequirementDefinition repetition 1 of 1
+10:19:34 cheatsheet/pastableExamples/Requirements_1RequirementDefinition repetition 1: 327.819 ms, 0 errors, 0 warnings
+10:19:34 cheatsheet/pastableExamples/Requirements_2RequirementUsage repetition 1 of 1
+10:19:34 cheatsheet/pastableExamples/Requirements_2RequirementUsage repetition 1: 494.363 ms, 0 errors, 2 warnings
+10:19:35 cheatsheet/pastableExamples/Requirements_3Satisfy repetition 1 of 1
+10:19:35 cheatsheet/pastableExamples/Requirements_3Satisfy repetition 1: 360.810 ms, 0 errors, 0 warnings
+10:19:35 cheatsheet/pastableExamples/Requirements_4Verify repetition 1 of 1
+10:19:36 cheatsheet/pastableExamples/Requirements_4Verify repetition 1: 386.216 ms, 0 errors, 0 warnings
+10:19:36 cheatsheet/pastableExamples/Requirements_5ConstraintDefinition repetition 1 of 1
+10:19:36 cheatsheet/pastableExamples/Requirements_5ConstraintDefinition repetition 1: 428.008 ms, 0 errors, 1 warnings
+10:19:36 cheatsheet/pastableExamples/Requirements_6AssertConstraint repetition 1 of 1
+10:19:37 cheatsheet/pastableExamples/Requirements_6AssertConstraint repetition 1: 446.458 ms, 0 errors, 1 warnings
+10:19:37 cheatsheet/pastableExamples/Requirements_6Assertions repetition 1 of 1
+10:19:37 cheatsheet/pastableExamples/Requirements_6Assertions repetition 1: 460.556 ms, 0 errors, 1 warnings
+10:19:38 cheatsheet/pastableExamples/Requirements_7TraceRefine repetition 1 of 1
+10:19:38 cheatsheet/pastableExamples/Requirements_7TraceRefine repetition 1: 311.481 ms, 0 errors, 0 warnings
+10:19:38 cheatsheet/pastableExamples/Requirements_Tutorial repetition 1 of 1
+10:19:39 cheatsheet/pastableExamples/Requirements_Tutorial repetition 1: 569.911 ms, 0 errors, 0 warnings
+10:19:39 cheatsheet/pastableExamples/SemanticMetadata_Tutorial repetition 1 of 1
+10:19:39 cheatsheet/pastableExamples/SemanticMetadata_Tutorial repetition 1: 559.470 ms, 0 errors, 0 warnings
+10:19:40 cheatsheet/pastableExamples/Shorthand_1Specialization repetition 1 of 1
+10:19:40 cheatsheet/pastableExamples/Shorthand_1Specialization repetition 1: 247.905 ms, 0 errors, 0 warnings
+10:19:40 cheatsheet/pastableExamples/Shorthand_2Subsetting repetition 1 of 1
+10:19:40 cheatsheet/pastableExamples/Shorthand_2Subsetting repetition 1: 287.112 ms, 0 errors, 0 warnings
+10:19:40 cheatsheet/pastableExamples/Shorthand_3Redefinition repetition 1 of 1
+10:19:41 cheatsheet/pastableExamples/Shorthand_3Redefinition repetition 1: 199.811 ms, 0 errors, 0 warnings
+10:19:41 cheatsheet/pastableExamples/Shorthand_4Conjugation repetition 1 of 1
+10:19:41 cheatsheet/pastableExamples/Shorthand_4Conjugation repetition 1: 304.707 ms, 0 errors, 0 warnings
+10:19:41 cheatsheet/pastableExamples/Shorthand_5FeatureValues repetition 1 of 1
+10:19:42 cheatsheet/pastableExamples/Shorthand_5FeatureValues repetition 1: 342.117 ms, 1 errors, 0 warnings
+10:19:42 cheatsheet/pastableExamples/Shorthand_6Multiplicity repetition 1 of 1
+10:19:42 cheatsheet/pastableExamples/Shorthand_6Multiplicity repetition 1: 305.603 ms, 0 errors, 0 warnings
+10:19:42 cheatsheet/pastableExamples/StateMachine_Tutorial repetition 1 of 1
+10:19:43 cheatsheet/pastableExamples/StateMachine_Tutorial repetition 1: 639.432 ms, 3 errors, 0 warnings
+10:19:43 cheatsheet/pastableExamples/StatePatterns_1EntryDoExit repetition 1 of 1
+10:19:43 cheatsheet/pastableExamples/StatePatterns_1EntryDoExit repetition 1: 326.816 ms, 0 errors, 0 warnings
+10:19:43 cheatsheet/pastableExamples/StatePatterns_2CompositeState repetition 1 of 1
+10:19:44 cheatsheet/pastableExamples/StatePatterns_2CompositeState repetition 1: 409.985 ms, 0 errors, 0 warnings
+10:19:44 cheatsheet/pastableExamples/StatePatterns_3ExhibitState repetition 1 of 1
+10:19:44 cheatsheet/pastableExamples/StatePatterns_3ExhibitState repetition 1: 319.860 ms, 0 errors, 0 warnings
+10:19:45 cheatsheet/pastableExamples/StatePatterns_4InternalTransition repetition 1 of 1
+10:19:45 cheatsheet/pastableExamples/StatePatterns_4InternalTransition repetition 1: 440.029 ms, 0 errors, 0 warnings
+10:19:45 cheatsheet/pastableExamples/States_1StateDefinition repetition 1 of 1
+10:19:45 cheatsheet/pastableExamples/States_1StateDefinition repetition 1: 344.955 ms, 0 errors, 0 warnings
+10:19:46 cheatsheet/pastableExamples/States_2Transitions repetition 1 of 1
+10:19:46 cheatsheet/pastableExamples/States_2Transitions repetition 1: 430.053 ms, 0 errors, 0 warnings
+10:19:46 cheatsheet/pastableExamples/States_3GuardsEffects repetition 1 of 1
+10:19:47 cheatsheet/pastableExamples/States_3GuardsEffects repetition 1: 527.702 ms, 0 errors, 0 warnings
+10:19:47 cheatsheet/pastableExamples/States_4CompositeStates repetition 1 of 1
+10:19:47 cheatsheet/pastableExamples/States_4CompositeStates repetition 1: 307.263 ms, 0 errors, 0 warnings
+10:19:47 cheatsheet/pastableExamples/States_5ParallelStates repetition 1 of 1
+10:19:48 cheatsheet/pastableExamples/States_5ParallelStates repetition 1: 304.009 ms, 0 errors, 0 warnings
+10:19:48 cheatsheet/pastableExamples/UseCaseTutorial_APS repetition 1 of 1
+10:19:48 cheatsheet/pastableExamples/UseCaseTutorial_APS repetition 1: 397.951 ms, 0 errors, 0 warnings
+10:19:48 cheatsheet/pastableExamples/Variants_Tutorial repetition 1 of 1
+10:19:49 cheatsheet/pastableExamples/Variants_Tutorial repetition 1: 367.646 ms, 4 errors, 2 warnings
+10:19:49 cheatsheet/pastableExamples/Viewpoints_Tutorial repetition 1 of 1
+10:19:49 cheatsheet/pastableExamples/Viewpoints_Tutorial repetition 1: 504.878 ms, 0 errors, 1 warnings
+10:19:50 cheatsheet/pastableExamples/Views_Sheet_1ViewDefinition repetition 1 of 1
+10:19:50 cheatsheet/pastableExamples/Views_Sheet_1ViewDefinition repetition 1: 304.264 ms, 0 errors, 0 warnings
+10:19:50 cheatsheet/pastableExamples/Views_Sheet_2ViewUsage repetition 1 of 1
+10:19:50 cheatsheet/pastableExamples/Views_Sheet_2ViewUsage repetition 1: 398.221 ms, 0 errors, 1 warnings
+10:19:51 cheatsheet/pastableExamples/Views_Sheet_3Viewpoint repetition 1 of 1
+10:19:51 cheatsheet/pastableExamples/Views_Sheet_3Viewpoint repetition 1: 367.330 ms, 0 errors, 0 warnings
+10:19:51 cheatsheet/pastableExamples/Views_Sheet_4ExposeContent repetition 1 of 1
+10:19:52 cheatsheet/pastableExamples/Views_Sheet_4ExposeContent repetition 1: 344.059 ms, 0 errors, 0 warnings
+10:19:52 cheatsheet/pastableExamples/Views_Sheet_5Filter repetition 1 of 1
+10:19:52 cheatsheet/pastableExamples/Views_Sheet_5Filter repetition 1: 431.653 ms, 0 errors, 0 warnings
+10:19:52 cheatsheet/pastableExamples/Views_Sheet_6RenderingStyle repetition 1 of 1
+10:19:53 cheatsheet/pastableExamples/Views_Sheet_6RenderingStyle repetition 1: 278.756 ms, 0 errors, 0 warnings
+10:19:53 cheatsheet/pastableExamples/Views_Tutorial repetition 1 of 1
+10:19:53 cheatsheet/pastableExamples/Views_Tutorial repetition 1: 413.305 ms, 3 errors, 9 warnings
+10:19:53 dsl/DSLinSysML repetition 1 of 1
+10:19:54 dsl/DSLinSysML repetition 1: 668.619 ms, 0 errors, 0 warnings
+10:19:54 dassault/Actions repetition 1 of 1
+10:19:55 dassault/Actions repetition 1: 861.534 ms, 24 errors, 0 warnings
+10:19:55 dassault/Flows repetition 1 of 1
+10:19:56 dassault/Flows repetition 1: 511.473 ms, 9 errors, 0 warnings
+10:19:56 dassault/Import repetition 1 of 1
+10:19:56 dassault/Import repetition 1: 409.258 ms, 3 errors, 0 warnings
+10:19:57 dassault/Index repetition 1 of 1
+10:19:57 dassault/Index repetition 1: 275.444 ms, 3 errors, 0 warnings
+10:19:57 dassault/Individual repetition 1 of 1
+10:19:57 dassault/Individual repetition 1: 495.700 ms, 3 errors, 0 warnings
+10:19:58 dassault/Interfaces repetition 1 of 1
+10:19:58 dassault/Interfaces repetition 1: 630.544 ms, 9 errors, 0 warnings
+10:19:58 dassault/Metadata repetition 1 of 1
+10:19:59 dassault/Metadata repetition 1: 749.142 ms, 20 errors, 7 warnings
+10:19:59 dassault/N-ary Interfaces repetition 1 of 1
+10:20:00 dassault/N-ary Interfaces repetition 1: 667.111 ms, 3 errors, 0 warnings
+10:20:00 dassault/Requirements Derivation repetition 1 of 1
+10:20:01 dassault/Requirements Derivation repetition 1: 763.291 ms, 3 errors, 0 warnings
+10:20:01 dassault/States repetition 1 of 1
+10:20:02 dassault/States repetition 1: 849.734 ms, 3 errors, 0 warnings
+10:20:02 dassault/Structural and Behavior Modeling repetition 1 of 1
+10:20:03 dassault/Structural and Behavior Modeling repetition 1: 515.649 ms, 3 errors, 0 warnings
+10:20:03 dassault/Use Case repetition 1 of 1
+10:20:04 dassault/Use Case repetition 1: 938.672 ms, 12 errors, 0 warnings
+10:20:04 dassault/ViewsRenderingAndExposedElements repetition 1 of 1
+10:20:14 dassault/ViewsRenderingAndExposedElements repetition 1: 9642.069 ms, 124 errors, 0 warnings
+10:20:14 pilot-repro/V1 repetition 1 of 1
+10:20:14 pilot-repro/V1 repetition 1: 331.479 ms, 0 errors, 1 warnings
+10:20:14 pilot-repro/V10a repetition 1 of 1
+10:20:15 pilot-repro/V10a repetition 1: 404.561 ms, 0 errors, 0 warnings
+10:20:15 pilot-repro/V10b repetition 1 of 1
+10:20:16 pilot-repro/V10b repetition 1: 411.976 ms, 0 errors, 2 warnings
+10:20:16 pilot-repro/V10c repetition 1 of 1
+10:20:16 pilot-repro/V10c repetition 1: 372.407 ms, 0 errors, 2 warnings
+10:20:16 pilot-repro/V10d repetition 1 of 1
+10:20:17 pilot-repro/V10d repetition 1: 464.198 ms, 3 errors, 3 warnings
+10:20:17 pilot-repro/V10e repetition 1 of 1
+10:20:17 pilot-repro/V10e repetition 1: 484.468 ms, 1 errors, 1 warnings
+10:20:18 pilot-repro/V10f repetition 1 of 1
+10:20:18 pilot-repro/V10f repetition 1: 420.733 ms, 0 errors, 2 warnings
+10:20:18 pilot-repro/V10g repetition 1 of 1
+10:20:19 pilot-repro/V10g repetition 1: 443.029 ms, 0 errors, 0 warnings
+10:20:19 pilot-repro/V1ok repetition 1 of 1
+10:20:19 pilot-repro/V1ok repetition 1: 332.916 ms, 0 errors, 0 warnings
+10:20:19 pilot-repro/V2 repetition 1 of 1
+10:20:20 pilot-repro/V2 repetition 1: 423.061 ms, 0 errors, 2 warnings
+10:20:20 pilot-repro/V2x repetition 1 of 1
+10:20:20 pilot-repro/V2x repetition 1: 424.549 ms, 0 errors, 3 warnings
+10:20:20 pilot-repro/V3 repetition 1 of 1
+10:20:21 pilot-repro/V3 repetition 1: 341.162 ms, 0 errors, 4 warnings
+10:20:21 pilot-repro/V4a repetition 1 of 1
+10:20:21 pilot-repro/V4a repetition 1: 467.580 ms, 0 errors, 2 warnings
+10:20:22 pilot-repro/V4b repetition 1 of 1
+10:20:22 pilot-repro/V4b repetition 1: 338.307 ms, 0 errors, 0 warnings
+10:20:22 pilot-repro/V5 repetition 1 of 1
+10:20:22 pilot-repro/V5 repetition 1: 358.469 ms, 0 errors, 0 warnings
+10:20:23 pilot-repro/V6a repetition 1 of 1
+10:20:23 pilot-repro/V6a repetition 1: 300.621 ms, 0 errors, 0 warnings
+10:20:23 pilot-repro/V6b repetition 1 of 1
+10:20:23 pilot-repro/V6b repetition 1: 430.864 ms, 0 errors, 0 warnings
+10:20:24 pilot-repro/V6d repetition 1 of 1
+10:20:24 pilot-repro/V6d repetition 1: 279.672 ms, 0 errors, 0 warnings
+10:20:24 pilot-repro/V6f repetition 1 of 1
+10:20:25 pilot-repro/V6f repetition 1: 462.286 ms, 10 errors, 3 warnings
+10:20:25 pilot-repro/V7a repetition 1 of 1
+10:20:25 pilot-repro/V7a repetition 1: 315.062 ms, 0 errors, 0 warnings
+10:20:25 pilot-repro/V7b repetition 1 of 1
+10:20:26 pilot-repro/V7b repetition 1: 326.579 ms, 0 errors, 0 warnings
+10:20:26 pilot-repro/V8 repetition 1 of 1
+10:20:26 pilot-repro/V8 repetition 1: 407.759 ms, 1 errors, 1 warnings
+10:20:26 pilot-repro/V9 repetition 1 of 1
+10:20:27 pilot-repro/V9 repetition 1: 469.712 ms, 0 errors, 1 warnings
+10:20:27 misc/test_extend repetition 1 of 1
+10:20:27 misc/test_extend repetition 1: 315.432 ms, 5 errors, 0 warnings
+10:20:27 examples/NameCollisionExamples repetition 1 of 1
+10:20:28 examples/NameCollisionExamples repetition 1: 674.967 ms, 0 errors, 14 warnings
+10:20:28 examples/NameCollisionErrorForm repetition 1 of 1
+10:20:29 examples/NameCollisionErrorForm repetition 1: 437.907 ms, 1 errors, 1 warnings
+10:20:29 examples/MassTypedByMass repetition 1 of 1
+10:20:29 examples/MassTypedByMass repetition 1: 482.184 ms, 3 errors, 3 warnings
+10:20:30 examples/16_medical_device_stability_v2 repetition 1 of 1
+10:20:30 examples/16_medical_device_stability_v2 repetition 1: 812.464 ms, 1 errors, 13 warnings
+10:20:31 examples/lint_metadata_examples repetition 1 of 1
+10:20:31 examples/lint_metadata_examples repetition 1: 563.917 ms, 96 errors, 0 warnings
+10:20:31 examples/lint_test repetition 1 of 1
+10:20:32 examples/lint_test repetition 1: 285.636 ms, 0 errors, 0 warnings
+10:20:32 kpar/stockticker repetition 1 of 1
+10:20:39 kpar/stockticker repetition 1: 6794.288 ms, 356 errors, 176 warnings
+10:20:40 kpar/name-collision-examples repetition 1 of 1
+10:20:40 kpar/name-collision-examples repetition 1: 674.907 ms, 0 errors, 14 warnings
+10:20:41 kpar/two-members repetition 1 of 1
+10:20:41 kpar/two-members repetition 1: 516.880 ms, 0 errors, 0 warnings
+10:20:41 kpar/two-members-error repetition 1 of 1
+10:20:42 kpar/two-members-error repetition 1: 495.750 ms, 4 errors, 0 warnings
+10:20:42 kpar/invalid-no-project: skipped, invalid KPAR (checked by this runner; the pilot reads no KPARs): no .project.json
+10:20:42 kpar/invalid-not-a-zip: skipped, invalid KPAR (checked by this runner; the pilot reads no KPARs): not a zip archive: zip END header not found
+10:20:42 wrote conformance/results/pilot_MacBook-Pro-2.local_20261027-101719 (278 rows, 1857 diagnostics)

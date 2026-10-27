@@ -1,0 +1,234 @@
+tool,file_id,member,source,severity,line,column,code,message
+pilot,errors-m,,linking,error,263,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,267,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,493,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,497,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,723,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,727,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,953,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,957,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,1183,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,1187,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,1413,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,1417,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,1643,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,1647,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,1873,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,1877,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,2103,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,2107,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,2333,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,2337,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,2563,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,2567,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,2793,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,2797,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,3023,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,3027,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,3253,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,3257,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,3483,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,3487,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,3713,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,3717,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,3943,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,3947,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,4173,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,4177,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,4403,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,4407,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,linking,error,4633,25,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Common::DataPrt'.
+pilot,errors-m,,linking,error,4637,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'costt'.
+pilot,errors-m,,validation,error,263,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,266,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,276,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0010"
+pilot,errors-m,,validation,error,493,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,496,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,506,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0020"
+pilot,errors-m,,validation,error,723,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,726,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,736,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0030"
+pilot,errors-m,,validation,error,953,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,956,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,966,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0040"
+pilot,errors-m,,validation,error,1183,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,1186,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,1196,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0050"
+pilot,errors-m,,validation,error,1413,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,1416,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,1426,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0060"
+pilot,errors-m,,validation,error,1643,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,1646,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,1656,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0070"
+pilot,errors-m,,validation,error,1873,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,1876,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,1886,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0080"
+pilot,errors-m,,validation,error,2103,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,2106,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,2116,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0090"
+pilot,errors-m,,validation,error,2333,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,2336,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,2346,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0100"
+pilot,errors-m,,validation,error,2563,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,2566,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,2576,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0110"
+pilot,errors-m,,validation,error,2793,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,2796,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,2806,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0120"
+pilot,errors-m,,validation,error,3023,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,3026,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,3036,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0130"
+pilot,errors-m,,validation,error,3253,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,3256,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,3266,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0140"
+pilot,errors-m,,validation,error,3483,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,3486,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,3496,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0150"
+pilot,errors-m,,validation,error,3713,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,3716,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,3726,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0160"
+pilot,errors-m,,validation,error,3943,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,3946,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,3956,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0170"
+pilot,errors-m,,validation,error,4173,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,4176,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,4186,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0180"
+pilot,errors-m,,validation,error,4403,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,4406,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,4416,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0190"
+pilot,errors-m,,validation,error,4633,13,validatePortUsageType_,A port must be typed by port definitions.
+pilot,errors-m,,validation,warning,4636,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Component
+pilot,errors-m,,validation,warning,4646,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0200"
+pilot,errors-m,,validation,warning,4661,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0010"
+pilot,errors-m,,validation,warning,4671,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0020"
+pilot,errors-m,,validation,warning,4681,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0030"
+pilot,errors-m,,validation,warning,4691,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0040"
+pilot,errors-m,,validation,warning,4701,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0050"
+pilot,errors-m,,validation,warning,4711,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0060"
+pilot,errors-m,,validation,warning,4721,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0070"
+pilot,errors-m,,validation,warning,4731,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0080"
+pilot,errors-m,,validation,warning,4741,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0090"
+pilot,errors-m,,validation,warning,4751,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0100"
+pilot,errors-m,,validation,warning,4761,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0110"
+pilot,errors-m,,validation,warning,4771,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0120"
+pilot,errors-m,,validation,warning,4781,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0130"
+pilot,errors-m,,validation,warning,4791,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0140"
+pilot,errors-m,,validation,warning,4801,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0150"
+pilot,errors-m,,validation,warning,4811,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0160"
+pilot,errors-m,,validation,warning,4821,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0170"
+pilot,errors-m,,validation,warning,4831,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0180"
+pilot,errors-m,,validation,warning,4841,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0190"
+pilot,errors-m,,validation,warning,4851,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'mass' from Component, Controller_0200"
+pilot,real-cameo-constructs,,validation,error,63,21,validateAttributeUsageType_,An attribute must be typed by attribute definitions.
+pilot,real-cameo-constructs,,validation,warning,63,21,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'self' from DataValue, Metaobject"
+pilot,real-cameo-constructs,,validation,warning,63,21,validateBindingConnectorTypeConformance,Bound features should have conforming types
+pilot,real-cameo-constructs,,validation,warning,66,58,validateBindingConnectorTypeConformance,Bound features should have conforming types
+pilot,real-cameo-constructs,,validation,error,78,82,validateFeatureReferenceExpressionReferentIsFeature,Must be a valid feature
+pilot,real-name-collisions,,validation,warning,14,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Vehicle
+pilot,real-name-collisions,,validation,warning,30,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Vehicle
+pilot,real-name-collisions,,validation,warning,36,13,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Vehicle
+pilot,real-name-collisions,,validation,warning,52,23,validateNamespaceDistinguishablity,Duplicate of other owned member name
+pilot,real-name-collisions,,validation,warning,53,23,validateNamespaceDistinguishablity,Duplicate of other owned member name
+pilot,real-name-collisions,,validation,warning,62,27,validateNamespaceDistinguishablity,Duplicate of other owned member name
+pilot,real-name-collisions,,validation,warning,63,23,validateNamespaceDistinguishablity,Duplicate of other owned member name
+pilot,real-name-collisions,,validation,warning,77,9,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'rating' from Insured, Powered"
+pilot,real-name-collisions,,validation,warning,191,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'cutoff' from TestRecordAsPublished
+pilot,real-name-collisions,,validation,warning,231,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Vehicle
+pilot,real-name-collisions,,validation,warning,246,27,validateNamespaceDistinguishablity,Duplicate of inherited member name 'weight' from Vehicle
+pilot,real-name-collisions,,validation,warning,280,13,validateNamespaceDistinguishablity,"Duplicate of inherited member name 'weight' from Metric, Scale"
+pilot,real-name-collisions,,validation,warning,305,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Vehicle
+pilot,real-name-collisions,,validation,warning,314,23,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Vehicle
+pilot,real-mass-typed-by-mass,,validation,warning,13,19,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Vehicle
+pilot,real-mass-typed-by-mass,,validation,error,13,9,validateAttributeUsageType_,An attribute must be typed by attribute definitions.
+pilot,real-mass-typed-by-mass,,validation,warning,21,19,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Vehicle
+pilot,real-mass-typed-by-mass,,validation,error,21,9,validateAttributeUsageType_,An attribute must be typed by attribute definitions.
+pilot,real-mass-typed-by-mass,,validation,warning,27,19,validateNamespaceDistinguishablity,Duplicate of inherited member name 'mass' from Vehicle
+pilot,real-mass-typed-by-mass,,validation,error,27,9,validateAttributeUsageType_,An attribute must be typed by attribute definitions.
+pilot,real-vehicle-legacy,,linking,error,416,41,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'Boolean'.
+pilot,real-vehicle-legacy,,linking,error,374,27,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Namespace 'USCU'.
+pilot,real-vehicle-legacy,,linking,error,76,54,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,112,54,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,164,72,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,339,65,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,445,46,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,529,49,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,671,55,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,672,55,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,673,67,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,687,59,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,693,46,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,868,66,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,882,45,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,1047,51,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,1175,53,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,1230,56,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,1355,65,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,1384,68,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'transportPassenger'.
+pilot,real-vehicle-legacy,,linking,error,1384,87,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Feature 'vehicle'.
+pilot,real-vehicle-legacy,,linking,error,1488,43,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,1490,60,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,linking,error,1492,18,org.eclipse.xtext.diagnostics.Diagnostic.Linking,Couldn't resolve reference to Type 'DS_Views::SymbolicViews::gv'.
+pilot,real-vehicle-legacy,,validation,error,55,61,validateInvocationExpressionInstantiatedType,Must invoke a behavior or a behavioral feature
+pilot,real-vehicle-legacy,,validation,error,58,87,validateInvocationExpressionInstantiatedType,Must invoke a behavior or a behavioral feature
+pilot,real-vehicle-legacy,,validation,error,70,117,validateInvocationExpressionInstantiatedType,Must invoke a behavior or a behavioral feature
+pilot,real-vehicle-legacy,,validation,error,76,17,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,76,17,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,112,17,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,112,17,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,164,17,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,164,17,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,339,17,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,339,17,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,416,17,validateAttributeUsageType_,An attribute must be typed by attribute definitions.
+pilot,real-vehicle-legacy,,validation,error,445,9,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,445,9,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,529,25,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,529,25,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,637,39,validateUsageType_,A usage must be typed by definitions.
+pilot,real-vehicle-legacy,,validation,error,644,39,validateUsageType_,A usage must be typed by definitions.
+pilot,real-vehicle-legacy,,validation,error,648,39,validateUsageType_,A usage must be typed by definitions.
+pilot,real-vehicle-legacy,,validation,error,671,21,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,671,21,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,672,21,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,672,21,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,673,21,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,673,21,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,684,53,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,684,84,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,685,30,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,685,66,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,686,30,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,686,65,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,687,21,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,687,21,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,693,17,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,693,17,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,705,58,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,705,82,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,710,59,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,710,77,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,868,17,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,868,17,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,882,17,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,882,17,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,944,21,validateConnectorRelatedFeatures,Must have at least two related elements
+pilot,real-vehicle-legacy,,validation,error,947,36,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,952,36,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,957,36,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,1047,21,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,1047,21,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,1157,30,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,1157,59,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,1175,13,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,1175,13,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,1230,13,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,1230,13,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,1355,21,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,1355,21,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,1447,36,validateConnectorTypeFeaturing,Must be an accessible feature (use dot notation for nesting)
+pilot,real-vehicle-legacy,,validation,error,1488,13,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,1488,13,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,1490,9,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,1490,9,validateViewUsageType_,A view must be typed by one view definition.
+pilot,real-vehicle-legacy,,validation,error,1492,5,validateOccurrenceUsageType_,"An occurrence, item or part must be typed by occurrence definitions."
+pilot,real-vehicle-legacy,,validation,error,1492,5,validateViewUsageType_,A view must be typed by one view definition.
