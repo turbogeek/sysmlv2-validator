@@ -30,14 +30,50 @@ public final class ModelIndexBuilder {
     public static final class Result {
         private final List<IndexedElement> elements;
         private final List<ReferenceSite> sites;
+        private final List<NameUse> uses;
+        private final Map<IndexedElement.ImportRecord, int[]> importSpans;
 
-        Result(List<IndexedElement> elements, List<ReferenceSite> sites) {
+        Result(List<IndexedElement> elements, List<ReferenceSite> sites, List<NameUse> uses,
+                Map<IndexedElement.ImportRecord, int[]> importSpans) {
             this.elements = elements;
             this.sites = sites;
+            this.uses = uses;
+            this.importSpans = importSpans;
         }
 
         public List<IndexedElement> getElements() { return elements; }
         public List<ReferenceSite> getSites() { return sites; }
+        /** Every name written in the file outside imports (collected with {@code collectSites}). */
+        public List<NameUse> getUses() { return uses; }
+        /**
+         * Source span of each import declaration of the file, including a visibility keyword written in
+         * front of it: {start char index, stop char index (inclusive)}. Collected with {@code collectSites}.
+         */
+        public Map<IndexedElement.ImportRecord, int[]> getImportSpans() { return importSpans; }
+    }
+
+    /** A name written in a file: its segments (up to the first '.'), the namespace it is resolved from. */
+    public static final class NameUse {
+        private final List<String> segments;
+        private final String scope;
+        private final boolean global;
+        private final int line;
+        private final int column;
+
+        NameUse(List<String> segments, String scope, boolean global, int line, int column) {
+            this.segments = List.copyOf(segments);
+            this.scope = scope;
+            this.global = global;
+            this.line = line;
+            this.column = column;
+        }
+
+        public List<String> getSegments() { return segments; }
+        public String getScope() { return scope; }
+        /** Written with '$::': resolved from the root, never through an import. */
+        public boolean isGlobal() { return global; }
+        public int getLine() { return line; }
+        public int getColumn() { return column; }
     }
 
     private final String fileKey;
@@ -46,6 +82,8 @@ public final class ModelIndexBuilder {
     private final boolean collectSites;
     private final Map<String, IndexedElement> elements = new LinkedHashMap<>();
     private final List<ReferenceSite> sites = new ArrayList<>();
+    private final List<NameUse> uses = new ArrayList<>();
+    private final Map<IndexedElement.ImportRecord, int[]> importSpans = new java.util.IdentityHashMap<>();
     private int anonymousCount;
     /** The last declaration, when it ended without ';' or '}' (its header may continue in the next rule). */
     private IndexedElement unterminated;
@@ -79,13 +117,17 @@ public final class ModelIndexBuilder {
             for (IndexedElement e : builder.elements.values()) {
                 if ("".equals(e.parentName)) {
                     for (IndexedElement.ImportRecord imp : root.imports) {
-                        e.imports.add(new IndexedElement.ImportRecord(imp.target, imp.mode, false));
+                        IndexedElement.ImportRecord copy = new IndexedElement.ImportRecord(imp.target, imp.mode, false);
+                        e.imports.add(copy);
+                        if (builder.importSpans.containsKey(imp)) {
+                            builder.importSpans.put(copy, builder.importSpans.get(imp));
+                        }
                     }
                 }
             }
             root.imports.clear();
         }
-        return new Result(new ArrayList<>(builder.elements.values()), builder.sites);
+        return new Result(new ArrayList<>(builder.elements.values()), builder.sites, builder.uses, builder.importSpans);
     }
 
     // ------------------------------------------------------------------------------------------
@@ -97,6 +139,9 @@ public final class ModelIndexBuilder {
         if (ctx instanceof SysMLv2Parser.ImportDeclarationContext imp) {
             recordImport(imp, scope);
             return;
+        }
+        if (collectSites) {
+            recordUse(ctx, scope);
         }
         if (collectSites && recordSite(ctx, scope, headerOwnerKind)) {
             return;
@@ -239,8 +284,93 @@ public final class ModelIndexBuilder {
                     element.redefines.add(segments(q));
                 }
                 collectSupertypes(child, element);
+                referenceSubsetting(ctx, i, element);
                 visit(child, scope, element.kind);
             }
+        }
+    }
+
+    /**
+     * The referenced feature of a reference form ({@code render DiagramInterchange::asRegularNode { ... }},
+     * {@code perform a { ... }}, {@code exhibit s { ... }}, {@code satisfy r { ... }}, {@code include u { ... }},
+     * {@code assert c { ... }}, {@code verify r { ... }}). The usage subsets the referenced feature (reference
+     * subsetting), so it inherits its members: {@code :>> height} in the render body redefines the rendering's
+     * height. A reference that is not a plain name makes the supertypes unknown.
+     */
+    private static void referenceSubsetting(ParserRuleContext ctx, int index, IndexedElement element) {
+        boolean referenceForm = ctx instanceof SysMLv2Parser.RenderStatementContext
+            || ctx instanceof SysMLv2Parser.PerformUsageContext
+            || ctx instanceof SysMLv2Parser.ExhibitUsageContext
+            || ctx instanceof SysMLv2Parser.SatisfyRequirementContext
+            || ctx instanceof SysMLv2Parser.IncludeUsageContext
+            || ctx instanceof SysMLv2Parser.VerifyRequirementContext
+            || ctx instanceof SysMLv2Parser.ConstraintUsageContext;
+        if (!referenceForm) {
+            return;
+        }
+        ParseTree child = ctx.getChild(index);
+        ParseTree previous = index > 0 ? ctx.getChild(index - 1) : null;
+        if (!(previous instanceof TerminalNode)) {
+            return;
+        }
+        int prevType = ((TerminalNode) previous).getSymbol().getType();
+        boolean afterKeyword = prevType == SysMLv2Parser.RENDER || prevType == SysMLv2Parser.PERFORM
+            || prevType == SysMLv2Parser.EXHIBIT || prevType == SysMLv2Parser.SATISFY
+            || prevType == SysMLv2Parser.INCLUDE || prevType == SysMLv2Parser.VERIFY
+            || prevType == SysMLv2Parser.ASSERT || prevType == SysMLv2Parser.NOT;
+        if (!afterKeyword) {
+            return;
+        }
+        List<String> segs = null;
+        if (child instanceof TerminalNode t && t.getSymbol().getType() == SysMLv2Parser.ID) {
+            segs = List.of(t.getText());
+        } else if (child instanceof SysMLv2Parser.QualifiedNameContext q) {
+            segs = segments(q);
+        } else if (child instanceof SysMLv2Parser.FeatureChainContext f) {
+            if (f.DOT().isEmpty()) {
+                segs = new ArrayList<>();
+                for (SysMLv2Parser.NameContext n : f.name()) {
+                    segs.add(normalize(n.getText()));
+                }
+            }
+        } else if (child instanceof SysMLv2Parser.ExpressionContext e) {
+            SysMLv2Parser.QualifiedNameContext q = soleQualifiedName(e);
+            if (q != null) {
+                segs = segments(q);
+            }
+        } else {
+            return;
+        }
+        if (segs == null) {
+            element.opaqueSupertypes = true;
+        } else {
+            element.supertypes.add(segs);
+        }
+    }
+
+    /** The qualified name an expression consists of, or null if it is anything else. */
+    private static SysMLv2Parser.QualifiedNameContext soleQualifiedName(ParserRuleContext e) {
+        ParserRuleContext node = e;
+        while (true) {
+            if (node instanceof SysMLv2Parser.QualifiedNameContext q) {
+                return q;
+            }
+            ParserRuleContext only = null;
+            for (int i = 0; i < node.getChildCount(); i++) {
+                ParseTree c = node.getChild(i);
+                if (c instanceof ParserRuleContext r) {
+                    if (only != null) {
+                        return null;
+                    }
+                    only = r;
+                } else {
+                    return null;
+                }
+            }
+            if (only == null || only.getStart() != e.getStart() || only.getStop() != e.getStop()) {
+                return null;
+            }
+            node = only;
         }
     }
 
@@ -582,12 +712,60 @@ public final class ModelIndexBuilder {
         }
         IndexedElement owner = elements.get(scope);
         if (owner != null) {
-            owner.imports.add(new IndexedElement.ImportRecord(segs, mode, !isPrivate));
+            IndexedElement.ImportRecord record = new IndexedElement.ImportRecord(segs, mode, !isPrivate);
+            owner.imports.add(record);
+            if (collectSites) {
+                ParserRuleContext span = imp.getParent() instanceof SysMLv2Parser.NamespaceBodyElementContext nbe ? nbe : imp;
+                importSpans.put(record, new int[] {span.getStart().getStartIndex(), span.getStop().getStopIndex()});
+            }
         }
         if (collectSites) {
             Token start = target.getStart();
             sites.add(new ReferenceSite(ReferenceSite.Kind.IMPORT, segs, target.getText(), scope,
                 start.getLine(), start.getCharPositionInLine()));
+        }
+    }
+
+    /**
+     * Records the names written in a rule: a qualified name, or the leading '::' segments of a feature
+     * chain. Rules that {@link #recordSite} handles without visiting their children are covered too.
+     */
+    private void recordUse(ParserRuleContext ctx, String scope) {
+        if (ctx instanceof SysMLv2Parser.RenderStatementContext render && render.ID() != null) {
+            // 'render asNode;' names the rendering with a bare identifier
+            addUse(List.of(render.ID().getText()), false, scope, render.ID().getSymbol());
+            return;
+        }
+        if (ctx instanceof SysMLv2Parser.QualifiedNameContext q) {
+            addUse(segments(q), q.DOLLAR() != null, scope, q.getStart());
+            return;
+        }
+        if (ctx instanceof SysMLv2Parser.FeatureChainContext f) {
+            List<String> segs = new ArrayList<>();
+            segs.add(normalize(f.name(0).getText()));
+            for (int i = 1; i < f.getChildCount() - 1; i += 2) {
+                if (!"::".equals(f.getChild(i).getText())) {
+                    break;
+                }
+                segs.add(normalize(f.getChild(i + 1).getText()));
+            }
+            addUse(segs, false, scope, f.getStart());
+            return;
+        }
+        if (ctx instanceof SysMLv2Parser.TypingClauseContext
+                || ctx instanceof SysMLv2Parser.SpecializesClauseContext
+                || ctx instanceof SysMLv2Parser.HashAnnotationContext) {
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                if (ctx.getChild(i) instanceof ParserRuleContext c) {
+                    recordUse(c, scope);
+                }
+            }
+        }
+    }
+
+    private void addUse(List<String> segs, boolean global, String scope, Token start) {
+        if (!segs.isEmpty()) {
+            uses.add(new NameUse(segs, scope, global, start.getLine(), start.getCharPositionInLine()));
         }
     }
 

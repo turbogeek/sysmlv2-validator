@@ -158,6 +158,54 @@ public final class ModelIndex {
         return lookupMember(namespace, name, false, 0);
     }
 
+    /** The import through which a simple name becomes visible in a namespace. */
+    public static final class ImportUse {
+        private final String namespace;
+        private final IndexedElement.ImportRecord record;
+        private final Set<String> targets;
+
+        ImportUse(String namespace, IndexedElement.ImportRecord record, Set<String> targets) {
+            this.namespace = namespace;
+            this.record = record;
+            this.targets = targets;
+        }
+
+        /** The namespace that owns the import. */
+        public String getNamespace() { return namespace; }
+        public IndexedElement.ImportRecord getRecord() { return record; }
+        /** The elements the name resolves to through the import. */
+        public Set<String> getTargets() { return targets; }
+    }
+
+    /**
+     * Find the import, if any, that makes a simple name visible in {@code scope}. The search follows
+     * {@link #resolve}: each namespace from {@code scope} outwards, owned members first, then its imports
+     * in declaration order, then inherited members. Returns null when the name is owned or inherited
+     * before any import supplies it, or when nothing supplies it.
+     */
+    public synchronized ImportUse importUse(String name, String scope) {
+        String namespace = scope;
+        int guard = 0;
+        while (namespace != null && guard++ < 256) {
+            if (!owned(namespace, name).isEmpty()) {
+                return null;
+            }
+            for (IndexedElement record : records(namespace)) {
+                for (IndexedElement.ImportRecord imp : record.imports) {
+                    Resolution r = viaImport(namespace, imp, name, 1);
+                    if (r.status == Status.FOUND) {
+                        return new ImportUse(namespace, imp, r.targets);
+                    }
+                }
+            }
+            if (lookupMember(namespace, name, false, 1).status == Status.FOUND) {
+                return null;
+            }
+            namespace = namespace.isEmpty() ? null : parentOf(namespace);
+        }
+        return null;
+    }
+
     /**
      * True when this layer, not only a parent layer, has the element: it belongs to the validated files
      * rather than to a library.

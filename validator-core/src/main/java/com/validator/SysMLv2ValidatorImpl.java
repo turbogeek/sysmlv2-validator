@@ -467,6 +467,32 @@ public class SysMLv2ValidatorImpl implements Validator {
         return libraryCache;
     }
 
+    /**
+     * Plan the replacement of private wildcard imports by element imports of the names used
+     * (see {@link com.validator.semantic.index.ImportMinimizer}). Nothing is written.
+     *
+     * @param files the model files, resolved together
+     * @return the rewritten texts, the changes and any resolution mismatch
+     * @throws IOException if a file cannot be read
+     */
+    public com.validator.semantic.index.ImportMinimizer.Result minimizeImports(List<File> files) throws IOException {
+        return minimizeImports(files, false);
+    }
+
+    /**
+     * As {@link #minimizeImports(List)}; with {@code owningNamespace}, each element is imported from the
+     * namespace that owns it ({@code ISQBase::MassValue} rather than {@code ISQ::MassValue}).
+     *
+     * @param files the model files, resolved together
+     * @param owningNamespace import from the owning namespace instead of through re-exports
+     * @return the rewritten texts, the changes and any resolution mismatch
+     * @throws IOException if a file cannot be read
+     */
+    public com.validator.semantic.index.ImportMinimizer.Result minimizeImports(List<File> files, boolean owningNamespace)
+            throws IOException {
+        return com.validator.semantic.index.ImportMinimizer.minimize(files, libraryIndex, parserFacade, owningNamespace);
+    }
+
     @Override
     public String getVersion() {
         return VERSION;

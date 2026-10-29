@@ -101,10 +101,67 @@ public class ValidatorCLI implements Callable<Integer> {
     private boolean errorFreeOnly = true;
 
     @Option(
+        names = {"--minimize-imports"},
+        description = "Replace private wildcard imports with element imports of the names each file uses, "
+            + "checked by resolving every name again. Lists the changes; add --write to save them. "
+            + "Runs only when validation finds no errors."
+    )
+    private boolean minimizeImports = false;
+
+    @Option(
+        names = {"--import-from-owner"},
+        description = "With --minimize-imports: import each element from the namespace that owns it "
+            + "(ISQBase::MassValue) instead of through re-exports (ISQ::MassValue)"
+    )
+    private boolean importFromOwner = false;
+
+    @Option(
+        names = {"--write"},
+        description = "With --minimize-imports: write the rewritten files"
+    )
+    private boolean writeChanges = false;
+
+    @Option(
         names = {"--clear-cache"},
         description = "Delete the parsed-library cache before validating"
     )
     private boolean clearCache = false;
+
+    /** Plan, check and optionally write the import minimization. Returns false if the check failed. */
+    private boolean minimizeImports(SysMLv2ValidatorImpl validator, List<File> filesToValidate) throws IOException {
+        System.out.println("========================================");
+        System.out.println("IMPORT MINIMIZATION");
+        System.out.println("========================================");
+        com.validator.semantic.index.ImportMinimizer.Result plan =
+            validator.minimizeImports(filesToValidate, importFromOwner);
+        for (String change : plan.getChanges()) {
+            System.out.println("  " + change);
+        }
+        System.out.println("Wildcard imports: " + plan.getWildcardsBefore() + " (replaced "
+            + plan.getWildcardsReplaced() + ", removed " + plan.getWildcardsRemoved() + ", public kept "
+            + plan.getPublicWildcardsKept() + "); element imports added: " + plan.getElementImportsAdded()
+            + "; files changed: " + plan.getRewritten().size());
+        if (!plan.getMismatches().isEmpty()) {
+            System.out.println("NOT WRITTEN: " + plan.getMismatches().size()
+                + " name(s) would resolve differently after the rewrite:");
+            for (String m : plan.getMismatches()) {
+                System.out.println("  " + m);
+            }
+            return false;
+        }
+        System.out.println("Every name resolves to the same element after the rewrite.");
+        if (writeChanges) {
+            for (java.util.Map.Entry<File, String> e : plan.getRewritten().entrySet()) {
+                java.nio.file.Files.writeString(e.getKey().toPath(), e.getValue(),
+                    java.nio.charset.StandardCharsets.UTF_8);
+            }
+            System.out.println("Wrote " + plan.getRewritten().size() + " file(s)");
+        } else if (!plan.getRewritten().isEmpty()) {
+            System.out.println("Nothing written (add --write)");
+        }
+        System.out.println();
+        return true;
+    }
 
     @Override
     public Integer call() throws Exception {
@@ -201,6 +258,16 @@ public class ValidatorCLI implements Callable<Integer> {
             if (refactoredFiles > 0) {
                 System.out.println();
                 System.out.println("Refactored " + refactoredFiles + " file(s)");
+            }
+        }
+
+        if (minimizeImports) {
+            if (totalErrors > 0) {
+                System.out.println("Imports not minimized: fix the validation errors first");
+                return 1;
+            }
+            if (!minimizeImports(validator, filesToValidate)) {
+                return 1;
             }
         }
 
