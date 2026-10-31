@@ -685,9 +685,14 @@ transitionUsage
     | TRANSITION featureChain transitionBody // source as a qualified name or chain, e.g. transition A::B then C;
     ;
 
+// SatisfyRequirementUsage (SysML v2 8.2.2.21): 'satisfy' ( OwnedReferenceSubsetting FeatureSpecializationPart?
+// | 'requirement' UsageDeclaration ). Only the 'requirement' form declares a name: 'satisfy r;' references r. With
+// REQUIREMENT optional here, 'satisfy r;' parsed as a new usage named r, so r was never resolved.
 satisfyRequirement
-      : ASSERT? NOT? SATISFY REQUIREMENT? usageName? featureRelationships? (BY expression)? requirementBody?
+      : ASSERT? NOT? SATISFY REQUIREMENT usageName? featureRelationships? (BY expression)? requirementBody?
+      | ASSERT? NOT? SATISFY CONCERN expression (BY expression)? featureRelationships? requirementBody? // accepted before
       | ASSERT? NOT? SATISFY expression (BY expression)? featureRelationships? requirementBody?
+      | ASSERT? NOT? SATISFY featureRelationships (BY expression)? requirementBody?
       ;
 
 // SysML v2 8.2.2.14.2: ( 'allocation' UsageDeclaration ( 'allocate' ConnectorPart )? | 'allocate' ConnectorPart ) UsageBody,

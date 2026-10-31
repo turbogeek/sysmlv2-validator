@@ -794,6 +794,15 @@ public final class ModelIndexBuilder {
             }
             return true;
         }
+        if (ctx instanceof SysMLv2Parser.SatisfyRequirementContext satisfy && satisfy.REQUIREMENT() == null
+                && !satisfy.expression().isEmpty()) {
+            // 'satisfy r;' / 'satisfy r by x;': the satisfied requirement is referenced by name
+            SysMLv2Parser.QualifiedNameContext q = soleQualifiedName(satisfy.expression(0));
+            if (q != null) {
+                addSite(ReferenceSite.Kind.REFERENCE, q, scope);
+            }
+            return false;
+        }
         if (ctx instanceof SysMLv2Parser.MetadataAnnotationContext meta && !meta.qualifiedName().isEmpty()) {
             addSite(ReferenceSite.Kind.METADATA, meta.qualifiedName(0), scope);
             return false;

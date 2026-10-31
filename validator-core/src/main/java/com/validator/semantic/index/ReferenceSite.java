@@ -9,7 +9,7 @@ import java.util.List;
 public final class ReferenceSite {
 
     /** What the name is used for; determines the wording of the error. */
-    public enum Kind { IMPORT, TYPE, SPECIALIZATION, METADATA }
+    public enum Kind { IMPORT, TYPE, SPECIALIZATION, METADATA, REFERENCE }
 
     private final Kind kind;
     private final List<String> segments;

@@ -62,6 +62,7 @@ public final class ReferenceChecker {
             case TYPE -> "type";
             case SPECIALIZATION -> "supertype";
             case METADATA -> "metadata definition";
+            case REFERENCE -> "referenced feature";
         };
         String missing = failed >= 0 && failed < segs.size() ? segs.get(failed) : site.getText();
         if (segs.size() == 1 || failed <= 0) {
