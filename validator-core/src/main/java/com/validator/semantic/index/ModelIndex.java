@@ -214,6 +214,16 @@ public final class ModelIndex {
         return byName.containsKey(qualifiedName);
     }
 
+    /** True when a parent layer (a library) declares an element with this simple name. */
+    public synchronized boolean declaredInLibrary(String name) {
+        for (ModelIndex layer = parent; layer != null; layer = layer.parent) {
+            if (layer.bySimpleName.containsKey(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** The records of an element (several when a namespace is declared more than once). */
     public synchronized List<IndexedElement> recordsOf(String qualifiedName) {
         return records(qualifiedName);

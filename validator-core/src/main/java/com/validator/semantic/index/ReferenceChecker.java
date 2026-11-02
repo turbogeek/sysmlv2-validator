@@ -27,7 +27,7 @@ public final class ReferenceChecker {
     public static List<ValidationError> check(List<ReferenceSite> sites, ModelIndex index, String filePath) {
         List<ValidationError> errors = new ArrayList<>();
         for (ReferenceSite site : sites) {
-            if (site.getKind() == ReferenceSite.Kind.REFERENCE && site.getSegments().size() == 1
+            if ((site.getKind() == ReferenceSite.Kind.REFERENCE || site.getKind() == ReferenceSite.Kind.SUBSETTING) && site.getSegments().size() == 1
                     && ("self".equals(site.getSegments().get(0)) || "that".equals(site.getSegments().get(0)))) {
                 // 'send x to self': the context feature, not a declared name
                 continue;
@@ -43,6 +43,12 @@ public final class ReferenceChecker {
                 continue;
             }
             if (r.getStatus() != ModelIndex.Status.NOT_FOUND) {
+                continue;
+            }
+            if (site.getKind() == ReferenceSite.Kind.SUBSETTING && r.getFailedSegment() == 0
+                    && index.declaredInLibrary(site.getSegments().get(0))) {
+                // A feature the usage may inherit from its implicit library base type ('item :> envelopingShapes',
+                // a flow's 'end ::> source'), which the index does not record as a supertype
                 continue;
             }
             errors.add(new ValidationError.Builder()
@@ -147,6 +153,7 @@ public final class ReferenceChecker {
             case SPECIALIZATION -> "supertype";
             case METADATA -> "metadata definition";
             case REFERENCE -> "referenced feature";
+            case SUBSETTING -> "subsetted feature";
         };
         String missing = failed >= 0 && failed < segs.size() ? segs.get(failed) : site.getText();
         if (segs.size() == 1 || failed <= 0) {

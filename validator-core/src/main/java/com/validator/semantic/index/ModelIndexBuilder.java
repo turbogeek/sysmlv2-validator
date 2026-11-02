@@ -799,6 +799,21 @@ public final class ModelIndexBuilder {
             }
             return true;
         }
+        if ((ctx instanceof SysMLv2Parser.SpecializesClauseContext && !isClassifierKind(headerOwnerKind))
+                || ctx instanceof SysMLv2Parser.SubsetsClauseContext || ctx instanceof SysMLv2Parser.ReferencesClauseContext) {
+            // A usage's ':>' / 'subsets' (subsetting) and '::>' / 'references' (reference subsetting, e.g. the ends of a
+            // '#derivation connection'): the subsetted feature, resolved from the usage's namespace; for 'a.b.c' the
+            // leading name and the chain after it
+            for (int i = 0; i < ctx.getChildCount(); i++) {
+                ParseTree c = ctx.getChild(i);
+                if (c instanceof SysMLv2Parser.QualifiedNameContext q) {
+                    addSite(ReferenceSite.Kind.SUBSETTING, q, scope);
+                } else if (c instanceof SysMLv2Parser.FeatureChainContext f) {
+                    leadingReference(f, scope, ReferenceSite.Kind.SUBSETTING);
+                }
+            }
+            return true;
+        }
         if (ctx instanceof SysMLv2Parser.SatisfyRequirementContext satisfy && satisfy.REQUIREMENT() == null
                 && !satisfy.expression().isEmpty()) {
             // 'satisfy r;' / 'satisfy r by x;': the satisfied requirement is referenced by name
@@ -880,6 +895,10 @@ public final class ModelIndexBuilder {
 
     /** A reference site for the qualified name an expression starts with ('a::b' of 'a::b.c.d'). */
     private void leadingReference(ParserRuleContext e, String scope) {
+        leadingReference(e, scope, ReferenceSite.Kind.REFERENCE);
+    }
+
+    private void leadingReference(ParserRuleContext e, String scope, ReferenceSite.Kind kind) {
         ParserRuleContext node = e;
         while (node != null) {
             if (node instanceof SysMLv2Parser.PrimaryExpressionContext pe && pe.getChildCount() > 1
@@ -898,12 +917,12 @@ public final class ModelIndexBuilder {
                     }
                 }
                 Token t = q.getStart();
-                sites.add(new ReferenceSite(ReferenceSite.Kind.REFERENCE, segments(q), pe.getText(), scope, t.getLine(),
+                sites.add(new ReferenceSite(kind, segments(q), pe.getText(), scope, t.getLine(),
                     t.getCharPositionInLine(), chain));
                 return;
             }
             if (node instanceof SysMLv2Parser.QualifiedNameContext q) {
-                addSite(ReferenceSite.Kind.REFERENCE, q, scope);
+                addSite(kind, q, scope);
                 return;
             }
             if (node instanceof SysMLv2Parser.FeatureChainContext f) {
@@ -923,7 +942,7 @@ public final class ModelIndexBuilder {
                     }
                 }
                 Token t = f.getStart();
-                sites.add(new ReferenceSite(ReferenceSite.Kind.REFERENCE, segs, f.getText(), scope, t.getLine(),
+                sites.add(new ReferenceSite(kind, segs, f.getText(), scope, t.getLine(),
                     t.getCharPositionInLine(), chain));
                 return;
             }
