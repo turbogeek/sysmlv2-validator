@@ -702,14 +702,19 @@ allocateUsage
     | ALLOCATE connectorPart usageBody
     ;
 
+// PerformActionUsage / ExhibitStateUsage (SysML v2 8.2.2.17, 8.2.2.18): with the 'action' / 'state' keyword the usage is
+// declared ('perform action a { }', 'exhibit state s { }'); without it, it references an existing one ('perform a;').
 performUsage
-    : PERFORM ACTION? expression (BY expression)? featureRelationships? usageBody?
-    | PERFORM ACTION? usageName? featureRelationships? usageBody
+    : PERFORM expression (BY expression)? featureRelationships? usageBody?
+    | PERFORM ACTION usageName? featureRelationships? usageBody?
+    | PERFORM ACTION expression (BY expression)? featureRelationships? usageBody? // accepted before: 'perform action a.b;'
     ;
 
 exhibitUsage
-    : EXHIBIT STATE? expression (BY expression)? featureRelationships? usageBody?
-    | EXHIBIT PARALLEL? STATE? usageName? PARALLEL? featureRelationships? stateUsageBody
+    : EXHIBIT expression (BY expression)? featureRelationships? usageBody?
+    | EXHIBIT PARALLEL? STATE usageName? PARALLEL? featureRelationships? stateUsageBody
+    | EXHIBIT STATE expression (BY expression)? featureRelationships? usageBody? // accepted before: 'exhibit state a.b;'
+    | EXHIBIT PARALLEL? usageName? PARALLEL? featureRelationships? stateUsageBody
     ;
 
 includeUsage

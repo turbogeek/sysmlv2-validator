@@ -151,6 +151,11 @@ public final class ModelIndexBuilder {
         }
 
         String[] declared = declaredNames(ctx);
+        if ((ctx instanceof SysMLv2Parser.AcceptClauseContext || ctx instanceof SysMLv2Parser.AcceptTransitionContext)
+                && ctx.getRuleContext(SysMLv2Parser.QualifiedNameContext.class, 0) == null) {
+            // 'accept Start then on;' types the payload by Start; only 'accept s : Start' names the payload
+            declared = null;
+        }
         if (declared != null && misreadAsName(ctx)) {
             declared = declared[1] == null ? null : new String[] {null, declared[1]};
         }
@@ -803,6 +808,51 @@ public final class ModelIndexBuilder {
             }
             return false;
         }
+        if (ctx instanceof SysMLv2Parser.AcceptTransitionContext || ctx instanceof SysMLv2Parser.AcceptClauseContext) {
+            // 'accept Start then on;': the payload is typed by Start (OwnedFeatureTyping); 'accept s : Start' names it
+            SysMLv2Parser.UsageNameContext un = ctx.getRuleContext(SysMLv2Parser.UsageNameContext.class, 0);
+            SysMLv2Parser.QualifiedNameContext typed = ctx.getRuleContext(SysMLv2Parser.QualifiedNameContext.class, 0);
+            SysMLv2Parser.FeatureChainContext chain = ctx.getRuleContext(SysMLv2Parser.FeatureChainContext.class, 0);
+            if (chain != null && chain.DOT().isEmpty()) {
+                // 'accept Start' parses as a feature chain of one or more '::' segments: the payload type
+                List<String> segs = new ArrayList<>();
+                for (SysMLv2Parser.NameContext n : chain.name()) {
+                    segs.add(normalize(n.getText()));
+                }
+                Token t = chain.getStart();
+                sites.add(new ReferenceSite(ReferenceSite.Kind.TYPE, segs, chain.getText(), scope, t.getLine(), t.getCharPositionInLine()));
+            } else if (typed != null) {
+                addSite(ReferenceSite.Kind.TYPE, typed, scope);
+            } else if (un != null && un.name() != null && un.shortName() == null) {
+                Token t = un.getStart();
+                List<String> segs = List.of(normalize(un.name().getText()));
+                sites.add(new ReferenceSite(ReferenceSite.Kind.TYPE, segs, un.getText(), scope, t.getLine(), t.getCharPositionInLine()));
+                uses.add(new NameUse(segs, scope, false, t.getLine(), t.getCharPositionInLine()));
+            }
+            viaSites(ctx, scope);
+            return false;
+        }
+        if ((ctx instanceof SysMLv2Parser.ExhibitUsageContext || ctx instanceof SysMLv2Parser.PerformUsageContext)
+                && ctx.getChildCount() > 1 && ctx.getChild(1) instanceof SysMLv2Parser.ExpressionContext e
+                && ctx.getRuleContext(SysMLv2Parser.FeatureRelationshipsContext.class, 0) == null) {
+            // 'exhibit s;' / 'perform a;': the referenced state or action. With a typing ('perform a : A;') the
+            // form is ambiguous in practice (often meant as a declaration), so it is not checked.
+            SysMLv2Parser.QualifiedNameContext q = soleQualifiedName(e);
+            if (q != null) {
+                addSite(ReferenceSite.Kind.REFERENCE, q, scope);
+            }
+            return false;
+        }
+        if (ctx instanceof SysMLv2Parser.NewExpressionContext created && created.qualifiedName() != null) {
+            // 'send new Start() via p': the signal type
+            addSite(ReferenceSite.Kind.TYPE, created.qualifiedName(), scope);
+            return false;
+        }
+        if (ctx instanceof SysMLv2Parser.DoActionClauseContext || ctx instanceof SysMLv2Parser.EffectClauseContext
+                || ctx instanceof SysMLv2Parser.SendStatementContext || ctx instanceof SysMLv2Parser.SendUsageContext) {
+            viaSites(ctx, scope);
+            return false;
+        }
         if (ctx instanceof SysMLv2Parser.MetadataAnnotationContext meta && !meta.qualifiedName().isEmpty()) {
             addSite(ReferenceSite.Kind.METADATA, meta.qualifiedName(0), scope);
             return false;
@@ -820,6 +870,19 @@ public final class ModelIndexBuilder {
             && !kind.equals("FeatureDefinition")
             && !kind.equals("ConnectorDefinition")
             && !kind.equals("BindingConnectorDefinition");
+    }
+
+    /** 'via p': the port (or other feature) the signal is sent or accepted through, when it is a plain name. */
+    private void viaSites(ParserRuleContext ctx, String scope) {
+        for (int i = 0; i + 1 < ctx.getChildCount(); i++) {
+            if (ctx.getChild(i) instanceof TerminalNode t && t.getSymbol().getType() == SysMLv2Parser.VIA
+                    && ctx.getChild(i + 1) instanceof SysMLv2Parser.ExpressionContext e) {
+                SysMLv2Parser.QualifiedNameContext q = soleQualifiedName(e);
+                if (q != null) {
+                    addSite(ReferenceSite.Kind.REFERENCE, q, scope);
+                }
+            }
+        }
     }
 
     private void addSite(ReferenceSite.Kind kind, SysMLv2Parser.QualifiedNameContext q, String scope) {
