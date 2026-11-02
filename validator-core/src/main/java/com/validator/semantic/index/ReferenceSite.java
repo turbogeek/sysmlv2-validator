@@ -17,14 +17,24 @@ public final class ReferenceSite {
     private final String scope;
     private final int line;
     private final int column;
+    private final List<String> chain;
 
     public ReferenceSite(Kind kind, List<String> segments, String text, String scope, int line, int column) {
+        this(kind, segments, text, scope, line, column, List.of());
+    }
+
+    /**
+     * A name followed by a feature chain: 'lab.supply.out' is the name 'lab' with the chain (supply, out); each chain
+     * name must be a feature of the element the previous name resolves to.
+     */
+    public ReferenceSite(Kind kind, List<String> segments, String text, String scope, int line, int column, List<String> chain) {
         this.kind = kind;
         this.segments = List.copyOf(segments);
         this.text = text;
         this.scope = scope;
         this.line = line;
         this.column = column;
+        this.chain = List.copyOf(chain);
     }
 
     public Kind getKind() { return kind; }
@@ -36,4 +46,6 @@ public final class ReferenceSite {
     public String getScope() { return scope; }
     public int getLine() { return line; }
     public int getColumn() { return column; }
+    /** Feature names after the first '.', resolved one after the other (empty for a plain name). */
+    public List<String> getChain() { return chain; }
 }

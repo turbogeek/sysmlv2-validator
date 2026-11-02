@@ -30,6 +30,13 @@ public final class ReferenceChecker {
             ModelIndex.Resolution r = site.getKind() == ReferenceSite.Kind.IMPORT
                 ? index.resolveImportTarget(site.getSegments(), site.getScope())
                 : index.resolve(site.getSegments(), site.getScope());
+            if (r.getStatus() == ModelIndex.Status.FOUND && !site.getChain().isEmpty()) {
+                ValidationError chainError = checkChain(site, r, index, filePath);
+                if (chainError != null) {
+                    errors.add(chainError);
+                }
+                continue;
+            }
             if (r.getStatus() != ModelIndex.Status.NOT_FOUND) {
                 continue;
             }
@@ -43,6 +50,78 @@ public final class ReferenceChecker {
                 .build());
         }
         return errors;
+    }
+
+    /** Each name after a '.' must be a feature of the element before it; stops where resolution is not certain. */
+    private static ValidationError checkChain(ReferenceSite site, ModelIndex.Resolution start, ModelIndex index, String filePath) {
+        ModelIndex.Resolution r = start;
+        String path = String.join("::", site.getSegments());
+        boolean first = true;
+        for (String name : site.getChain()) {
+            if (r.getTargets().size() != 1) {
+                return null;
+            }
+            String owner = r.getTargets().iterator().next();
+            if (!certainType(owner, index)) {
+                return null;
+            }
+            if (first && site.getSegments().size() == 1 && !lexicallyVisible(owner, site.getScope(), index)) {
+                // An inherited feature may be redefined here by an unnamed ':>> x : T', which narrows its type
+                return null;
+            }
+            first = false;
+            r = index.resolveMember(owner, name);
+            if (r.getStatus() == ModelIndex.Status.NOT_FOUND) {
+                return new ValidationError.Builder()
+                    .filePath(filePath)
+                    .line(site.getLine())
+                    .column(site.getColumn())
+                    .message(String.format("Cannot resolve '%s': '%s' is not a feature of '%s'", site.getText(), name, path))
+                    .errorCode(ErrorCodes.SEMANTIC_UNRESOLVED_REFERENCE)
+                    .severity(ValidationError.Severity.ERROR)
+                    .build();
+            }
+            if (r.getStatus() != ModelIndex.Status.FOUND) {
+                return null;
+            }
+            path = path + "." + name;
+        }
+        return null;
+    }
+
+    /** The element's features are known: it is typed or specialized by plain names (an untyped usage, or one whose
+     *  type a user-defined keyword supplies, is not checked). */
+    private static boolean certainType(String qualifiedName, ModelIndex index) {
+        List<IndexedElement> records = index.recordsOf(qualifiedName);
+        if (records.isEmpty()) {
+            return false;
+        }
+        for (IndexedElement e : records) {
+            if (e.opaqueSupertypes || e.supertypes.isEmpty() && e.kind != null && !e.kind.endsWith("Definition")) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** The element is owned by the site's scope or a namespace enclosing it (not inherited from a supertype). */
+    private static boolean lexicallyVisible(String qualifiedName, String scope, ModelIndex index) {
+        List<IndexedElement> records = index.recordsOf(qualifiedName);
+        if (records.isEmpty()) {
+            return false;
+        }
+        String parent = records.get(0).parentName == null ? "" : records.get(0).parentName;
+        String s = scope == null ? "" : scope;
+        while (true) {
+            if (s.equals(parent)) {
+                return true;
+            }
+            int cut = s.lastIndexOf("::");
+            if (s.isEmpty()) {
+                return false;
+            }
+            s = cut < 0 ? "" : s.substring(0, cut);
+        }
     }
 
     private static String errorCode(ReferenceSite site, int failed) {

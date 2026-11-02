@@ -843,6 +843,12 @@ public final class ModelIndexBuilder {
             }
             return false;
         }
+        if (ctx instanceof SysMLv2Parser.ConnectionEndContext end && end.expression() != null
+                && !(end.getParent() instanceof SysMLv2Parser.SuccessionEndpointsContext)) {
+            // 'connect a.p to b.q': the leading name of each end ('a', 'b'); later segments are features of its type
+            leadingReference(end.expression(), scope);
+            return false;
+        }
         if (ctx instanceof SysMLv2Parser.NewExpressionContext created && created.qualifiedName() != null) {
             // 'send new Start() via p': the signal type
             addSite(ReferenceSite.Kind.TYPE, created.qualifiedName(), scope);
@@ -870,6 +876,71 @@ public final class ModelIndexBuilder {
             && !kind.equals("FeatureDefinition")
             && !kind.equals("ConnectorDefinition")
             && !kind.equals("BindingConnectorDefinition");
+    }
+
+    /** A reference site for the qualified name an expression starts with ('a::b' of 'a::b.c.d'). */
+    private void leadingReference(ParserRuleContext e, String scope) {
+        ParserRuleContext node = e;
+        while (node != null) {
+            if (node instanceof SysMLv2Parser.PrimaryExpressionContext pe && pe.getChildCount() > 1
+                    && pe.getChild(0) instanceof SysMLv2Parser.BaseExpressionContext base
+                    && soleQualifiedName(base) != null) {
+                // 'a.b.c': the name a followed by '.b' and '.c' suffixes
+                SysMLv2Parser.QualifiedNameContext q = soleQualifiedName(base);
+                List<String> chain = new ArrayList<>();
+                for (int i = 1; i < pe.getChildCount(); i++) {
+                    ParseTree c = pe.getChild(i);
+                    if (c instanceof SysMLv2Parser.SequenceSuffixContext sfx && sfx.getChildCount() == 2
+                            && ".".equals(sfx.getChild(0).getText()) && sfx.getChild(1) instanceof SysMLv2Parser.NameContext n) {
+                        chain.add(normalize(n.getText()));
+                    } else {
+                        break;
+                    }
+                }
+                Token t = q.getStart();
+                sites.add(new ReferenceSite(ReferenceSite.Kind.REFERENCE, segments(q), pe.getText(), scope, t.getLine(),
+                    t.getCharPositionInLine(), chain));
+                return;
+            }
+            if (node instanceof SysMLv2Parser.QualifiedNameContext q) {
+                addSite(ReferenceSite.Kind.REFERENCE, q, scope);
+                return;
+            }
+            if (node instanceof SysMLv2Parser.FeatureChainContext f) {
+                List<String> segs = new ArrayList<>();
+                segs.add(normalize(f.name(0).getText()));
+                List<String> chain = new ArrayList<>();
+                boolean dotted = false;
+                for (int i = 1; i < f.getChildCount() - 1; i += 2) {
+                    String op = f.getChild(i).getText();
+                    if (!dotted && "::".equals(op)) {
+                        segs.add(normalize(f.getChild(i + 1).getText()));
+                    } else if (".".equals(op)) {
+                        dotted = true;
+                        chain.add(normalize(f.getChild(i + 1).getText()));
+                    } else {
+                        break;
+                    }
+                }
+                Token t = f.getStart();
+                sites.add(new ReferenceSite(ReferenceSite.Kind.REFERENCE, segs, f.getText(), scope, t.getLine(),
+                    t.getCharPositionInLine(), chain));
+                return;
+            }
+            ParserRuleContext first = null;
+            for (int i = 0; i < node.getChildCount(); i++) {
+                if (node.getChild(i) instanceof ParserRuleContext r) {
+                    first = r;
+                    break;
+                } else if (node.getChild(i) instanceof TerminalNode) {
+                    return;                   // starts with a token (literal, 'new', '(' ...): nothing to check
+                }
+            }
+            if (first == null || first.getStart() != e.getStart()) {
+                return;
+            }
+            node = first;
+        }
     }
 
     /** 'via p': the port (or other feature) the signal is sent or accepted through, when it is a plain name. */
