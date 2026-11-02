@@ -60,6 +60,32 @@ class SignalReferenceTest {
         assertTrue(errors.get(0).getMessage().contains("missingState"), errors.toString());
     }
 
+    @Test
+    @DisplayName("'send new S() to a.b' checks the receiver and its chain; 'to self' is not a name")
+    void sendTo() {
+        List<ValidationError> errors = check("""
+            package P {
+                item def Go;
+                part def Station { exhibit state c { state idle; transition first start then idle; } }
+                part def Lab { part bench : Station; }
+                part campaign {
+                    part lab : Lab;
+                    part seq {
+                        exhibit state s {
+                            state a; state b;
+                            transition first start then a;
+                            transition first a accept after 1 [s] do send new Go() to lab.bench then b;
+                            transition first b accept after 1 [s] do send new Go() to lab.benchX then a;
+                            transition first b accept Go do send new Go() to self then a;
+                        }
+                    }
+                }
+            }
+            """);
+        assertEquals(1, errors.size(), errors.toString());
+        assertTrue(errors.get(0).getMessage().contains("'benchX' is not a feature of 'lab'"), errors.toString());
+    }
+
     private static List<ValidationError> check(String text) {
         ModelIndexBuilder.Result built = ModelIndexBuilder.build(PARSER.parseString(text, "M.sysml").getParseTree(), "M.sysml", true);
         ModelIndex index = new ModelIndex();

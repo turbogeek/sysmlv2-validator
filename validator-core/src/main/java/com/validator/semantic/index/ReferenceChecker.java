@@ -27,6 +27,11 @@ public final class ReferenceChecker {
     public static List<ValidationError> check(List<ReferenceSite> sites, ModelIndex index, String filePath) {
         List<ValidationError> errors = new ArrayList<>();
         for (ReferenceSite site : sites) {
+            if (site.getKind() == ReferenceSite.Kind.REFERENCE && site.getSegments().size() == 1
+                    && ("self".equals(site.getSegments().get(0)) || "that".equals(site.getSegments().get(0)))) {
+                // 'send x to self': the context feature, not a declared name
+                continue;
+            }
             ModelIndex.Resolution r = site.getKind() == ReferenceSite.Kind.IMPORT
                 ? index.resolveImportTarget(site.getSegments(), site.getScope())
                 : index.resolve(site.getSegments(), site.getScope());

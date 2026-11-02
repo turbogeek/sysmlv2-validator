@@ -946,11 +946,15 @@ public final class ModelIndexBuilder {
     /** 'via p': the port (or other feature) the signal is sent or accepted through, when it is a plain name. */
     private void viaSites(ParserRuleContext ctx, String scope) {
         for (int i = 0; i + 1 < ctx.getChildCount(); i++) {
-            if (ctx.getChild(i) instanceof TerminalNode t && t.getSymbol().getType() == SysMLv2Parser.VIA
+            // 'via p' names the sending port, 'to a.b' the receiving feature (its leading name and the chain after it)
+            if (ctx.getChild(i) instanceof TerminalNode t
+                    && (t.getSymbol().getType() == SysMLv2Parser.VIA || t.getSymbol().getType() == SysMLv2Parser.TO)
                     && ctx.getChild(i + 1) instanceof SysMLv2Parser.ExpressionContext e) {
                 SysMLv2Parser.QualifiedNameContext q = soleQualifiedName(e);
                 if (q != null) {
                     addSite(ReferenceSite.Kind.REFERENCE, q, scope);
+                } else {
+                    leadingReference(e, scope);
                 }
             }
         }
