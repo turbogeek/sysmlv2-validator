@@ -541,6 +541,8 @@ partUsage
 actionUsage
     : directionPrefix? ACTION usageName? featureRelationships? ASSIGN expression COLON_EQUALS expression SEMICOLON?
     | directionPrefix? ACTION usageName? featureRelationships? WHILE expression LBRACE usageBodyElement* RBRACE (UNTIL expression)? SEMICOLON?
+    // TerminateNode (SysML v2 8.2.2.17.6): 'action stop terminate;', also in a state body as in the 7.18.3 example
+    | directionPrefix? ACTION usageName? featureRelationships? TERMINATE expression? (SEMICOLON | usageBody)
     | directionPrefix? ACTION usageName? featureRelationships? LOOP LBRACE usageBodyElement* RBRACE (UNTIL expression)? SEMICOLON?
     | directionPrefix? ACTION usageName? featureRelationships? (actionKeyword | SEND actionPayload? (VIA expression)? (TO expression)? | ACCEPT actionPayload? (VIA expression)?)? usageBody?
     | directionPrefix? ACTION usageName? featureRelationships? (actionKeyword | SEND actionPayload? (VIA expression)? (TO expression)? | ACCEPT actionPayload? (VIA expression)?)? SEMICOLON
@@ -573,7 +575,8 @@ viewUsage
 // differ only after the declaration, SLL prediction chose the bodiless one for 'constraint c : C;' and fell back to LL.
 constraintUsage
     : CONSTRAINT usageName? featureRelationships? (SEMICOLON | constraintBody)?
-    | ASSERT CONSTRAINT usageName? featureRelationships? (SEMICOLON | constraintBody)?
+    // AssertConstraintUsage (SysML v2 8.2.2.20): 'assert' ( isNegated ?= 'not' )? 'constraint' ...
+    | ASSERT NOT? CONSTRAINT usageName? featureRelationships? (SEMICOLON | constraintBody)?
     | ASSERT NOT? qualifiedName (SEMICOLON | constraintBody)?
     ;
 
@@ -1247,6 +1250,8 @@ acceptTransition
 
 doActionClause
     : DO (ACTION usageName? featureRelationships? | SEND expression (VIA expression)? (TO expression)? | expression)
+    // TransitionAssignmentActionUsage (SysML v2 8.2.2.18.3): 'accept Tick if n > 0 do assign n := n - 1 then s;'
+    | DO (ACTION usageName? featureRelationships?)? ASSIGN expression COLON_EQUALS expression
     ;
 
 requirementBody
@@ -1361,6 +1366,7 @@ guardClause
 effectClause
     : DO ACTION usageName? featureRelationships? (LBRACE usageBodyElement* RBRACE)?
     | DO SEND actionPayload? (VIA expression)? (TO expression)?
+    | DO (ACTION usageName? featureRelationships?)? ASSIGN expression COLON_EQUALS expression
     | DO expression
     ;
 
