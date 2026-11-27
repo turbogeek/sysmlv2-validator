@@ -17,10 +17,10 @@ package RefactoringExample {
     /* BEFORE REFACTORING - Wildcard imports */
 
     /* This wildcard import brings in many ISQ types but only 3 are used */
-    import ISQ::*;
+    private import ISQ::*;
 
     /* This wildcard import brings in many SI units but only 2 are used */
-    import SI::*;
+    private import SI::*;
 
     /*
      * AFTER REFACTORING - What the tool will suggest:

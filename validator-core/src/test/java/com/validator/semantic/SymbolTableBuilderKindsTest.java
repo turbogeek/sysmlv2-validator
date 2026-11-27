@@ -163,15 +163,13 @@ class SymbolTableBuilderKindsTest {
     @Test
     @DisplayName("Imports are recorded in the scope of their package as wildcard or specific")
     void testImports() {
-        SymbolTable table = build("package P { import ISQ::*; import SI::kg; import Lib::**; }", "i.sysml");
+        SymbolTable table = build("package P { private import ISQ::*; private import SI::kg; public import Lib::**; }", "i.sysml");
         List<ImportStatement> imports = table.resolveScope("P").getImports();
         assertEquals(List.of("ISQ::*", "SI::kg", "Lib::**"), imports.stream().map(ImportStatement::getImportPath).toList());
         assertEquals(List.of(ImportType.WILDCARD, ImportType.SPECIFIC, ImportType.WILDCARD),
             imports.stream().map(ImportStatement::getImportType).toList());
     }
 
-    @Disabled("bug: SymbolTableBuilder.enterImportDeclaration takes an import as private only when the import's own "
-        + "text starts with 'private', but namespaceBodyElement owns the visibility, so 'private import' is public")
     @Test
     @DisplayName("A private import is not public")
     void testPrivateImport() {

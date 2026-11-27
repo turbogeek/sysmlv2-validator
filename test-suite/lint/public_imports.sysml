@@ -22,8 +22,8 @@ package PublicImportTests {
 
     /* CORRECT PATTERNS - No warnings */
 
-    /* Private import (default) - only visible within this package */
-    import SI::s;
+    /* Private import - only visible within this package (visibility is required on every import) */
+    private import SI::s;
 
     /* USAGE EXAMPLES */
 
@@ -53,7 +53,7 @@ package RecommendedPattern {
     public import SI::kg;
 
     /* Internal implementation stays private */
-    import ISQ::TimeValue;
+    private import ISQ::TimeValue;
 
     part def MeasurementUtils {
         attribute mass : Real;

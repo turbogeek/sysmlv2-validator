@@ -46,12 +46,13 @@ positive/44_variant_configuration,test-suite/positive/44_variant_configuration.s
 positive/45_import_membership,test-suite/positive/45_import_membership.sysml,positive,-,clean,52,1159,df9d1d6c6f38bfdac1446e2755931e9a3a60d8096f1c4b0bd2e07abdcf2c45f8,A test file of test-suite/positive
 positive/46_loop_conditional,test-suite/positive/46_loop_conditional.sysml,positive,-,clean,67,1417,c4efc2e39ec9cfadc601a6b3477e971176e4c5b0009bf906aa8aa48424707514,A test file of test-suite/positive
 positive/47_expression_operators,test-suite/positive/47_expression_operators.sysml,positive,-,clean,71,1951,f7598bc82e9b15c0459fa511c6e5d094ea4a6e7cd02314354fbfeefda8a5910d,A test file of test-suite/positive
-positive/48_library_package,test-suite/positive/48_library_package.sysml,positive,-,clean,67,1209,466546a0934f7100910855b6ba21ea6f39534f2a176f4880a50323e8f959fb2a,A test file of test-suite/positive
+positive/48_library_package,test-suite/positive/48_library_package.sysml,positive,-,clean,67,1225,c46cc3823888a5232b0d8fd2a1f584129bac94d71f23bcd08b42aa52d8e8bd3f,A test file of test-suite/positive
 positive/49_actor_stakeholder,test-suite/positive/49_actor_stakeholder.sysml,positive,-,clean,60,1288,1aa9c653c7dbf855e26b4d79660600faabde975283901b9d4c662a14e806f916,A test file of test-suite/positive
 positive/50_accept_via,test-suite/positive/50_accept_via.sysml,positive,-,clean,44,1284,f760f4f673e4760e904591df22fa205bdfb6b51b76ee953cedf487f0fc74116f,A test file of test-suite/positive
 positive/60_cameo_26xR2_constructs,test-suite/positive/60_cameo_26xR2_constructs.sysml,positive,-,clean,89,4174,d8dcc835dd0b071a933f9b46472f47a71537791a8bffec9ab669f8aa8711354f,A test file of test-suite/positive
 positive/61_diamond_resolved,test-suite/positive/61_diamond_resolved.sysml,positive,-,clean,54,2455,d96dfb611bf4845352dd6797620da66dd230e30b9202fa371dcb5eedbf9625d6,A test file of test-suite/positive
 positive/62_diamond_unresolved_warnings,test-suite/positive/62_diamond_unresolved_warnings.sysml,positive,-,clean,45,1724,94b7a47808bf23c38e2beefba10a9c1144d0d96ddb69636b1b8cb8ab7613d343,A test file of test-suite/positive
+positive/63_negated_assert_terminate_transition_assign,test-suite/positive/63_negated_assert_terminate_transition_assign.sysml,positive,-,clean,35,1178,a43e03f4ceff6e27eb58dd8739c3ad8a72a634c6d1393423d14d1ca0ecc16174,A test file of test-suite/positive
 negative/01_action_parallel_invalid,test-suite/negative/01_action_parallel_invalid.sysml,negative,-,errors,12,346,5cdda3f269c3ade287550738f02d69e22e65f841ff70dc2f39f1d5740249cf0c,A test file of test-suite/negative
 negative/02_action_then_invalid,test-suite/negative/02_action_then_invalid.sysml,negative,-,errors,15,377,48917f6accc98f9814d75ac06c5533db757033508b43759087ac98a395b978b2,A test file of test-suite/negative
 negative/03_action_decide_invalid,test-suite/negative/03_action_decide_invalid.sysml,negative,-,errors,14,375,2e38708f0868917456234f138af105c7f6489ca9108c3ee097d21e78c1d75f1d,A test file of test-suite/negative
@@ -108,14 +109,15 @@ negative/53_incompatible_redefinition_type,test-suite/negative/53_incompatible_r
 negative/54_succession_creates_deadlock,test-suite/negative/54_succession_creates_deadlock.sysml,negative,-,errors,16,412,f39fcd883af4221554981b7b95f96163f163e2680f162a450b25debdbe0a4d28,A test file of test-suite/negative
 negative/55_breakfast_example_original,test-suite/negative/55_breakfast_example_original.sysml,negative,-,errors,226,6439,8f4055efb4411a05f7d49db689954c39df8ef7fd045dc9a6de54c7c47a45b7b8,A test file of test-suite/negative
 negative/56_unresolved_library_type,test-suite/negative/56_unresolved_library_type.sysml,negative,-,errors,15,588,9d2843ece8a59ba71504b4de56bde992cdd1c701a11475a12858ca04cd5487a8,A test file of test-suite/negative
+negative/57_import_without_visibility,test-suite/negative/57_import_without_visibility.sysml,negative,-,errors,7,184,debe9af81755e3b74510d38be18cd4d52e95be7795f7cba325e35ceeb48f1fb1,A test file of test-suite/negative
 negative/MissingDefinitions_Actions_8Trigger,test-suite/negative/MissingDefinitions_Actions_8Trigger.sysml,negative,-,errors,10,278,e5b2567387d13cbcfc0e059df53aee9f9f6f2ad519bdf63a3e238d00702ec206,A test file of test-suite/negative
-lint/good_practices,test-suite/lint/good_practices.sysml,lint,-,-,98,2442,d31555ddcc5946aabff40c829a75a0809c691211ed8007d138422784a464fc8d,A test file of test-suite/lint
+lint/good_practices,test-suite/lint/good_practices.sysml,lint,-,-,98,2474,1ea90c880cb2b157fb08eae51f447e9b2ad3ad9e43a06d50faa9a145223d77b0,A test file of test-suite/lint
 lint/naming_conventions,test-suite/lint/naming_conventions.sysml,lint,-,-,100,2575,27f4227483016a29680a57b2a8a43b1a480d151ad5a98a212c625372832ddb43,A test file of test-suite/lint
-lint/public_imports,test-suite/lint/public_imports.sysml,lint,-,-,61,1609,cd110ee1dfc926c04e95e56e996a3898bb6f396943c3f18c96234955ac7b1f30,A test file of test-suite/lint
-lint/refactoring_example,test-suite/lint/refactoring_example.sysml,lint,-,-,78,2166,5bc48631ac853090a33c0b0eb0810968f13f84b988163e3e8cb89890b9df5f19,A test file of test-suite/lint
-lint/unit_mismatches,test-suite/lint/unit_mismatches.sysml,lint,-,-,20,723,77ff4c9dd633b13915d9eaeb22d3f33b5abe2d6c86cac89d47a410a605f968fd,A test file of test-suite/lint
-lint/unused_elements,test-suite/lint/unused_elements.sysml,lint,-,-,117,2903,3c22041b0922394ec50e723ba7951151ed6f48830f00e5e1c100abe8cdc759d2,A test file of test-suite/lint
-lint/wildcard_imports,test-suite/lint/wildcard_imports.sysml,lint,-,-,49,1428,547676e75b6824ad0597d86ff3c9153dd2f3b403f8a1aba2d3ff5824730218da,A test file of test-suite/lint
+lint/public_imports,test-suite/lint/public_imports.sysml,lint,-,-,61,1656,ac72ca5bfbeb1a586d5e70894a6bbaae3e967a9c1a4ae84f002d510e0a8667ab,A test file of test-suite/lint
+lint/refactoring_example,test-suite/lint/refactoring_example.sysml,lint,-,-,78,2182,6d3c7162c1bfc26d809ce5d728743c619a9d2bd9067c0f95068ccef87a3b38aa,A test file of test-suite/lint
+lint/unit_mismatches,test-suite/lint/unit_mismatches.sysml,lint,-,-,20,747,e34e355a6ba53557401d86d3ed92eaf3bc4f83e58a6bf15b25c0d91811570f1e,A test file of test-suite/lint
+lint/unused_elements,test-suite/lint/unused_elements.sysml,lint,-,-,117,2943,7370bc735e444b1dabe1b6a205b37e76e80e1c0699f227d9610345022f19e150,A test file of test-suite/lint
+lint/wildcard_imports,test-suite/lint/wildcard_imports.sysml,lint,-,-,49,1452,7fc2ae0797c082f8c896e042d0000e33263c77a11ea2eb63a1a358dc80b490e4,A test file of test-suite/lint
 cheatsheet/cheatsheet_validation,test-suite/CheatSheet/cheatsheet_validation.sysml,cheatsheet,-,-,870,27711,98d06628d6e2b31c3f3c502367ffd3414c6ed9945b3ab1df5256e3fe05e4c169,A test file of test-suite/CheatSheet
 cheatsheet/pastableExamples/ActionPatterns_1WhileLoop,test-suite/CheatSheet/pastableExamples/ActionPatterns_1WhileLoop.sysml,cheatsheet,-,-,14,288,44194f9227b9d6fe9f194217aec2d57e49dd9eb20d482fa84131959b173ca36e,A test file of test-suite/CheatSheet
 cheatsheet/pastableExamples/ActionPatterns_2ForLoop,test-suite/CheatSheet/pastableExamples/ActionPatterns_2ForLoop.sysml,cheatsheet,-,-,14,307,e77cef7a2654ec261a03341e7843177554170edf6251e18d97988c95104fe126,A test file of test-suite/CheatSheet
@@ -131,7 +133,7 @@ cheatsheet/pastableExamples/Actions_4Parameters,test-suite/CheatSheet/pastableEx
 cheatsheet/pastableExamples/Actions_5SendAcceptSignal,test-suite/CheatSheet/pastableExamples/Actions_5SendAcceptSignal.sysml,cheatsheet,-,-,15,417,58c9c523c896d807c8d9e51caa2e294708f00a8887b322ee2aa4d68ac435a6f9,A test file of test-suite/CheatSheet
 cheatsheet/pastableExamples/Actions_6Successionfirstthen,test-suite/CheatSheet/pastableExamples/Actions_6Successionfirstthen.sysml,cheatsheet,-,-,14,346,4c2f5cba6c33568ca302671670cb772bd07edadfed1a934060d342a4e8c63620,A test file of test-suite/CheatSheet
 cheatsheet/pastableExamples/Actions_7Assignmentassign,test-suite/CheatSheet/pastableExamples/Actions_7Assignmentassign.sysml,cheatsheet,-,-,11,289,699aff65bf4d02c9e0d1a7e681850b763905c0b98a7f1e23075a11fcbbfa61bc,A test file of test-suite/CheatSheet
-cheatsheet/pastableExamples/Actions_8Trigger,test-suite/CheatSheet/pastableExamples/Actions_8Trigger.sysml,cheatsheet,-,-,17,415,b560d3766c0b760c186c9692a0a5a91d8551b31f81c5d3a245fbea35f592ebe3,A test file of test-suite/CheatSheet
+cheatsheet/pastableExamples/Actions_8Trigger,test-suite/CheatSheet/pastableExamples/Actions_8Trigger.sysml,cheatsheet,-,-,17,423,8718ede224f4d5d66bc48483dfe6878bb66961be56541286f6cdcafbe8bab2e5,A test file of test-suite/CheatSheet
 cheatsheet/pastableExamples/Actions_Tutorial,test-suite/CheatSheet/pastableExamples/Actions_Tutorial.sysml,cheatsheet,-,-,40,1101,1be831c74cf44b117058bc5180e6fb20f30df7aa14a76995fef5e27fce657556,A test file of test-suite/CheatSheet
 cheatsheet/pastableExamples/Allocation_Tutorial,test-suite/CheatSheet/pastableExamples/Allocation_Tutorial.sysml,cheatsheet,-,-,18,544,c57f26683508b1b841593fe49e870ccd8a37d62a3d7ca9e1d0562f44721b50f5,A test file of test-suite/CheatSheet
 cheatsheet/pastableExamples/Analysis_Tutorial,test-suite/CheatSheet/pastableExamples/Analysis_Tutorial.sysml,cheatsheet,-,-,35,912,6013573a31484896e6ce3a24aa79da8fbbf0bee796f3adfd1aafdf4e8e655651,A test file of test-suite/CheatSheet
@@ -263,7 +265,7 @@ pilot-repro/V7a,examples/name-collision/pilot-repro/models/V7a.sysml,pilot-repro
 pilot-repro/V7b,examples/name-collision/pilot-repro/models/V7b.sysml,pilot-repro,-,-,7,180,4f34616dec7656af66d932f00695f310db185410afa891d6654cecfad21c1aa9,A test file of examples/name-collision/pilot-repro/models
 pilot-repro/V8,examples/name-collision/pilot-repro/models/V8.sysml,pilot-repro,-,-,6,218,95fe1ac17985ce7e090af09fef4dcf1f50df7e6082c6c1d31840dc452202ddf9,A test file of examples/name-collision/pilot-repro/models
 pilot-repro/V9,examples/name-collision/pilot-repro/models/V9.sysml,pilot-repro,-,-,13,472,f1d07a415f563b751a4e3e6269970afbec36c9da1cc2d53eb2f74e6911477415,A test file of examples/name-collision/pilot-repro/models
-misc/test_extend,test-suite/test_extend.sysml,misc,-,-,7,116,c664e48ae4c05beb81a4b501e62339823703a606ddeedcb6ebd01fd0e8b508bd,A test file
+misc/test_extend,test-suite/test_extend.sysml,misc,-,-,7,124,70740bb7fc424f01ff7725f9f6acf4730903d00cfafe8fa581e411e06d7f4796,A test file
 examples/NameCollisionExamples,examples/name-collision/NameCollisionExamples.sysml,examples,-,warnings,323,14503,23c7d772e29b14269e13742275afe78763a42787eb34854c5be6df54d550b646,A test file
 examples/NameCollisionErrorForm,examples/name-collision/NameCollisionErrorForm.sysml,examples,-,errors,28,1158,b4afb310b939f922f28ad9b16a0ad16cb0c8efd979d62999e8185e5c7169d268,A test file
 examples/MassTypedByMass,examples/name-collision/MassTypedByMass.sysml,examples,-,errors,47,1953,eabf309f5dcd3f876ca83c132a3a069ad2b942b439f78be710c12af85f092c97,A test file

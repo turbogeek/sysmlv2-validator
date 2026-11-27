@@ -90,7 +90,7 @@ class ImportRefactoringTest {
         RefactoringEdit edit = edits.get(0);
         
         // Output should use filtered import {A, B, C, D}
-        String expected = "import Pkg::{A, B, C, D};";
+        String expected = "private import Pkg::{A, B, C, D};";
         assertEquals(expected, edit.getNewText());
         assertTrue(edit.getDescription().contains("filtered import"));
     }

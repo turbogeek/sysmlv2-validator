@@ -1,5 +1,5 @@
 package TestExtend {
-    import ScalarValues::*;
+    private import ScalarValues::*;
     
     part def MyPart {
         attribute weight: Real;

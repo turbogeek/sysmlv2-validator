@@ -30,7 +30,7 @@ class ImportUsageAnalyzerTest {
     void testWildcardUsageIsTracked() {
         // Parse simple SysML containing references to symbols
         SysMLv2ParserFacade parser = new SysMLv2ParserFacade();
-        String sysml = "import Pkg::*; package MyPkg { part myPart : TypeA; }";
+        String sysml = "private import Pkg::*; package MyPkg { part myPart : TypeA; }";
         ParseTree tree = parser.parseString(sysml, "test.sysml").getParseTree();
 
         // Create mock symbol table with TypeA mapped to Pkg::TypeA
@@ -54,8 +54,8 @@ class ImportUsageAnalyzerTest {
 
         RefactoringEdit edit = analyzer.generateRefactoring(imp, "test.sysml");
         assertNotNull(edit);
-        assertEquals("import Pkg::*;", edit.getOldText());
-        assertEquals("import Pkg::TypeA;", edit.getNewText());
+        assertEquals("private import Pkg::*;", edit.getOldText());
+        assertEquals("private import Pkg::TypeA;", edit.getNewText());
         
         ImportUsageAnalyzer.ImportUsageStats stats = analyzer.getStats(imp);
         assertEquals(1, stats.getUsedCount());
@@ -67,7 +67,7 @@ class ImportUsageAnalyzerTest {
     @Test
     void testSpecificUsageIsTracked() {
         SysMLv2ParserFacade parser = new SysMLv2ParserFacade();
-        String sysml = "import Pkg::TypeB; package MyPkg { part myPart : TypeB; }";
+        String sysml = "private import Pkg::TypeB; package MyPkg { part myPart : TypeB; }";
         ParseTree tree = parser.parseString(sysml, "test.sysml").getParseTree();
 
         ImportStatement imp = new ImportStatement("Pkg::TypeB", ImportType.SPECIFIC, true);
@@ -110,7 +110,7 @@ class ImportUsageAnalyzerTest {
     @Test
     void testAliasUsageIsTracked() {
         SysMLv2ParserFacade parser = new SysMLv2ParserFacade();
-        String sysml = "import Pkg::LongType as T; package MyPkg { part myPart : T; }";
+        String sysml = "private import Pkg::LongType as T; package MyPkg { part myPart : T; }";
         ParseTree tree = parser.parseString(sysml, "test.sysml").getParseTree();
 
         ImportStatement imp = new ImportStatement("Pkg::LongType as T", ImportType.ALIAS, false);
@@ -125,7 +125,7 @@ class ImportUsageAnalyzerTest {
     @Test
     void testUnusedImport() {
         SysMLv2ParserFacade parser = new SysMLv2ParserFacade();
-        String sysml = "import Pkg::TypeE; package MyPkg { part myPart : TypeF; }";
+        String sysml = "private import Pkg::TypeE; package MyPkg { part myPart : TypeF; }";
         ParseTree tree = parser.parseString(sysml, "test.sysml").getParseTree();
 
         ImportStatement imp = new ImportStatement("Pkg::TypeE", ImportType.SPECIFIC, false);

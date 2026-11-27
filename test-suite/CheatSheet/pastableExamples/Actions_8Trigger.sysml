@@ -1,5 +1,5 @@
 package Actions_8Trigger {
-	import MyLibrary;
+	private import MyLibrary;
     private import ScalarValues::*;
     private import SysML::*;
     action def Main {

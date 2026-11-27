@@ -496,6 +496,7 @@ public class SysMLv2ParserFacade {
             List<SyntaxError> errors = errorListener.getErrors();
             List<SyntaxError> accepted = new ArrayList<>(
                 MisspelledKeywordCheck.check(tree, tokens, errorListener.keywordEngine));
+            accepted.addAll(ImportVisibilityCheck.check(tree));
             if (errors.isEmpty()) {
                 accepted.addAll(MissingTerminatorCheck.check(tree, tokens));
             }

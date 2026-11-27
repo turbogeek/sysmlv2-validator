@@ -1,7 +1,7 @@
 package UnitMismatches {
-    import ScalarValues::*;
-    import ISQ::*;
-    import SI::*;
+    private import ScalarValues::*;
+    private import ISQ::*;
+    private import SI::*;
     
     // Correct usage
     attribute length1: LengthValue = 4.0 [m];

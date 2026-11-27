@@ -422,7 +422,7 @@ public class ImportUsageAnalyzer {
 
         // Build new import text
         StringBuilder newText = new StringBuilder();
-        String visibility = imp.isPublic() ? "public " : "";
+        String visibility = imp.isPublic() ? "public " : "private ";
         for (int i = 0; i < specific.size(); i++) {
             if (i > 0) {
                 newText.append("\n");

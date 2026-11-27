@@ -16,13 +16,13 @@ package WildcardImportTests {
     /* PROBLEMATIC PATTERNS - These will trigger lint warnings */
 
     /* LINT017: Single-level wildcard import */
-    import ISQ::*;
+    private import ISQ::*;
 
     /* LINT017: Another wildcard import */
-    import SI::*;
+    private import SI::*;
 
     /* LINT018: Recursive wildcard import */
-    import ScalarFunctions::**;
+    private import ScalarFunctions::**;
 
     /* USAGE - Only a few elements are actually used */
 
