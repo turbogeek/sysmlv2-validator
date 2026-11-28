@@ -1,7 +1,7 @@
 // start-v2language-test-harness.groovy - the SysML v2 test harness of CATIA Magic / Cameo, launched once from
-// MagicDraw (Tools > Macros or the Groovy console). It serves REST on port 8771 (8770 is taken by macOS's AirDrop/Handoff
-// service, sharingd). If the port is busy it tries the next ones up to 8780 and logs the port it got.
-// -Dsysmlv2.harness.port=<n> picks another starting port.
+// MagicDraw (Tools > Macros or the Groovy console). It serves REST on port 8771 by default (8770 is taken by
+// macOS sharingd/AirDrop on some Macs); if that port is busy it takes the next free one up to 8780, which GET /ping
+// and the log report. Set -Dsysmlv2.harness.port to choose another starting port.
 //
 // This script is only the bootstrap: it owns the port and the HTTP server and keeps running. Everything a caller
 // asks for is handled by v2language-harness-impl.groovy, which the bootstrap loads in a class loader of its own and
@@ -28,7 +28,7 @@ class HarnessBootstrap {
 
     static final String VERSION = "2.0"
     static final int DEFAULT_PORT = 8771
-    static final int LAST_PORT = 8780        // stop-v2language-test-harness.groovy scans 8770-8780
+    static final int LAST_PORT = 8780          // stop-v2language-test-harness.groovy scans 8770-8780
     static final String IMPL_FILE = "v2language-harness-impl.groovy"
     static final String REGISTRY_KEY = "sysmlv2.harness.instance"   // survives class loaders: see stopPrevious
 
@@ -72,7 +72,11 @@ class HarnessBootstrap {
         if (property != null && !property.trim().isEmpty()) {
             candidates.add(property)
         }
-        candidates.add(new File(System.getProperty("user.home"), "Documents/GitHub/sysmlv2-validator/utilityScripts").getAbsolutePath())
+        String home = System.getProperty("user.home")
+        for (String rel : ["Documents/GitHub/sysmlv2-validator", "Desktop/git/sysmlv2-validator", "git/sysmlv2-validator",
+                           "Documents/git/sysmlv2-validator", "Desktop/GitHub/sysmlv2-validator", "GitHub/sysmlv2-validator"]) {
+            candidates.add(new File(home, rel + "/utilityScripts").getAbsolutePath())
+        }
         candidates.add("E:/_Documents/git/sysml-validator/utilityScripts")
         for (Object c : candidates) {
             File dir = new File(c.toString())
@@ -106,16 +110,37 @@ class HarnessBootstrap {
             System.getProperties().remove(REGISTRY_KEY)
             return
         }
-        try {
-            URL url = new URL("http://localhost:" + port + "/shutdown")
-            URLConnection connection = url.openConnection()
-            connection.setConnectTimeout(700)
-            connection.setReadTimeout(2000)
-            connection.getInputStream().getText("UTF-8")
-            log("Asked the harness already on port " + port + " to shut down")
+        // An older harness may sit anywhere in the port sequence (the wanted port, the next ones up to LAST_PORT, or
+        // 8770 where earlier versions listened). Only a port whose /ping answers like a harness is asked to shut down.
+        List ports = []
+        for (int p = port; p <= Math.max(port, LAST_PORT); p++) {
+            ports.add(p)
+        }
+        if (!ports.contains(8770)) {
+            ports.add(8770)
+        }
+        boolean stoppedAny = false
+        for (Object p : ports) {
+            try {
+                URLConnection ping = new URL("http://localhost:" + p + "/ping").openConnection()
+                ping.setConnectTimeout(300)
+                ping.setReadTimeout(1000)
+                String answer = ping.getInputStream().getText("UTF-8")
+                if (!answer.contains('"version"')) {
+                    continue
+                }
+                URLConnection connection = new URL("http://localhost:" + p + "/shutdown").openConnection()
+                connection.setConnectTimeout(700)
+                connection.setReadTimeout(2000)
+                connection.getInputStream().getText("UTF-8")
+                log("Asked the harness already on port " + p + " to shut down")
+                stoppedAny = true
+            } catch (Throwable ignored) {
+                // nothing (or something other than a harness) was listening, which is the normal case
+            }
+        }
+        if (stoppedAny) {
             Thread.sleep(1500)
-        } catch (Throwable ignored) {
-            // nothing was listening, which is the normal case
         }
     }
 
@@ -182,31 +207,35 @@ class HarnessBootstrap {
         log("=== SysML v2 test harness " + VERSION + " starting, directory " + harnessDir.getAbsolutePath() + " ===")
         stopPrevious(wantedPort)
 
-        int port = wantedPort
+        // The wanted port gets a few retries (a previous harness may still be letting go of it); after that each
+        // following port up to LAST_PORT is tried once.
+        server = null
+        int chosen = wantedPort
         BindException lastBindFailure = null
-        // the wanted port gets a few seconds (a previous instance may still be letting go of it),
-        // then the next ports up to LAST_PORT are tried once each
-        for (int candidate = wantedPort; candidate <= Math.max(wantedPort, LAST_PORT); candidate++) {
-            int tries = (candidate == wantedPort) ? 12 : 1
-            for (int attempt = 0; attempt < tries; attempt++) {
+        int lastPort = Math.max(wantedPort, LAST_PORT)
+        for (int candidate = wantedPort; candidate <= lastPort && server == null; candidate++) {
+            int attempts = (candidate == wantedPort) ? 12 : 1
+            for (int attempt = 0; attempt < attempts; attempt++) {
                 try {
                     server = HttpServer.create(new InetSocketAddress(candidate), 0)
+                    chosen = candidate
                     lastBindFailure = null
                     break
                 } catch (BindException e) {
                     lastBindFailure = e
-                    if (attempt < tries - 1) Thread.sleep(500)
+                    if (attempt + 1 < attempts) {
+                        Thread.sleep(500)
+                    }
                 }
             }
-            if (lastBindFailure == null) {
-                port = candidate
-                if (port != wantedPort) log("Port " + wantedPort + " is in use; using port " + port + " instead")
-                break
-            }
         }
-        if (lastBindFailure != null) {
-            log("Ports " + wantedPort + "-" + Math.max(wantedPort, LAST_PORT) + " are all in use; stop the process holding them, or set -Dsysmlv2.harness.port")
+        if (server == null) {
+            log("Ports " + wantedPort + "-" + lastPort + " are all in use; stop the process holding them, or set -Dsysmlv2.harness.port")
             throw lastBindFailure
+        }
+        int port = chosen    // assigned once: the request handler below captures it
+        if (port != wantedPort) {
+            log("Port " + wantedPort + " is in use, so the harness takes port " + port)
         }
         server.setExecutor(Executors.newFixedThreadPool(4))
 

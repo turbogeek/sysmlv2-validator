@@ -224,6 +224,38 @@ class HarnessImpl {
         }
     }
 
+    /**
+     * Turns one builder diagnostic into a map. The diagnostic class differs between releases (26xR2's has no
+     * getLine(), only getEndLine() and friends), so each position accessor is tried by name and the ones the class
+     * lacks are skipped; "line" is the first line found, and the raw text is kept so nothing is lost.
+     */
+    static Map describeDiagnostic(Object d) {
+        Map m = [severity: String.valueOf(call(d, "getSeverity")), message: String.valueOf(call(d, "getMessage"))]
+        for (String name : ["getLine", "getStartLine", "getBeginLine", "getEndLine", "getColumn", "getStartColumn",
+                            "getEndColumn", "getOffset", "getStartOffset", "getEndOffset", "getSize", "getLength", "getCode"]) {
+            if (d.metaClass.respondsTo(d, name)) {
+                Object v = call(d, name)
+                if (v != null) {
+                    String key = name.substring(3, 4).toLowerCase() + name.substring(4)
+                    m.put(key, v instanceof Number ? v : String.valueOf(v))
+                }
+            }
+        }
+        if (!m.containsKey("line")) {
+            m.put("line", m.get("startLine") ?: m.get("beginLine") ?: m.get("endLine"))
+        }
+        m.put("raw", String.valueOf(d))
+        return m
+    }
+
+    static Object call(Object target, String method) {
+        try {
+            return target.invokeMethod(method, null)
+        } catch (Throwable ignored) {
+            return null
+        }
+    }
+
     void loadSysml(HttpExchange exchange) {
         if (!"POST".equals(exchange.getRequestMethod())) {
             respond(exchange, 405, [success: false, error: "POST only"])
@@ -261,7 +293,7 @@ class HarnessImpl {
             def diags = buildResult.getDiagnostics() ?: []
             List diagnostics = []
             for (Object d : diags) {
-                diagnostics.add([severity: String.valueOf(d.getSeverity()), line: d.getLine(), message: String.valueOf(d.getMessage())])
+                diagnostics.add(describeDiagnostic(d))
             }
             List errors = diagnostics.findAll { "ERROR".equals(it.get("severity")) }
             long durationMs = System.currentTimeMillis() - startedAt
