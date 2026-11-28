@@ -11,19 +11,19 @@ package UnusedElementTests {
     /* IMPORT ANALYSIS */
 
     /* USED: Referenced below */
-    import ISQ::MassValue;
+    private import ISQ::MassValue;
 
     /* LINT002: LengthValue imported but never used */
-    import ISQ::LengthValue;
+    private import ISQ::LengthValue;
 
     /* LINT002: TimeValue imported but never used */
-    import ISQ::TimeValue;
+    private import ISQ::TimeValue;
 
     /* USED: kg is referenced */
-    import SI::kg;
+    private import SI::kg;
 
     /* LINT002: m imported but never used */
-    import SI::m;
+    private import SI::m;
 
     /* DEFINITION ANALYSIS */
 

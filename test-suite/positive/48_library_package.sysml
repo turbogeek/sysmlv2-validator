@@ -29,7 +29,7 @@ library package MathLibrary {
 }
 
 library package GeometryLibrary {
-    import MathLibrary::*;
+    private import MathLibrary::*;
 
     calc def circleArea {
         in radius : Real;
@@ -44,7 +44,7 @@ library package GeometryLibrary {
 }
 
 // Using library packages
-import GeometryLibrary::*;
+private import GeometryLibrary::*;
 
 part def Circle {
     attribute radius : Real;

@@ -142,7 +142,7 @@ public class ImportRefactoring {
         }
 
         String basePath = getBasePath(imp.getImportPath());
-        String visibility = imp.isPublic() ? "public " : "";
+        String visibility = imp.isPublic() ? "public " : "private ";
 
         String newText;
         String description;
@@ -246,7 +246,7 @@ public class ImportRefactoring {
      * Builds the original import text.
      */
     private String buildOriginalImportText(ImportStatement imp) {
-        String visibility = imp.isPublic() ? "public " : "";
+        String visibility = imp.isPublic() ? "public " : "private ";
         return visibility + "import " + imp.getImportPath() + ";";
     }
 

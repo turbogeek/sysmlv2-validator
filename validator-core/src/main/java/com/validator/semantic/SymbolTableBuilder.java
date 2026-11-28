@@ -164,7 +164,13 @@ public final class SymbolTableBuilder extends SysMLv2ParserBaseListener {
 
         String importPath = ctx.qualifiedNameWithWildcard().getText();
         boolean isWildcard = importPath.endsWith("::*") || importPath.endsWith("*");
-        boolean isPublic = !ctx.getText().startsWith("private");
+        // The visibility is the import's own or, as the grammar usually parses it, that of the
+        // namespaceBodyElement that holds it. An import without one is a syntax error (SysML v2 8.2.2.5.1).
+        SysMLv2Parser.VisibilityContext visibility = ctx.visibility();
+        if (visibility == null && ctx.getParent() instanceof SysMLv2Parser.NamespaceBodyElementContext element) {
+            visibility = element.visibility();
+        }
+        boolean isPublic = visibility == null || visibility.PUBLIC() != null;
 
         ImportType type = isWildcard ? ImportType.WILDCARD : ImportType.SPECIFIC;
         ImportStatement importStmt = new ImportStatement(importPath, type, isPublic);

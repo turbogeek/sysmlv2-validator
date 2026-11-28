@@ -14,10 +14,10 @@
 package GoodPracticesExample {
 
     /* SPECIFIC IMPORTS - Only import what you need */
-    import ISQ::MassValue;
-    import ISQ::LengthValue;
-    import SI::kg;
-    import SI::m;
+    private import ISQ::MassValue;
+    private import ISQ::LengthValue;
+    private import SI::kg;
+    private import SI::m;
 
     /* WELL-NAMED DEFINITIONS - PascalCase */
 
