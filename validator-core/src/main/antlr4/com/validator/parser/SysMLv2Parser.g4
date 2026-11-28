@@ -872,23 +872,28 @@ messageUsage
 
 // SysML v2 8.2.2.3: 'dependency' ( Identification 'from' )? client ( ',' client )* 'to' supplier ( ',' supplier )*
 // RelationshipBody, where RelationshipBody = ';' | '{' ... '}' (e.g. an owned doc)
+// SysML v2 8.2.2.3: 'dependency' ( Identification 'from' )? client ( ',' client )* 'to' supplier ( ',' supplier )*,
+// so a name needs 'from' ('dependency d from a to b;') and 'dependency a to b;' has client a and no name
 dependencyDeclaration
-    : DEPENDENCY usageName? (FROM expression (COMMA expression)*)? TO expression (COMMA expression)* usageBody
+    : DEPENDENCY (usageName? FROM)? expression (COMMA expression)* TO expression (COMMA expression)* usageBody
     ;
 
 // SysML v2 8.2.2.27: 'metadata' MetadataUsageDeclaration ( 'about' Annotation ( ',' Annotation )* )? MetadataBody,
 // e.g. 'metadata SafetyFeature about vehicle::seatBelt, vehicle::bumper;'
+// SysML v2 8.2.2.27: MetadataUsageDeclaration = ( Identification ( ':' | 'typed' 'by' ) )? OwnedFeatureTyping, so
+// 'metadata Approval about x;' is an unnamed usage typed by Approval, and a name needs ':' ('metadata a : Approval')
 metadataUsage
-    : METADATA usageName? featureRelationships? (ABOUT qualifiedName (COMMA qualifiedName)*)? (SEMICOLON | metadataBody)?
+    : METADATA metadataDeclaredName? qualifiedName (ABOUT qualifiedName (COMMA qualifiedName)*)? (SEMICOLON | metadataBody)?
     ;
 
 metadataBody
     : LBRACE metadataBodyElement* RBRACE
     ;
 
+// SysML v2 8.2.2.27: MetadataBodyUsage = 'ref'? ( ':>>' | 'redefines' )? OwnedRedefinition ... ValuePart? MetadataBody
 metadataBodyElement
-    : usageName EQUALS expression SEMICOLON
-    | usageName metadataBody
+    : REF? (REDEFINES_OP | REDEFINES)? usageName EQUALS expression SEMICOLON
+    | REF? (REDEFINES_OP | REDEFINES)? usageName metadataBody
     | metadataAnnotation
     ;
 
