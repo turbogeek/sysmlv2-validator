@@ -72,7 +72,11 @@ class HarnessBootstrap {
         if (property != null && !property.trim().isEmpty()) {
             candidates.add(property)
         }
-        candidates.add(new File(System.getProperty("user.home"), "Documents/GitHub/sysmlv2-validator/utilityScripts").getAbsolutePath())
+        String home = System.getProperty("user.home")
+        for (String rel : ["Documents/GitHub/sysmlv2-validator", "Desktop/git/sysmlv2-validator", "git/sysmlv2-validator",
+                           "Documents/git/sysmlv2-validator", "Desktop/GitHub/sysmlv2-validator", "GitHub/sysmlv2-validator"]) {
+            candidates.add(new File(home, rel + "/utilityScripts").getAbsolutePath())
+        }
         candidates.add("E:/_Documents/git/sysml-validator/utilityScripts")
         for (Object c : candidates) {
             File dir = new File(c.toString())
