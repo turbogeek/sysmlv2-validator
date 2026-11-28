@@ -2,7 +2,8 @@
 // Exercises: 'case def' and 'case', 'enum def' without a body, an enumerated value with only a value (enumMember#5)
 // and a body that redefines (enumMemberBodyElement#1), 'enum' usages with ';' and with a body, 'rendering' usages,
 // the 'constant' prefix, 'references', 'assert' of a named constraint with 'not' and a body and without, an 'inout' parameter in
-// an action usage body, and an anonymous redefinition in a constraint definition.
+// an action usage body, and an anonymous redefinition in a constraint definition and in a constraint usage
+// (constraintBodyElement#4).
 package SysmlUsages {
     private import ScalarValues::*;
 
@@ -31,6 +32,7 @@ package SysmlUsages {
         constant attribute wheels : Integer = 4;
         attribute count references wheels;
         constraint fast : Positive { }
+        constraint slow : Positive { :>> x = 2.0; }
         assert not fast { true }
         assert fast;
         action drive {
