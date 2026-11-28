@@ -1,5 +1,7 @@
 // start-v2language-test-harness.groovy - the SysML v2 test harness of CATIA Magic / Cameo, launched once from
-// MagicDraw (Tools > Macros or the Groovy console). It serves REST on port 8770.
+// MagicDraw (Tools > Macros or the Groovy console). It serves REST on port 8771 (8770 is taken by macOS's AirDrop/Handoff
+// service, sharingd). If the port is busy it tries the next ones up to 8780 and logs the port it got.
+// -Dsysmlv2.harness.port=<n> picks another starting port.
 //
 // This script is only the bootstrap: it owns the port and the HTTP server and keeps running. Everything a caller
 // asks for is handled by v2language-harness-impl.groovy, which the bootstrap loads in a class loader of its own and
@@ -25,7 +27,8 @@ import com.nomagic.magicdraw.core.Application
 class HarnessBootstrap {
 
     static final String VERSION = "2.0"
-    static final int DEFAULT_PORT = 8770
+    static final int DEFAULT_PORT = 8771
+    static final int LAST_PORT = 8780        // stop-v2language-test-harness.groovy scans 8770-8780
     static final String IMPL_FILE = "v2language-harness-impl.groovy"
     static final String REGISTRY_KEY = "sysmlv2.harness.instance"   // survives class loaders: see stopPrevious
 
@@ -181,18 +184,28 @@ class HarnessBootstrap {
 
         int port = wantedPort
         BindException lastBindFailure = null
-        for (int attempt = 0; attempt < 12; attempt++) {
-            try {
-                server = HttpServer.create(new InetSocketAddress(port), 0)
-                lastBindFailure = null
+        // the wanted port gets a few seconds (a previous instance may still be letting go of it),
+        // then the next ports up to LAST_PORT are tried once each
+        for (int candidate = wantedPort; candidate <= Math.max(wantedPort, LAST_PORT); candidate++) {
+            int tries = (candidate == wantedPort) ? 12 : 1
+            for (int attempt = 0; attempt < tries; attempt++) {
+                try {
+                    server = HttpServer.create(new InetSocketAddress(candidate), 0)
+                    lastBindFailure = null
+                    break
+                } catch (BindException e) {
+                    lastBindFailure = e
+                    if (attempt < tries - 1) Thread.sleep(500)
+                }
+            }
+            if (lastBindFailure == null) {
+                port = candidate
+                if (port != wantedPort) log("Port " + wantedPort + " is in use; using port " + port + " instead")
                 break
-            } catch (BindException e) {
-                lastBindFailure = e
-                Thread.sleep(500)
             }
         }
         if (lastBindFailure != null) {
-            log("Port " + port + " stayed in use; stop the process holding it, or set -Dsysmlv2.harness.port")
+            log("Ports " + wantedPort + "-" + Math.max(wantedPort, LAST_PORT) + " are all in use; stop the process holding them, or set -Dsysmlv2.harness.port")
             throw lastBindFailure
         }
         server.setExecutor(Executors.newFixedThreadPool(4))
